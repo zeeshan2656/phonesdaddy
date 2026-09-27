@@ -281,3 +281,47 @@ async function loadDynamicFooterPages() {
   }
 }
 
+// ==========================================================================
+//  Scroll To Top Button — global, injected on every page
+// ==========================================================================
+(function initScrollToTop() {
+  // Create the button element
+  const btn = document.createElement('button');
+  btn.id = 'scrollToTopBtn';
+  btn.setAttribute('aria-label', 'Scroll to top');
+  btn.setAttribute('title', 'Back to top');
+  btn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 15l-6-6-6 6"/>
+    </svg>`;
+  document.body.appendChild(btn);
+
+  // Show button after scrolling 300px down
+  const THRESHOLD = 300;
+  let ticking = false;
+
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        if (window.scrollY > THRESHOLD) {
+          btn.classList.add('visible');
+        } else {
+          btn.classList.remove('visible');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Smooth scroll to top + ripple effect on click
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Trigger ripple
+    btn.classList.add('ripple');
+    setTimeout(() => btn.classList.remove('ripple'), 450);
+  });
+})();

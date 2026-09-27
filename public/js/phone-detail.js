@@ -3,6 +3,27 @@
 async function initPhoneDetail() {
   if (window.__INITIAL_PHONE__) {
     renderPhoneDetail(window.__INITIAL_PHONE__);
+
+    // SSR hydration bypasses the API, so fire a background ping to increment the view counter
+    const slug = window.__INITIAL_PHONE__.slug;
+    if (slug) {
+      fetch(`/api/phones/ping-view/${encodeURIComponent(slug)}`, { method: 'POST' }).catch(() => {});
+
+      // Also fetch fresh live counts (views + review_count) in background to show real-time numbers
+      fetch(`/api/phones/slug/${encodeURIComponent(slug)}`)
+        .then(r => r.json())
+        .then(json => {
+          if (json.success && json.data) {
+            const viewsEl = document.getElementById('phoneViewsVal');
+            const reviewsEl = document.getElementById('phoneReviewsVal');
+            const tabReviewsCount = document.getElementById('tabReviewsCount');
+            if (viewsEl) viewsEl.innerText = (json.data.views || 0).toLocaleString();
+            if (reviewsEl) reviewsEl.innerText = (json.data.review_count || 0).toLocaleString();
+            if (tabReviewsCount) tabReviewsCount.innerText = (json.data.review_count || 0).toLocaleString();
+          }
+        })
+        .catch(() => {});
+    }
     return;
   }
 

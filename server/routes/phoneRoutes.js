@@ -14,6 +14,9 @@ router.get('/upcoming', cacheMiddleware(300, ['phones', 'home']), PhoneControlle
 router.get('/slug/:slug', cacheMiddleware(600, ['phones']), PhoneController.getBySlug);
 router.get('/:id', cacheMiddleware(600, ['phones']), PhoneController.getById);
 
+// Non-cached: Fire view increment (called from phone detail page after SSR hydration)
+router.post('/ping-view/:slug', PhoneController.pingView);
+
 // Protected admin & mobile manager routes
 router.post('/fetch-external-specs', requirePhonePermission, PhoneController.fetchExternalSpecs);
 router.post('/bulk-import-url', requirePhonePermission, PhoneController.importSingleUrl);

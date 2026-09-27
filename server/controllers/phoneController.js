@@ -133,6 +133,28 @@ class PhoneController {
     }
   }
 
+  /**
+   * Non-cached: Increment view count for a phone by slug.
+   * Called from the phone detail page after SSR hydration so view counts
+   * are reliably updated even when the cached getBySlug response is served.
+   */
+  static async pingView(req, res, next) {
+    try {
+      const { slug } = req.params;
+      if (!slug || typeof slug !== 'string') {
+        return res.status(400).json({ success: false });
+      }
+      const phone = await PhoneModel.getPhoneBySlug(slug);
+      if (phone) {
+        PhoneModel.incrementViews(phone.id).catch(console.error);
+      }
+      return res.json({ success: true });
+    } catch (err) {
+      // Silent – don't break the page if view ping fails
+      return res.json({ success: false });
+    }
+  }
+
   static async create(req, res, next) {
     try {
       const {

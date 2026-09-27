@@ -4225,14 +4225,16 @@ button, input, select, textarea {
   }
 }
 
-/* ── Phone Card Stats: Icons Only on Mobile ── */
+/* ── Phone Card Stats: Compact count on mobile ── */
 @media (max-width: 768px) {
   .phone-card-stats-row .stat-label {
-    display: none;
+    display: inline;
+    font-size: 11px;
+    font-weight: 600;
   }
   .phone-card-stats-row > span {
-    gap: 0 !important;
-    font-size: 14px;
+    gap: 3px !important;
+    font-size: 12px;
   }
 }
 
@@ -4339,5 +4341,88 @@ button, input, select, textarea {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+/* ==========================================================================
+   Scroll To Top Button
+   ========================================================================== */
+
+#scrollToTopBtn {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.45), 0 2px 8px rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.85);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1), visibility 0.3s ease, box-shadow 0.2s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#scrollToTopBtn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+#scrollToTopBtn:hover {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, #0a6660 100%);
+  box-shadow: 0 6px 28px rgba(13, 148, 136, 0.6), 0 2px 10px rgba(0,0,0,0.22);
+  transform: translateY(-2px) scale(1.07);
+}
+
+#scrollToTopBtn:active {
+  transform: translateY(0) scale(0.96);
+}
+
+#scrollToTopBtn svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  flex-shrink: 0;
+}
+
+/* Ripple animation on click */
+#scrollToTopBtn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+#scrollToTopBtn.ripple::after {
+  opacity: 1;
+  transform: scale(1.6);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #scrollToTopBtn {
+    bottom: 18px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+  }
+  #scrollToTopBtn svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
