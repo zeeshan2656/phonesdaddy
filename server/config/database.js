@@ -9,7 +9,11 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'phonesdaddy',
   waitForConnections: true,
   connectionLimit: 15,
+  maxIdle: 10,
+  idleTimeout: 60000,
   queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10000,
   charset: 'utf8mb4'
 });
 

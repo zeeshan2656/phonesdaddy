@@ -17,7 +17,8 @@ class PhoneModel {
     featured = null,
     popular = null,
     status = null,
-    search = null
+    search = null,
+    skipCount = false
   } = {}) {
     const offset = (Math.max(1, parseInt(page, 10)) - 1) * parseInt(limit, 10);
     const parsedLimit = parseInt(limit, 10);
@@ -103,17 +104,14 @@ class PhoneModel {
     else if (sort === 'views') orderBy = 'ORDER BY p.views DESC';
     else if (sort === 'name') orderBy = 'ORDER BY p.name ASC';
 
-    // Count total matching
+    // Queries (Run count and select concurrently via Promise.all)
     const countSql = `
-      SELECT COUNT(DISTINCT p.id) as total
+      SELECT COUNT(p.id) as total
       FROM phones p
       JOIN brands b ON p.brand_id = b.id
       ${whereClause}
     `;
-    const [countRows] = await pool.query(countSql, params);
-    const total = countRows[0].total;
 
-    // Fetch phones
     const querySql = `
       SELECT 
         p.id, p.name, p.slug, p.short_description, p.image, p.release_date, 
@@ -127,7 +125,14 @@ class PhoneModel {
       LIMIT ? OFFSET ?
     `;
 
-    const [phoneRows] = await pool.query(querySql, [...params, parsedLimit, offset]);
+    const countPromise = skipCount
+      ? Promise.resolve([{ total: 0 }])
+      : pool.query(countSql, params).then(([rows]) => rows);
+
+    const queryPromise = pool.query(querySql, [...params, parsedLimit, offset]).then(([rows]) => rows);
+
+    const [countRows, phoneRows] = await Promise.all([countPromise, queryPromise]);
+    const total = skipCount ? phoneRows.length : (countRows[0] ? countRows[0].total : 0);
 
     // Fetch quick specs for each phone (Display, Camera, Battery, RAM, Chipset)
     if (phoneRows.length > 0) {
@@ -233,41 +238,80 @@ class PhoneModel {
     if (rows.length === 0) return null;
     const phone = rows[0];
 
-    // Fetch specs grouped by section
-    const [specRows] = await pool.query(`
+    // Concurrently fetch specs, prices, related devices, popular devices, and news
+    const brandName = phone.brand_name || '';
+    const phoneName = phone.name || '';
+
+    const specsPromise = pool.query(`
       SELECT section, spec_key, spec_value, sort_order
       FROM phone_specs
       WHERE phone_id = ?
       ORDER BY section, sort_order ASC, id ASC
-    `, [phone.id]);
-
-    const specsBySection = {};
-    for (const spec of specRows) {
-      if (!specsBySection[spec.section]) {
-        specsBySection[spec.section] = [];
+    `, [phone.id]).then(([specRows]) => {
+      const specsBySection = {};
+      for (const spec of specRows) {
+        if (!specsBySection[spec.section]) {
+          specsBySection[spec.section] = [];
+        }
+        specsBySection[spec.section].push({
+          key: spec.spec_key,
+          value: spec.spec_value
+        });
       }
-      specsBySection[spec.section].push({
-        key: spec.spec_key,
-        value: spec.spec_value
-      });
-    }
-    phone.specs = specsBySection;
+      return specsBySection;
+    }).catch(() => ({}));
 
-    // Fetch prices
-    const [priceRows] = await pool.query(`
+    const pricesPromise = pool.query(`
       SELECT country, currency, amount
       FROM phone_prices
       WHERE phone_id = ?
       ORDER BY id ASC
-    `, [phone.id]);
-    phone.prices = priceRows;
+    `, [phone.id]).then(([priceRows]) => priceRows).catch(() => []);
+
+    const relatedPromise = pool.query(`
+      SELECT id, name, slug, image, price, release_date, status
+      FROM phones
+      WHERE brand_id = ? AND id != ?
+      ORDER BY id DESC
+      LIMIT 6
+    `, [phone.brand_id, phone.id]).then(([relatedRows]) => relatedRows).catch(() => []);
+
+    const popularPromise = pool.query(`
+      SELECT id, name, slug, image, price, release_date, status
+      FROM phones
+      WHERE brand_id = ? AND id != ?
+      ORDER BY popular DESC, views DESC, id DESC
+      LIMIT 6
+    `, [phone.brand_id, phone.id]).then(([popRows]) => popRows).catch(() => []);
+
+    const newsPromise = pool.query(`
+      SELECT id, title, slug, image, created_at
+      FROM news
+      WHERE status = 'published'
+        AND (title LIKE ? OR title LIKE ? OR summary LIKE ?)
+      ORDER BY created_at DESC
+      LIMIT 4
+    `, [`%${phoneName}%`, `%${brandName}%`, `%${brandName}%`]).then(([newsRows]) => newsRows).catch(() => []);
+
+    const [specs, prices, related_phones, popular_brand_phones, related_news] = await Promise.all([
+      specsPromise,
+      pricesPromise,
+      relatedPromise,
+      popularPromise,
+      newsPromise
+    ]);
+
+    phone.specs = specs;
+    phone.prices = prices;
+    phone.related_phones = related_phones;
+    phone.popular_brand_phones = popular_brand_phones;
+    phone.related_news = related_news;
 
     // Parse images JSON
     if (phone.images) {
       try {
         phone.images = typeof phone.images === 'string' ? JSON.parse(phone.images) : phone.images;
       } catch (_) {
-        // Fallback: treat as comma-separated list
         phone.images = String(phone.images).split(',').map(s => s.trim()).filter(Boolean);
       }
     } else {
@@ -283,65 +327,6 @@ class PhoneModel {
       }
     } else {
       phone.affiliate_links = [];
-    }
-
-    // 1. Fetch related phones (up to 6 devices from same brand or similar)
-    try {
-      const [relatedRows] = await pool.query(`
-        SELECT id, name, slug, image, price, release_date, status
-        FROM phones
-        WHERE brand_id = ? AND id != ?
-        ORDER BY id DESC
-        LIMIT 6
-      `, [phone.brand_id, phone.id]);
-      phone.related_phones = relatedRows;
-    } catch (_) {
-      phone.related_phones = [];
-    }
-
-    // 2. Fetch popular phones from same brand (GSMArena "POPULAR FROM [BRAND]")
-    try {
-      const [popularRows] = await pool.query(`
-        SELECT id, name, slug, image, price, release_date, status
-        FROM phones
-        WHERE brand_id = ? AND id != ?
-        ORDER BY popular DESC, views DESC, id DESC
-        LIMIT 6
-      `, [phone.brand_id, phone.id]);
-      phone.popular_brand_phones = popularRows;
-    } catch (_) {
-      phone.popular_brand_phones = [];
-    }
-
-    // 3. Fetch related news articles mentioning brand or phone (GSMArena "[PHONE] IN THE NEWS")
-    try {
-      const brandName = phone.brand_name || '';
-      const phoneName = phone.name || '';
-      const [newsRows] = await pool.query(`
-        SELECT id, title, slug, image, created_at
-        FROM news
-        WHERE status = 'published'
-          AND (title LIKE ? OR title LIKE ? OR summary LIKE ?)
-        ORDER BY created_at DESC
-        LIMIT 4
-      `, [`%${phoneName}%`, `%${brandName}%`, `%${brandName}%`]);
-
-      if (newsRows.length < 4) {
-        const existingIds = newsRows.map(n => n.id);
-        const limitMore = 4 - newsRows.length;
-        const excludeClause = existingIds.length > 0 ? `AND id NOT IN (${existingIds.map(() => '?').join(',')})` : '';
-        const [moreNews] = await pool.query(`
-          SELECT id, title, slug, image, created_at
-          FROM news
-          WHERE status = 'published' ${excludeClause}
-          ORDER BY is_hot DESC, created_at DESC
-          LIMIT ?
-        `, [...existingIds, limitMore]);
-        newsRows.push(...moreNews);
-      }
-      phone.related_news = newsRows;
-    } catch (_) {
-      phone.related_news = [];
     }
 
     return phone;

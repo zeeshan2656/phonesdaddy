@@ -173,17 +173,9 @@ async function downloadScrapedImage(imageUrl, slug) {
       console.warn('Background removal error:', bgErr.message);
     }
 
-    const filename = `scraped-${slugify(slug || 'phone')}-${Date.now()}.png`;
-    const uploadDir = path.join(__dirname, '..', 'uploads', 'phones');
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const filePath = path.join(uploadDir, filename);
-    fs.writeFileSync(filePath, finalBuffer);
-
-    return `/uploads/phones/${filename}`;
+    const { optimizePhoneImage } = require('./imageOptimizer');
+    const { url } = await optimizePhoneImage(finalBuffer, `scraped-${slugify(slug || 'phone')}`);
+    return url;
   } catch (err) {
     console.error('Error downloading scraped phone image:', err.message);
     return null;
@@ -233,10 +225,9 @@ async function downloadAllImages(imageUrls, slug) {
           console.warn('Gallery BG removal error:', bgErr.message);
         }
 
-        const filename = `gallery-${slugify(slug || 'phone')}-${Date.now()}-${i + idx}.png`;
-        const filePath = path.join(uploadDir, filename);
-        fs.writeFileSync(filePath, finalBuffer);
-        return `/uploads/phones/${filename}`;
+        const { optimizePhoneImage } = require('./imageOptimizer');
+        const { url } = await optimizePhoneImage(finalBuffer, `gallery-${slugify(slug || 'phone')}-${i + idx}`);
+        return url;
       } catch (err) {
         console.warn(`Gallery image download failed: ${url} – ${err.message}`);
         return null;

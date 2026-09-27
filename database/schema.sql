@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS `brands` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_brands_slug` (`slug`),
-  INDEX `idx_brands_status` (`status`)
+  INDEX `idx_brands_status` (`status`),
+  INDEX `idx_brands_status_name` (`status`, `name`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. Phones Table
@@ -44,7 +45,12 @@ CREATE TABLE IF NOT EXISTS `phones` (
   INDEX `idx_phones_status` (`status`),
   INDEX `idx_phones_featured` (`featured`),
   INDEX `idx_phones_popular` (`popular`),
-  INDEX `idx_phones_created_at` (`created_at`)
+  INDEX `idx_phones_created_at` (`created_at`),
+  INDEX `idx_phones_brand_status_id` (`brand_id`, `status`, `id`),
+  INDEX `idx_phones_status_id` (`status`, `id`),
+  INDEX `idx_phones_popular_views` (`popular`, `views`),
+  INDEX `idx_phones_featured_id` (`featured`, `id`),
+  INDEX `idx_phones_price` (`price`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. Phone Specifications Table (Flexible EAV-like section model)
@@ -58,7 +64,9 @@ CREATE TABLE IF NOT EXISTS `phone_specs` (
   FOREIGN KEY (`phone_id`) REFERENCES `phones`(`id`) ON DELETE CASCADE,
   INDEX `idx_phone_specs_phone_id` (`phone_id`),
   INDEX `idx_phone_specs_section` (`section`),
-  INDEX `idx_phone_specs_key` (`spec_key`)
+  INDEX `idx_phone_specs_key` (`spec_key`),
+  INDEX `idx_phone_specs_phone_sec_key` (`phone_id`, `section`, `spec_key`),
+  INDEX `idx_phone_specs_sec_key_phone` (`section`, `spec_key`, `phone_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. Multi-country Phone Prices Table
@@ -70,7 +78,8 @@ CREATE TABLE IF NOT EXISTS `phone_prices` (
   `amount` VARCHAR(50) NOT NULL,
   FOREIGN KEY (`phone_id`) REFERENCES `phones`(`id`) ON DELETE CASCADE,
   INDEX `idx_phone_prices_phone_id` (`phone_id`),
-  INDEX `idx_phone_prices_country` (`country`)
+  INDEX `idx_phone_prices_country` (`country`),
+  INDEX `idx_phone_prices_phone_country` (`phone_id`, `country`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. Admins Table
@@ -101,7 +110,10 @@ CREATE TABLE IF NOT EXISTS `news` (
   INDEX `idx_news_category` (`category`),
   INDEX `idx_news_status` (`status`),
   INDEX `idx_news_is_hot` (`is_hot`),
-  INDEX `idx_news_created_at` (`created_at`)
+  INDEX `idx_news_created_at` (`created_at`),
+  INDEX `idx_news_status_hot_date` (`status`, `is_hot`, `created_at`),
+  INDEX `idx_news_status_date` (`status`, `created_at`),
+  INDEX `idx_news_category_status` (`category`, `status`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 7. Site Settings Table (AdSense, Analytics, Adsterra, Head/Body snippets)
@@ -135,5 +147,27 @@ CREATE TABLE IF NOT EXISTS `pages` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_pages_slug` (`slug`),
   INDEX `idx_pages_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. Reviews & Comments Table
+CREATE TABLE IF NOT EXISTS `reviews_comments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `entity_type` ENUM('phone', 'news') NOT NULL,
+  `entity_id` INT NOT NULL,
+  `parent_id` INT DEFAULT NULL,
+  `user_name` VARCHAR(100) NOT NULL,
+  `user_email_phone` VARCHAR(150) NOT NULL,
+  `user_website` VARCHAR(255) DEFAULT NULL,
+  `rating` TINYINT DEFAULT NULL,
+  `message` LONGTEXT NOT NULL,
+  `status` ENUM('approved', 'rejected') NOT NULL DEFAULT 'approved',
+  `is_admin` BOOLEAN DEFAULT FALSE,
+  `ip_address` VARCHAR(45) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_entity` (`entity_type`, `entity_id`, `status`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_created` (`created_at`),
+  INDEX `idx_parent` (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
