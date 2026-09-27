@@ -172,12 +172,20 @@ async function getHomeSsrReplacements() {
       `).then(([rows]) => rows).catch(() => [])
     ]);
 
-    const renderCard = (p) => `
+    const renderCard = (p, isEager = false, isLcp = false) => {
+      let loadingAttrs = 'loading="lazy" decoding="async"';
+      if (isLcp) {
+        loadingAttrs = 'loading="eager" fetchpriority="high"';
+      } else if (isEager) {
+        loadingAttrs = 'loading="eager"';
+      }
+
+      return `
       <div class="phone-card home-phone-card" onclick="window.location.href='/phone/${escapeAttr(p.slug)}'">
         <div class="phone-card-image-wrap">
           <span class="phone-card-brand-badge">${escapeHtml(p.brand_name || '')}</span>
           <a href="/phone/${escapeAttr(p.slug)}" onclick="event.stopPropagation()">
-            <img src="${escapeAttr(p.image || '/images/placeholder.svg')}" alt="${escapeAttr(p.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
+            <img src="${escapeAttr(p.image || '/images/placeholder.svg')}" alt="${escapeAttr(p.name)}" class="phone-card-image" ${loadingAttrs} width="160" height="212">
           </a>
         </div>
         <div class="phone-card-body">
@@ -187,10 +195,18 @@ async function getHomeSsrReplacements() {
         </div>
       </div>
     `;
+    };
 
-    const latestHtml = (latestPhones || []).map(renderCard).join('');
-    const popularHtml = (popularPhones || []).map(renderCard).join('');
-    const upcomingHtml = (upcomingPhones || []).map(renderCard).join('');
+    // First row (8 cards) is above the fold: Card 0 is LCP with fetchpriority="high", rest are eager (no lazy delay)
+    const latestHtml = (latestPhones || []).map((p, idx) => renderCard(p, idx < 8, idx === 0)).join('');
+    const popularHtml = (popularPhones || []).map(p => renderCard(p, false, false)).join('');
+    const upcomingHtml = (upcomingPhones || []).map(p => renderCard(p, false, false)).join('');
+
+    // Preload the primary LCP image in <head> for instantaneous paint
+    let lcpPreload = '';
+    if (latestPhones && latestPhones.length > 0 && latestPhones[0].image) {
+      lcpPreload = `<link rel="preload" href="${escapeAttr(latestPhones[0].image)}" as="image" fetchpriority="high">`;
+    }
 
     const brandsHtml = (topBrands || []).map(b => `
       <a href="/brand/${escapeAttr(b.slug)}" class="brand-card">
@@ -245,7 +261,8 @@ async function getHomeSsrReplacements() {
       '{{UPCOMING_PHONES_HTML}}': upcomingHtml || '<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">No upcoming phones found.</div>',
       '{{HOME_BRANDS_HTML}}': brandsHtml,
       '{{HOT_NEWS_HTML}}': newsHtml,
-      '{{QUICK_COMPARE_OPTIONS}}': quickCompareOptions
+      '{{QUICK_COMPARE_OPTIONS}}': quickCompareOptions,
+      '{{HOME_LCP_PRELOAD}}': lcpPreload
     };
 
     cache.set(HOME_SSR_CACHE_KEY, replacements, HOME_SSR_TTL_SECONDS, ['home', 'phones', 'brands', 'news']);
