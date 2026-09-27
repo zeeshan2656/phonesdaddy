@@ -70,13 +70,27 @@ function escapeQuote(str) {
   return str.toString().replace(/'/g, "\\'");
 }
 
-// Helper: Extract YouTube video ID from various URL formats
+// Helper: Extract YouTube video ID from various URL formats or full iframe embed code
 function extractYouTubeVideoId(url) {
   if (!url || typeof url !== 'string') return null;
-  const clean = url.trim();
+  let clean = url.trim();
+
+  // If user pasted full <iframe> embed snippet, extract src attribute
+  const srcMatch = clean.match(/src=["']([^"']+)["']/i);
+  if (srcMatch) {
+    clean = srcMatch[1];
+  }
+
+  // Direct 11-char video ID
   if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
-  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = clean.match(regExp);
+
+  // Handle URL-encoded redirects
+  if (clean.includes('%2F') || clean.includes('%3A') || clean.includes('%3D')) {
+    try { clean = decodeURIComponent(clean); } catch (_) {}
+  }
+
+  // Comprehensive regex matching youtube.com, youtube-nocookie.com, youtu.be, /embed/, /shorts/, ?v=
+  const match = clean.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
   return match ? match[1] : null;
 }
 
@@ -1414,8 +1428,10 @@ async function initPhoneForm() {
     });
     formData.set('affiliate_links', JSON.stringify(affArray));
 
-    // Collect Video URL
-    const videoUrl = document.getElementById('phoneVideoUrl')?.value.trim() || '';
+    // Collect Video URL (Normalize iframe or raw link to clean canonical watch URL)
+    const rawVideoUrl = document.getElementById('phoneVideoUrl')?.value.trim() || '';
+    const extractedVid = extractYouTubeVideoId(rawVideoUrl);
+    const videoUrl = extractedVid ? `https://www.youtube.com/watch?v=${extractedVid}` : rawVideoUrl;
     formData.set('video_url', videoUrl);
 
     try {
@@ -1457,7 +1473,7 @@ function updateVideoPreview() {
   if (videoId && videoPreviewBox && videoPreviewIframe) {
     videoPreviewIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
     videoPreviewIframe.src = `https://www.youtube.com/embed/${videoId}`;
-    if (previewVideoIdBadge) previewVideoIdBadge.textContent = `ID: ${videoId}`;
+    if (previewVideoIdBadge) previewVideoIdBadge.textContent = `ID: ${videoId} (Ready to embed)`;
     videoPreviewBox.style.display = 'block';
   } else {
     if (videoPreviewIframe) videoPreviewIframe.src = '';

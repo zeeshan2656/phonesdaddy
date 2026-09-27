@@ -8,6 +8,7 @@
   <meta name="description" content="{{META_DESCRIPTION}}">
   <link rel="canonical" href="{{CANONICAL_URL}}">
   {{SITE_FAVICON_TAG}}
+  {{PHONE_IMAGE_PRELOAD}}
   <link rel="stylesheet" href="/css/style.css">
   <!-- Quill Snow CSS for Rich Reviews (Non-render-blocking) -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" media="print" onload="this.media='all'">
@@ -224,13 +225,13 @@
             <!-- Phone Visual Column -->
             <div class="phone-visual-col">
               <div class="phone-main-card">
-                <img id="phoneDetailImage" src="/images/placeholder.svg" alt="{{PHONE_NAME}}" class="phone-main-image" width="300" height="400" fetchpriority="high" style="cursor:pointer;" onclick="openCurrentInGallery()" title="Click to view full-size gallery">
-                <button type="button" id="btnGalleryCountBadge" class="gallery-count-pill" onclick="openCurrentInGallery()" style="display:none;" title="Click to view all photos">
-                  <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span> <span id="galleryCountText">0 Photos</span>
+                <img id="phoneDetailImage" src="{{PHONE_IMAGE}}" alt="{{PHONE_NAME}}" class="phone-main-image" width="300" height="400" fetchpriority="high" style="cursor:pointer;" onclick="openCurrentInGallery()" title="Click to view full-size gallery">
+                <button type="button" id="btnGalleryCountBadge" class="gallery-count-pill" onclick="openCurrentInGallery()" style="{{GALLERY_BADGE_STYLE}}" title="Click to view all photos">
+                  <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span> <span id="galleryCountText">{{GALLERY_COUNT_TEXT}}</span>
                 </button>
               </div>
               <!-- Thumbnail strip shown below main image card -->
-              <div id="phoneGalleryStrip" class="phone-gallery-thumbs" style="display:none;"></div>
+              <div id="phoneGalleryStrip" class="phone-gallery-thumbs" style="{{GALLERY_STRIP_STYLE}}">{{PHONE_GALLERY_THUMBS_HTML}}</div>
             </div>
 
             <!-- Phone Info Column -->
@@ -385,11 +386,11 @@
         </div>
 
         <!-- Video Review & Unboxing (YouTube Responsive Player) -->
-        <div class="spec-section-card phone-video-section" id="phoneVideoSection" style="margin-bottom: 28px; display: none;">
+        <div class="spec-section-card phone-video-section" id="phoneVideoSection" style="margin-bottom: 28px; {{VIDEO_SECTION_DISPLAY}}">
           <div class="spec-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span style="display: flex; align-items: center; gap: 8px;">
               <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
-              <span id="phoneVideoReviewTitle">Video Review &amp; Unboxing</span>
+              <span id="phoneVideoReviewTitle">{{PHONE_NAME}} — Video Review &amp; Unboxing</span>
             </span>
             <span style="background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">
               <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#fff"/></svg>
@@ -398,7 +399,7 @@
           </div>
           <div class="phone-video-body">
             <div class="phone-video-responsive-wrap">
-              <iframe id="phoneDetailVideoIframe" src="" title="Video Review &amp; Unboxing" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              <iframe id="phoneDetailVideoIframe" src="{{VIDEO_IFRAME_SRC}}" title="{{PHONE_NAME}} Video Review &amp; Unboxing" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
             </div>
           </div>
         </div>

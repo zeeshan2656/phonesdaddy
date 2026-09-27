@@ -347,6 +347,47 @@ router.get('/phone/:slug', async (req, res, next) => {
       };
     }
 
+    function extractYouTubeId(url) {
+      if (!url || typeof url !== 'string') return null;
+      let clean = url.trim();
+      const srcMatch = clean.match(/src=["']([^"']+)["']/i);
+      if (srcMatch) clean = srcMatch[1];
+      if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
+      if (clean.includes('%2F') || clean.includes('%3A') || clean.includes('%3D')) {
+        try { clean = decodeURIComponent(clean); } catch (_) {}
+      }
+      const match = clean.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+      return match ? match[1] : null;
+    }
+
+    const videoId = extractYouTubeId(phone.video_url);
+    const videoSectionDisplay = videoId ? 'display: block;' : 'display: none;';
+    const videoIframeSrc = videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : '';
+
+    const allGalleryImages = phone.image
+      ? [phone.image, ...(Array.isArray(phone.images) ? phone.images : []).filter(u => u && u !== phone.image)]
+      : (Array.isArray(phone.images) ? phone.images : []);
+    const validGalleryImages = allGalleryImages.filter(Boolean);
+
+    let galleryThumbsHtml = '';
+    let galleryCountBadgeStyle = 'display: none;';
+    let galleryCountText = '0 Photos';
+    let galleryStripStyle = 'display: none;';
+
+    if (validGalleryImages.length > 1) {
+      galleryCountBadgeStyle = 'display: inline-flex;';
+      galleryCountText = `${validGalleryImages.length} Photos`;
+      galleryStripStyle = 'display: flex;';
+      galleryThumbsHtml = validGalleryImages.map((src, idx) => `
+        <div class="phone-thumb-item ${idx === 0 ? 'active' : ''}" onclick="selectPreviewImage(${idx})" ondblclick="openGallery(${idx})" title="Click to preview photo ${idx + 1}">
+          <img src="${escapeAttr(src)}" alt="Photo ${idx + 1}" loading="lazy" width="56" height="56" onerror="this.parentElement.style.display='none'">
+        </div>
+      `).join('');
+    }
+
+    const phoneImgUrl = phone.image || '/images/placeholder.svg';
+    const lcpPreload = phone.image ? `<link rel="preload" href="${escapeAttr(phone.image)}" as="image" fetchpriority="high">` : '';
+
     const replacements = {
       '{{PAGE_TITLE}}': escapeHtml(pageTitle),
       '{{META_DESCRIPTION}}': escapeHtml(pageDescription),
@@ -354,7 +395,15 @@ router.get('/phone/:slug', async (req, res, next) => {
       '{{PHONE_NAME}}': escapeHtml(phone.name),
       '{{PHONE_SLUG}}': escapeHtml(phone.slug),
       '{{SCHEMA_JSON}}': JSON.stringify(schemaData, null, 2),
-      '{{PHONE_DATA_JSON}}': JSON.stringify(phone).replace(/</g, '\\u003c')
+      '{{PHONE_DATA_JSON}}': JSON.stringify(phone).replace(/</g, '\\u003c'),
+      '{{PHONE_IMAGE}}': escapeAttr(phoneImgUrl),
+      '{{PHONE_IMAGE_PRELOAD}}': lcpPreload,
+      '{{GALLERY_BADGE_STYLE}}': galleryCountBadgeStyle,
+      '{{GALLERY_COUNT_TEXT}}': galleryCountText,
+      '{{GALLERY_STRIP_STYLE}}': galleryStripStyle,
+      '{{PHONE_GALLERY_THUMBS_HTML}}': galleryThumbsHtml,
+      '{{VIDEO_SECTION_DISPLAY}}': videoSectionDisplay,
+      '{{VIDEO_IFRAME_SRC}}': videoIframeSrc
     };
 
     await renderViewWithSnippets(res, 'phone.html', replacements);

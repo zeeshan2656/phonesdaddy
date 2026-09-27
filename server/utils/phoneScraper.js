@@ -204,16 +204,16 @@ async function downloadAllImages(imageUrls, slug) {
   // Process in batches of 3 to avoid rate limiting
   for (let i = 0; i < limited.length; i += 3) {
     const batch = limited.slice(i, i + 3);
-    const batchResults = await Promise.all(batch.map(async (url, idx) => {
+    const batchResults = await Promise.all(batch.map(async (imgUrl, idx) => {
       try {
-        const res = await fetch(url, {
+        const res = await fetch(imgUrl, {
           headers: {
             'User-Agent': DEFAULT_HEADERS['User-Agent'],
-            'Referer': url
+            'Referer': imgUrl
           },
           signal: AbortSignal.timeout(12000)
         });
-        if (!res.ok) { console.warn(`Gallery img skip (${res.status}): ${url}`); return null; }
+        if (!res.ok) { console.warn(`Gallery img skip (${res.status}): ${imgUrl}`); return null; }
 
         const arrayBuffer = await res.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
@@ -226,10 +226,10 @@ async function downloadAllImages(imageUrls, slug) {
         }
 
         const { optimizePhoneImage } = require('./imageOptimizer');
-        const { url } = await optimizePhoneImage(finalBuffer, `gallery-${slugify(slug || 'phone')}-${i + idx}`);
-        return url;
+        const optRes = await optimizePhoneImage(finalBuffer, `gallery-${slugify(slug || 'phone')}-${i + idx}`);
+        return optRes ? optRes.url : null;
       } catch (err) {
-        console.warn(`Gallery image download failed: ${url} – ${err.message}`);
+        console.warn(`Gallery image download failed: ${imgUrl} – ${err.message}`);
         return null;
       }
     }));
@@ -914,8 +914,8 @@ async function scrapePhoneFromUrl(url) {
       parsedData.images = localImages;             // all gallery images
       parsedData.localImage = true;
     } else {
-      parsedData.image = parsedData.imageUrl || '/images/placeholder.svg';
-      parsedData.images = parsedData.imageUrl ? [parsedData.imageUrl] : [];
+      parsedData.image = parsedData.imageUrl || (allRemoteUrls[0] || '/images/placeholder.svg');
+      parsedData.images = (allRemoteUrls.length > 0) ? allRemoteUrls : (parsedData.imageUrl ? [parsedData.imageUrl] : []);
       parsedData.localImage = false;
     }
   } else {
