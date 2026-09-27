@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "node server/server.js",
+    "migrate": "node database/migrate.js",
+    "db:backup": "node scripts/backup-db.js",
+    "package:deploy": "node scripts/package-deploy.js",
     "seed": "node database/seed.js"
   },
   "keywords": [],

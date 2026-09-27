@@ -2,6 +2,7 @@ const NewsModel = require('../models/newsModel');
 const path = require('path');
 const fs = require('fs');
 const { cache } = require('../utils/cache');
+const { deleteMediaFiles } = require('../utils/imageOptimizer');
 
 class NewsController {
   /**
@@ -242,6 +243,9 @@ class NewsController {
       }
 
       await NewsModel.deleteArticle(id);
+      if (existing.image) {
+        deleteMediaFiles(existing.image);
+      }
       cache.invalidateTags(['news', 'home']);
       return res.json({ success: true, message: 'Article deleted successfully' });
     } catch (err) {
@@ -264,7 +268,22 @@ class NewsController {
         return res.status(400).json({ success: false, message: 'No valid article IDs provided.' });
       }
 
+      // Fetch images before deleting records
+      let imagesToDelete = [];
+      try {
+        const { pool } = require('../config/database');
+        const [rows] = await pool.query('SELECT image FROM news WHERE id IN (?)', [cleanIds]);
+        if (rows && rows.length > 0) {
+          imagesToDelete = rows.map(r => r.image).filter(Boolean);
+        }
+      } catch (_) {}
+
       const affected = await NewsModel.deleteArticles(cleanIds);
+
+      if (imagesToDelete.length > 0) {
+        deleteMediaFiles(imagesToDelete);
+      }
+
       cache.invalidateTags(['news', 'home']);
       return res.json({
         success: true,

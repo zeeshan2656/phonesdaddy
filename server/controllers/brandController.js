@@ -1,6 +1,6 @@
 const BrandModel = require('../models/brandModel');
 const { cache } = require('../utils/cache');
-const { optimizeBrandLogo } = require('../utils/imageOptimizer');
+const { optimizeBrandLogo, deleteMediaFiles } = require('../utils/imageOptimizer');
 
 const BRAND_PALETTE = [
   '#1428a0', // Royal Blue (Samsung)
@@ -220,10 +220,15 @@ class BrandController {
   static async deleteBrand(req, res, next) {
     try {
       const { id } = req.params;
+      const brand = await BrandModel.getBrandById(id);
       const deleted = await BrandModel.deleteBrand(id);
 
       if (!deleted) {
         return res.status(404).json({ success: false, message: 'Brand not found' });
+      }
+
+      if (brand && brand.logo) {
+        deleteMediaFiles(brand.logo);
       }
 
       // Invalidate brand and related phone caches

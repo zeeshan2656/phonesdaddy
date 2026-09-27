@@ -562,6 +562,15 @@ class PhoneModel {
   }
 
   /**
+   * Get image and gallery URLs for phone IDs
+   */
+  static async getImagesByPhoneIds(ids) {
+    if (!Array.isArray(ids) || ids.length === 0) return [];
+    const [rows] = await pool.query(`SELECT id, image, images FROM phones WHERE id IN (?)`, [ids]);
+    return rows;
+  }
+
+  /**
    * Delete phone
    */
   static async deletePhone(id) {

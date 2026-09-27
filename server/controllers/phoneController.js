@@ -2,7 +2,7 @@ const PhoneModel = require('../models/phoneModel');
 const BrandModel = require('../models/brandModel');
 const { scrapePhoneFromUrl } = require('../utils/phoneScraper');
 const { cache } = require('../utils/cache');
-const { optimizePhoneImage } = require('../utils/imageOptimizer');
+const { optimizePhoneImage, deleteMediaFiles } = require('../utils/imageOptimizer');
 
 function extractUrls(rawText) {
   if (!rawText || typeof rawText !== 'string') return [];
@@ -322,6 +322,18 @@ class PhoneController {
         parsedPrices = typeof prices === 'string' ? JSON.parse(prices) : prices;
       }
 
+      // Clean up old image if user uploaded a new one or requested image removal
+      if (req.file || req.body.remove_image === 'true' || req.body.remove_image === true) {
+        try {
+          const oldPhone = await PhoneModel.getImagesByPhoneIds([id]);
+          if (oldPhone.length > 0 && oldPhone[0].image && oldPhone[0].image !== phoneData.image) {
+            deleteMediaFiles(oldPhone[0].image);
+          }
+        } catch (cleanupErr) {
+          console.warn('Could not clean up replaced image:', cleanupErr.message);
+        }
+      }
+
       await PhoneModel.updatePhone(id, phoneData, parsedSpecs, parsedPrices);
 
       // Invalidate relevant cache groups
@@ -342,16 +354,38 @@ class PhoneController {
   static async deletePhone(req, res, next) {
     try {
       const { id } = req.params;
-      const success = await PhoneModel.deletePhone(id);
+      const phoneId = parseInt(id, 10);
+      if (isNaN(phoneId)) {
+        return res.status(400).json({ success: false, message: 'Invalid phone ID' });
+      }
+
+      // 1. Fetch image and gallery URLs before deleting the record
+      const rows = await PhoneModel.getImagesByPhoneIds([phoneId]);
+
+      // 2. Delete phone from database
+      const success = await PhoneModel.deletePhone(phoneId);
 
       if (!success) {
         return res.status(404).json({ success: false, message: 'Phone not found' });
       }
 
+      // 3. Automatically clean up image files and thumbnails from disk
+      if (rows && rows.length > 0) {
+        const mediaList = [];
+        if (rows[0].image) mediaList.push(rows[0].image);
+        if (rows[0].images) {
+          try {
+            const parsed = typeof rows[0].images === 'string' ? JSON.parse(rows[0].images) : rows[0].images;
+            if (Array.isArray(parsed)) mediaList.push(...parsed);
+          } catch (_) {}
+        }
+        deleteMediaFiles(mediaList);
+      }
+
       // Invalidate relevant cache groups
       cache.invalidateTags(['phones', 'home']);
 
-      return res.json({ success: true, message: 'Phone deleted successfully' });
+      return res.json({ success: true, message: 'Phone and associated images deleted successfully' });
     } catch (err) {
       next(err);
     }
@@ -369,14 +403,33 @@ class PhoneController {
         return res.status(400).json({ success: false, message: 'No valid phone IDs provided.' });
       }
 
+      // 1. Fetch image and gallery URLs before deleting the records
+      const rows = await PhoneModel.getImagesByPhoneIds(cleanIds);
+
+      // 2. Delete phones from database
       const affected = await PhoneModel.deletePhones(cleanIds);
+
+      // 3. Automatically clean up image files and thumbnails from disk
+      if (rows && rows.length > 0) {
+        const mediaList = [];
+        for (const row of rows) {
+          if (row.image) mediaList.push(row.image);
+          if (row.images) {
+            try {
+              const parsed = typeof row.images === 'string' ? JSON.parse(row.images) : row.images;
+              if (Array.isArray(parsed)) mediaList.push(...parsed);
+            } catch (_) {}
+          }
+        }
+        deleteMediaFiles(mediaList);
+      }
 
       // Invalidate relevant cache groups
       cache.invalidateTags(['phones', 'home']);
 
       return res.json({
         success: true,
-        message: `Successfully deleted ${affected} phone(s).`,
+        message: `Successfully deleted ${affected} phone(s) and associated images.`,
         affected
       });
     } catch (err) {

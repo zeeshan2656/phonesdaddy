@@ -123,10 +123,76 @@ async function optimizeNewsImage(input, baseName = 'news') {
   }
 }
 
+/**
+ * Safely delete image files and their thumbnails from disk
+ * @param {string|string[]} urls - Single URL or array of URLs
+ */
+function deleteMediaFiles(urls) {
+  if (!urls) return;
+  const list = Array.isArray(urls) ? urls : [urls];
+  const ROOT = path.resolve(__dirname, '../../');
+  const validWebfiles = path.normalize(path.join(ROOT, 'public', 'webfiles'));
+  const validUploads = path.normalize(path.join(ROOT, 'server', 'uploads'));
+
+  for (const item of list) {
+    if (!item || typeof item !== 'string') continue;
+    const cleanUrl = item.trim();
+
+    // Ignore remote URLs (http://, https://) or system placeholders
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) continue;
+    if (cleanUrl.startsWith('/images/') || cleanUrl === '/images/placeholder.svg' || cleanUrl.includes('placeholder')) continue;
+
+    let targetFilePath = null;
+    if (cleanUrl.startsWith('/webfiles/')) {
+      targetFilePath = path.join(ROOT, 'public', cleanUrl.replace(/^\//, ''));
+    } else if (cleanUrl.startsWith('/uploads/')) {
+      targetFilePath = path.join(ROOT, 'server', cleanUrl.replace(/^\//, ''));
+    } else if (cleanUrl.startsWith('webfiles/')) {
+      targetFilePath = path.join(ROOT, 'public', cleanUrl);
+    } else if (cleanUrl.startsWith('uploads/')) {
+      targetFilePath = path.join(ROOT, 'server', cleanUrl);
+    }
+
+    if (!targetFilePath) continue;
+
+    // Security check: ensure path is strictly inside public/webfiles or server/uploads
+    const normalized = path.normalize(targetFilePath);
+    if (!normalized.startsWith(validWebfiles) && !normalized.startsWith(validUploads)) {
+      console.warn(`[Security] Blocked attempt to delete path outside uploads/webfiles: ${normalized}`);
+      continue;
+    }
+
+    // 1. Delete main file if exists
+    try {
+      if (fs.existsSync(normalized) && fs.statSync(normalized).isFile()) {
+        fs.unlinkSync(normalized);
+        console.log(`[Media Clean] Deleted file: ${normalized}`);
+      }
+    } catch (e) {
+      console.warn(`[Media Clean] Could not delete file ${normalized}:`, e.message);
+    }
+
+    // 2. Check and delete thumbnail counterpart if .webp (e.g. phone-123.webp -> phone-123-thumb.webp)
+    if (normalized.endsWith('.webp') && !normalized.endsWith('-thumb.webp')) {
+      const thumbPath = normalized.replace(/\.webp$/, '-thumb.webp');
+      try {
+        if (fs.existsSync(thumbPath) && fs.statSync(thumbPath).isFile()) {
+          fs.unlinkSync(thumbPath);
+          console.log(`[Media Clean] Deleted thumbnail: ${thumbPath}`);
+        }
+      } catch (e) {
+        console.warn(`[Media Clean] Could not delete thumb ${thumbPath}:`, e.message);
+      }
+    }
+  }
+}
+
 module.exports = {
   WEBFILES_ROOT,
   DIRS,
   optimizePhoneImage,
   optimizeBrandLogo,
-  optimizeNewsImage
+  optimizeNewsImage,
+  deleteMediaFiles
 };
+
