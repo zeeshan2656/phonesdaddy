@@ -87,7 +87,12 @@ app.use(session({
 const staticOptions = {
   maxAge: '30d',
   setHeaders: (res, filePath) => {
-    if (filePath.includes('webfiles')) {
+    // Admin scripts and styles must never be cached so updates reflect immediately
+    if (filePath.includes('admin') || filePath.endsWith('admin.js') || filePath.endsWith('admin.css')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    } else if (filePath.includes('webfiles')) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     } else if (/\.(css|js|woff2|woff|ttf|ico|svg|png|jpg|jpeg|webp)$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');

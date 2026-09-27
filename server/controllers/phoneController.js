@@ -4,6 +4,27 @@ const { scrapePhoneFromUrl } = require('../utils/phoneScraper');
 const { cache } = require('../utils/cache');
 const { optimizePhoneImage } = require('../utils/imageOptimizer');
 
+function extractUrls(rawText) {
+  if (!rawText || typeof rawText !== 'string') return [];
+  const regex = /https?:\/\/(?:www\.)?(?:whatmobile\.com\.pk|gsmarena\.com)[^\s"',;)<>]+/gi;
+  const matches = rawText.match(regex) || [];
+  const valid = [];
+  const seen = new Set();
+  for (let raw of matches) {
+    let clean = raw.trim().replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+    if (!clean) continue;
+    try {
+      const u = new URL(clean);
+      const host = u.hostname.toLowerCase();
+      if ((host.includes('whatmobile.com.pk') || host.includes('gsmarena.com')) && !seen.has(clean)) {
+        seen.add(clean);
+        valid.push(clean);
+      }
+    } catch (_) {}
+  }
+  return valid;
+}
+
 class PhoneController {
   static async list(req, res, next) {
     try {
@@ -370,7 +391,21 @@ class PhoneController {
         return res.status(400).json({ success: false, message: 'A valid URL is required.' });
       }
 
-      const scrapedData = await scrapePhoneFromUrl(url);
+      const multiUrls = extractUrls(url);
+      if (multiUrls.length > 1) {
+        return res.status(400).json({
+          success: false,
+          isMultiple: true,
+          count: multiUrls.length,
+          urls: multiUrls,
+          message: `Detected ${multiUrls.length} phone links. Please click "Start Bulk Queue" to import all devices sequentially.`
+        });
+      }
+
+      const cleanUrl = multiUrls.length === 1 
+        ? multiUrls[0] 
+        : String(url || '').trim().replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+      const scrapedData = await scrapePhoneFromUrl(cleanUrl);
 
       // Attempt to match brand in the database
       let matchedBrand = null;
@@ -426,7 +461,10 @@ class PhoneController {
         return res.status(400).json({ success: false, message: 'A valid URL is required.' });
       }
 
-      const scrapedData = await scrapePhoneFromUrl(url.trim());
+      const cleanUrl = String(url || '')
+        .trim()
+        .replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+      const scrapedData = await scrapePhoneFromUrl(cleanUrl);
 
       // Attempt to match brand in the database
       let brandId = null;

@@ -4,9 +4,10 @@ const sharp = require('sharp');
 
 // Common User-Agent to avoid blocking
 const DEFAULT_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
   'Accept-Language': 'en-US,en;q=0.9',
+  'Referer': 'https://www.whatmobile.com.pk/',
   'Cache-Control': 'no-cache'
 };
 
@@ -855,7 +856,10 @@ async function scrapePhoneFromUrl(url) {
     throw new Error('Please provide a valid URL.');
   }
 
-  const trimmedUrl = url.trim();
+  const trimmedUrl = String(url || '')
+    .trim()
+    .replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+
   let parsedUrl;
   try {
     parsedUrl = new URL(trimmedUrl);

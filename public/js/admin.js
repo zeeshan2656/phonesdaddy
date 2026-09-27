@@ -1134,25 +1134,172 @@ async function initPhoneForm() {
   const fetchIcon = document.getElementById('fetchIcon');
   const fetchBtnText = document.getElementById('fetchBtnText');
 
-  if (urlInput && btnClearUrl) {
-    urlInput.addEventListener('input', () => {
-      btnClearUrl.style.display = urlInput.value ? 'block' : 'none';
+  let adminAutoStartTimer = null;
+
+  const cancelAdminAutoStart = () => {
+    if (adminAutoStartTimer) {
+      clearTimeout(adminAutoStartTimer);
+      adminAutoStartTimer = null;
+    }
+    if (typeof window.cancelInlineAutoStart === 'function') {
+      window.cancelInlineAutoStart();
+    }
+  };
+
+  const triggerBulkQueue = (urls) => {
+    cancelAdminAutoStart();
+    if (!urls || urls.length <= 1) return;
+
+    if (typeof window.runInlineBulkQueue === 'function') {
+      window.runInlineBulkQueue(urls);
+      return;
+    }
+
+    openBulkImportModal();
+    const bulkTextarea = document.getElementById('bulkImportUrlsInput');
+    if (bulkTextarea) {
+      bulkTextarea.value = urls.join('\n');
+      updateBulkLinksCount();
+    }
+    startBulkQueue();
+  };
+
+  if (urlInput) {
+
+    const handleUrlPasteOrInput = (isPaste = false) => {
+      const val = (urlInput.value || '').trim();
+      if (btnClearUrl) btnClearUrl.style.display = val ? 'inline-block' : 'none';
+      const detectedUrls = parseBulkUrls(val);
+      const badge = document.getElementById('detectedUrlsCountBadge');
+
+      if (detectedUrls.length > 1) {
+        // If pasted or missing linebreaks, format so every URL is on its own separate line
+        if (isPaste || !val.includes('\n')) {
+          urlInput.value = detectedUrls.join('\n');
+        }
+        if (badge) {
+          badge.textContent = `⚡ ${detectedUrls.length} links detected (Bulk Mode)`;
+          badge.style.display = 'inline-block';
+          badge.style.background = '#ecfdf5';
+          badge.style.color = '#047857';
+          badge.style.borderColor = '#a7f3d0';
+        }
+        if (fetchBtnText) {
+          fetchBtnText.textContent = `⚡ Start Bulk Queue (${detectedUrls.length} Phones)`;
+        }
+        if (btnFetchSpecs) {
+          btnFetchSpecs.style.background = '#0d9488';
+        }
+
+        const chkAuto = document.getElementById('chkAutoStartQueue');
+        const autoStartEnabled = chkAuto ? chkAuto.checked : true;
+
+        cancelAdminAutoStart();
+
+        if (autoStartEnabled) {
+          if (fetchStatus) {
+            fetchStatus.style.display = 'block';
+            fetchStatus.style.background = '#f0fdfa';
+            fetchStatus.style.color = '#0f766e';
+            fetchStatus.style.border = '1px solid #99f6e4';
+            fetchStatus.innerHTML = `
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <span>🚀 <strong>${detectedUrls.length} phone links detected!</strong> Queuing starting automatically...</span>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" id="btnAdminAutoStartNow" class="btn btn-primary btn-sm" style="font-size: 11.5px; padding: 3px 12px; background: #0d9488; border: none; font-weight: 700; cursor: pointer;">Start Now ▶</button>
+                  <button type="button" id="btnAdminCancelAutoStart" class="btn btn-outline btn-sm" style="font-size: 11.5px; padding: 3px 10px; cursor: pointer;">Cancel</button>
+                </div>
+              </div>
+            `;
+            document.getElementById('btnAdminAutoStartNow')?.addEventListener('click', (e) => {
+              e.preventDefault();
+              triggerBulkQueue(detectedUrls);
+            });
+            document.getElementById('btnAdminCancelAutoStart')?.addEventListener('click', (e) => {
+              e.preventDefault();
+              cancelAdminAutoStart();
+              if (fetchStatus) {
+                fetchStatus.innerHTML = `⚡ Detected <strong>${detectedUrls.length} phone links</strong>. Auto-start paused. Click "Start Bulk Queue" when ready.`;
+              }
+            });
+          }
+
+          adminAutoStartTimer = setTimeout(() => {
+            triggerBulkQueue(detectedUrls);
+          }, 750);
+        } else {
+          if (fetchStatus) {
+            fetchStatus.style.display = 'block';
+            fetchStatus.style.background = '#ecfdf5';
+            fetchStatus.style.color = '#065f46';
+            fetchStatus.style.border = '1px solid #a7f3d0';
+            fetchStatus.innerHTML = `⚡ Detected <strong>${detectedUrls.length} phone links</strong> formatted on separate lines! Click <strong>"Start Bulk Queue"</strong> to import all phones.`;
+          }
+        }
+      } else if (detectedUrls.length === 1) {
+        cancelAdminAutoStart();
+        if (badge) {
+          badge.textContent = `1 link detected`;
+          badge.style.display = 'inline-block';
+          badge.style.background = '#eff6ff';
+          badge.style.color = '#1d4ed8';
+          badge.style.borderColor = '#bfdbfe';
+        }
+        if (fetchBtnText) {
+          fetchBtnText.textContent = 'Fetch Phone Specs';
+        }
+        if (btnFetchSpecs) {
+          btnFetchSpecs.style.background = '';
+        }
+        if (fetchStatus && fetchStatus.textContent.includes('Detected')) {
+          fetchStatus.style.display = 'none';
+        }
+      } else {
+        cancelAdminAutoStart();
+        if (badge) badge.style.display = 'none';
+        if (fetchBtnText) fetchBtnText.textContent = 'Fetch Phone Specs';
+        if (btnFetchSpecs) btnFetchSpecs.style.background = '';
+      }
+    };
+
+    urlInput.addEventListener('input', (e) => {
+      const isPaste = e && e.inputType === 'insertFromPaste';
+      handleUrlPasteOrInput(isPaste);
     });
-    btnClearUrl.addEventListener('click', () => {
-      urlInput.value = '';
-      btnClearUrl.style.display = 'none';
-      if (fetchStatus) fetchStatus.style.display = 'none';
-    });
+    urlInput.addEventListener('paste', () => setTimeout(() => handleUrlPasteOrInput(true), 50));
+
+    if (btnClearUrl) {
+      btnClearUrl.addEventListener('click', () => {
+        cancelAdminAutoStart();
+        urlInput.value = '';
+        btnClearUrl.style.display = 'none';
+        const badge = document.getElementById('detectedUrlsCountBadge');
+        if (badge) badge.style.display = 'none';
+        if (fetchBtnText) fetchBtnText.textContent = 'Fetch Phone Specs';
+        if (btnFetchSpecs) btnFetchSpecs.style.background = '';
+        if (fetchStatus) fetchStatus.style.display = 'none';
+      });
+    }
   }
 
-  if (btnFetchSpecs && urlInput) {
-    btnFetchSpecs.addEventListener('click', async () => {
-      const url = urlInput.value.trim();
-      if (!url) {
-        alert('Please paste a phone URL from whatmobile.com.pk or gsmarena.com first.');
-        urlInput.focus();
-        return;
-      }
+  if (btnFetchSpecs) {
+      btnFetchSpecs.addEventListener('click', async (e) => {
+        cancelAdminAutoStart();
+        const raw = urlInput.value.trim();
+        if (!raw) {
+          alert('Please paste a phone URL from whatmobile.com.pk or gsmarena.com first.');
+          urlInput.focus();
+          return;
+        }
+
+        // If user pasted multiple URLs, route to Bulk Import Queue
+        const detectedUrls = parseBulkUrls(raw);
+        if (detectedUrls.length > 1) {
+          triggerBulkQueue(detectedUrls);
+          return;
+        }
+
+      const url = detectedUrls.length === 1 ? detectedUrls[0] : raw.replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
 
       // UI Loading state
       btnFetchSpecs.disabled = true;
@@ -4670,23 +4817,22 @@ function clearBulkQueueForm() {
 
 function parseBulkUrls(rawText) {
   if (!rawText || typeof rawText !== 'string') return [];
-  const lines = rawText.split('\n');
+  const regex = /https?:\/\/(?:www\.)?(?:whatmobile\.com\.pk|gsmarena\.com)[^\s"',;)<>]+/gi;
+  const matches = rawText.match(regex) || [];
   const valid = [];
   const seen = new Set();
 
-  for (let line of lines) {
-    line = line.trim();
-    if (!line) continue;
+  for (let raw of matches) {
+    let clean = raw.trim().replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+    if (!clean) continue;
     try {
-      const u = new URL(line);
+      const u = new URL(clean);
       const host = u.hostname.toLowerCase();
-      if ((host.includes('whatmobile.com.pk') || host.includes('gsmarena.com')) && !seen.has(line)) {
-        seen.add(line);
-        valid.push(line);
+      if ((host.includes('whatmobile.com.pk') || host.includes('gsmarena.com')) && !seen.has(clean)) {
+        seen.add(clean);
+        valid.push(clean);
       }
-    } catch (_) {
-      // not a valid URL
-    }
+    } catch (_) {}
   }
   return valid;
 }
@@ -4913,12 +5059,14 @@ async function processNextQueueItem() {
   const row = document.getElementById(`queueRow_${bulkQueueIndex}`);
   if (row) row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
+  const cleanItemUrl = String(item.url || '').trim().replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+
   try {
     const res = await fetch('/api/phones/bulk-import-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        url: item.url,
+        url: cleanItemUrl,
         overwrite: item.overwrite,
         defaultStatus: item.defaultStatus,
         autoAddBrand: item.autoAddBrand
@@ -4994,12 +5142,14 @@ async function retryBulkQueueItem(index) {
   item.error = null;
   renderBulkQueueTable();
 
+  const cleanItemUrl = String(item.url || '').trim().replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+
   try {
     const res = await fetch('/api/phones/bulk-import-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        url: item.url,
+        url: cleanItemUrl,
         overwrite: item.overwrite,
         defaultStatus: item.defaultStatus,
         autoAddBrand: item.autoAddBrand
@@ -5031,6 +5181,15 @@ function initBulkImportModalListener() {
     textarea.addEventListener('input', updateBulkLinksCount);
     textarea.addEventListener('paste', () => setTimeout(updateBulkLinksCount, 50));
   }
+
+  // Bind to any open buttons
+  const openBtns = document.querySelectorAll('#btnOpenBulkImportModal, .btn-open-bulk-import');
+  openBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openBulkImportModal();
+    });
+  });
 
   // Check if URL has ?action=bulk-import
   const params = new URLSearchParams(window.location.search);
