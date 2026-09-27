@@ -116,6 +116,45 @@ async function renderViewWithSnippets(res, templateFile, replacements = {}, stat
 const HOME_SSR_CACHE_KEY = 'view_home_ssr_replacements';
 const HOME_SSR_TTL_SECONDS = 180; // 3 minutes
 
+async function getQuickCompareOptions() {
+  const cached = cache.get('QUICK_COMPARE_OPTIONS_HTML');
+  if (cached) return cached;
+
+  try {
+    const [phones] = await pool.query(`
+      SELECT p.slug, p.name, b.name AS brand_name 
+      FROM phones p 
+      JOIN brands b ON p.brand_id = b.id 
+      ORDER BY b.name ASC, p.name ASC
+    `);
+
+    const byBrand = {};
+    for (const p of phones) {
+      const bName = p.brand_name || 'Other';
+      if (!byBrand[bName]) byBrand[bName] = [];
+      byBrand[bName].push(p);
+    }
+
+    let html = '';
+    for (const [brand, list] of Object.entries(byBrand)) {
+      html += `<optgroup label="${escapeAttr(brand)}">`;
+      for (const p of list) {
+        const displayName = p.name.toLowerCase().startsWith(brand.toLowerCase())
+          ? p.name
+          : `${brand} ${p.name}`;
+        html += `<option value="${escapeAttr(p.slug)}">${escapeHtml(displayName)}</option>`;
+      }
+      html += `</optgroup>`;
+    }
+
+    cache.set('QUICK_COMPARE_OPTIONS_HTML', html, 600, ['phones', 'brands']);
+    return html;
+  } catch (err) {
+    console.error('getQuickCompareOptions error:', err);
+    return '';
+  }
+}
+
 async function getHomeSsrReplacements() {
   const cached = cache.get(HOME_SSR_CACHE_KEY);
   if (cached) {
@@ -123,7 +162,7 @@ async function getHomeSsrReplacements() {
   }
 
   try {
-    const [latestPhones, popularPhones, upcomingPhones, topBrands, articles, comparePhones] = await Promise.all([
+    const [latestPhones, popularPhones, upcomingPhones, topBrands, articles] = await Promise.all([
       pool.query(`
         SELECT p.id, p.name, p.slug, p.image, b.name AS brand_name
         FROM phones p
@@ -165,10 +204,6 @@ async function getHomeSsrReplacements() {
         WHERE status = 'published'
         ORDER BY is_hot DESC, created_at DESC
         LIMIT 4
-      `).then(([rows]) => rows).catch(() => []),
-
-      pool.query(`
-        SELECT slug, name FROM phones ORDER BY popular DESC, views DESC, id DESC LIMIT 50
       `).then(([rows]) => rows).catch(() => [])
     ]);
 
@@ -251,9 +286,7 @@ async function getHomeSsrReplacements() {
       newsHtml = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 24px;">No hot stories published yet. Stay tuned!</div>`;
     }
 
-    const quickCompareOptions = (comparePhones || []).map(p =>
-      `<option value="${escapeAttr(p.slug)}">${escapeHtml(p.name)}</option>`
-    ).join('');
+    const quickCompareOptions = await getQuickCompareOptions();
 
     const replacements = {
       '{{LATEST_PHONES_HTML}}': latestHtml || '<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">No phones found.</div>',
@@ -457,7 +490,10 @@ router.get('/brand/:slug', async (req, res, next) => {
 // Phone Comparison Page
 router.get('/compare', async (req, res, next) => {
   try {
-    await renderViewWithSnippets(res, 'compare.html');
+    const quickCompareOptions = await getQuickCompareOptions();
+    await renderViewWithSnippets(res, 'compare.html', {
+      '{{QUICK_COMPARE_OPTIONS}}': quickCompareOptions
+    });
   } catch (err) {
     next(err);
   }

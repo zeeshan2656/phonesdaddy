@@ -418,6 +418,160 @@ class PhoneController {
       });
     }
   }
+
+  static async importSingleUrl(req, res, next) {
+    try {
+      const { url, overwrite = false, defaultStatus = 'Available', autoAddBrand = true } = req.body;
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ success: false, message: 'A valid URL is required.' });
+      }
+
+      const scrapedData = await scrapePhoneFromUrl(url.trim());
+
+      // Attempt to match brand in the database
+      let brandId = null;
+      let brandName = scrapedData.brand || 'Other';
+
+      if (scrapedData.brand) {
+        const allBrands = await BrandModel.getAllBrands();
+        let matched = allBrands.find(b =>
+          b.name.toLowerCase() === scrapedData.brand.toLowerCase() ||
+          b.slug.toLowerCase() === scrapedData.brand.toLowerCase()
+        );
+
+        if (matched) {
+          brandId = matched.id;
+          brandName = matched.name;
+        } else if (autoAddBrand) {
+          // Auto-create brand if it doesn't exist
+          const bSlug = String(scrapedData.brand)
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
+          const newBrandId = await BrandModel.createBrand({
+            name: scrapedData.brand,
+            slug: bSlug,
+            logo: '',
+            description: `${scrapedData.brand} mobile phones and specifications.`,
+            status: 'active'
+          });
+          brandId = newBrandId;
+          brandName = scrapedData.brand;
+        }
+      }
+
+      if (!brandId) {
+        return res.status(400).json({
+          success: false,
+          message: `Brand "${scrapedData.brand}" not found in database and auto-create is disabled.`
+        });
+      }
+
+      // Ensure model name contains ONLY the model, not the brand prefix
+      let cleanModelName = scrapedData.name || '';
+      const bLower = brandName.toLowerCase();
+      if (cleanModelName.toLowerCase().startsWith(bLower + ' ')) {
+        cleanModelName = cleanModelName.slice(brandName.length).trim();
+      }
+
+      const slugifyFn = (t) => String(t || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      const phoneSlug = scrapedData.slug || slugifyFn(cleanModelName);
+      const shortDesc = scrapedData.shortSummary || `${brandName} ${cleanModelName} full specifications, camera, battery, and price details.`;
+      const primaryImage = scrapedData.image || (scrapedData.images && scrapedData.images[0]) || '/images/placeholder.svg';
+      const imagesArr = (scrapedData.images && scrapedData.images.length > 0)
+        ? scrapedData.images
+        : (primaryImage !== '/images/placeholder.svg' ? [primaryImage] : []);
+
+      const phoneData = {
+        brand_id: brandId,
+        name: cleanModelName,
+        slug: phoneSlug,
+        short_description: shortDesc,
+        image: primaryImage,
+        images: imagesArr,
+        affiliate_links: [],
+        video_url: null,
+        release_date: scrapedData.releaseDate || '',
+        status: defaultStatus || scrapedData.status || 'Available',
+        price: scrapedData.price || 0,
+        featured: false,
+        popular: false,
+        meta_title: `${brandName} ${cleanModelName} Price in Pakistan & Specifications`,
+        meta_description: `${brandName} ${cleanModelName} price in Pakistan, specifications, camera, battery, and display details.`
+      };
+
+      // Check if phone with this slug exists
+      const existing = await PhoneModel.getPhoneBySlug(phoneSlug);
+
+      if (existing) {
+        if (!overwrite) {
+          return res.json({
+            success: true,
+            action: 'skipped',
+            message: `"${brandName} ${cleanModelName}" already exists (skipped)`,
+            phone: {
+              id: existing.id,
+              name: `${brandName} ${cleanModelName}`,
+              slug: phoneSlug,
+              price: existing.price,
+              imagesCount: (existing.images || []).length
+            }
+          });
+        }
+
+        // Overwrite existing phone
+        await PhoneModel.updatePhone(existing.id, phoneData, scrapedData.specs, scrapedData.prices);
+        cache.invalidateTags(['phones', 'home']);
+
+        return res.json({
+          success: true,
+          action: 'updated',
+          message: `"${brandName} ${cleanModelName}" updated successfully`,
+          phone: {
+            id: existing.id,
+            name: `${brandName} ${cleanModelName}`,
+            slug: phoneSlug,
+            price: phoneData.price,
+            image: primaryImage,
+            imagesCount: imagesArr.length
+          }
+        });
+      }
+
+      // Create new phone
+      const newPhoneId = await PhoneModel.createPhone(phoneData, scrapedData.specs, scrapedData.prices);
+      cache.invalidateTags(['phones', 'home']);
+
+      return res.status(201).json({
+        success: true,
+        action: 'created',
+        message: `"${brandName} ${cleanModelName}" added successfully`,
+        phone: {
+          id: newPhoneId,
+          name: `${brandName} ${cleanModelName}`,
+          slug: phoneSlug,
+          price: phoneData.price,
+          image: primaryImage,
+          imagesCount: imagesArr.length
+        }
+      });
+    } catch (err) {
+      console.error('importSingleUrl error:', err);
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'Failed to import phone from URL.'
+      });
+    }
+  }
 }
 
 module.exports = PhoneController;

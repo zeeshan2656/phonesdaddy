@@ -1518,6 +1518,20 @@ button, input, select, textarea {
   font-size: 14px;
 }
 
+@media (max-width: 768px) {
+  .compare-inputs-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .compare-vs-badge {
+    margin: 4px auto;
+  }
+  #btnLaunchQuickCompare {
+    width: 100%;
+    margin-top: 8px !important;
+  }
+}
+
 /* ==========================================================================
    Phone Detail Page Layout & Specifications Table
    ========================================================================== */

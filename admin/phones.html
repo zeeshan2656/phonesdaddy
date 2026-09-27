@@ -70,7 +70,11 @@
         <button type="button" class="admin-hamburger-btn" onclick="toggleAdminSidebar()" aria-label="Toggle Navigation Menu"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
         <h2>Mobile Phones Management</h2>
       </div>
-      <div class="admin-topbar-actions">
+      <div class="admin-topbar-actions" style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" class="btn btn-outline btn-sm" id="btnOpenBulkImportModal" onclick="openBulkImportModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+          <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-2 2.5h3L11 10h4l-5 8 1.5-5.5h-3L10 2Z"/></svg>
+          ⚡ Bulk Import (Queue)
+        </button>
         <a href="/admin/phones/new" class="btn btn-primary btn-sm" id="btnAdminAddNewPhone">+ Add Phone</a>
       </div>
     </header>
@@ -206,8 +210,121 @@
         <div class="pagination-wrap" id="adminPhonesPagination" style="margin-top: 24px;"></div>
       </div>
 
+  <!-- Bulk Phone Import Queue Modal -->
+  <div id="bulkImportModal" class="admin-modal-backdrop" style="display: none;">
+    <div class="admin-modal-box" style="max-width: 820px; width: 95%;">
+      <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--admin-border); padding: 18px 24px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">⚡</span>
+          <div>
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--admin-dark); margin: 0;">Bulk Phone Import Queue</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted); margin: 2px 0 0 0;">Add up to 50+ phones at once. The system crawls, downloads photos to WebP, and saves each phone sequentially.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeBulkImportModal()" class="admin-modal-close" style="background: none; border: none; font-size: 24px; color: var(--admin-text-muted); cursor: pointer; line-height: 1;" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="admin-modal-body" style="padding: 24px; max-height: 75vh; overflow-y: auto;">
+        
+        <!-- Input Card -->
+        <div id="bulkInputSection">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 0;">Phone Links (WhatMobile or GSMArena — One URL Per Line):</label>
+              <span id="bulkUrlsCountBadge" style="font-size: 12px; font-weight: 700; color: var(--admin-primary); background: var(--admin-primary-light); padding: 2px 10px; border-radius: 9999px; border: 1px solid var(--admin-primary-border);">0 links detected</span>
+            </div>
+            <textarea id="bulkImportUrlsInput" class="form-control" rows="7" placeholder="https://www.whatmobile.com.pk/Infinix_Hot-40&#10;https://www.whatmobile.com.pk/Samsung_Galaxy-A15&#10;https://www.gsmarena.com/xiaomi_redmi_note_13-12776.php&#10;https://www.whatmobile.com.pk/Tecno_Spark-20-Pro" style="font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre;"></textarea>
+            <div style="font-size: 11.5px; color: var(--admin-text-muted); margin-top: 6px;">
+              💡 <strong>Tip:</strong> Paste 5, 10, 20, or 50+ links directly. Duplicate and empty lines are automatically ignored.
+            </div>
+          </div>
+
+          <!-- Options Grid -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; background: #f8fafc; border: 1px solid var(--admin-border); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 12px; font-weight: 700;">Default Market Status:</label>
+              <select id="bulkDefaultStatus" class="form-control" style="height: 38px; font-size: 13px;">
+                <option value="Available">Available</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Rumored">Rumored</option>
+              </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; justify-content: center; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--admin-dark);">
+                <input type="checkbox" id="bulkOverwriteExisting" checked style="width: 16px; height: 16px; accent-color: var(--admin-primary);">
+                Update specs &amp; images if phone already exists
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--admin-dark);">
+                <input type="checkbox" id="bulkAutoAddBrand" checked style="width: 16px; height: 16px; accent-color: var(--admin-primary);">
+                Auto-create brand if not yet in database
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Queue Live Progress Dashboard (Appears when running / completed) -->
+        <div id="bulkQueueDashboard" style="display: none; margin-bottom: 20px;">
+          <!-- Header & Progress Stats -->
+          <div style="background: #ffffff; border: 1px solid var(--admin-border); border-radius: 8px; padding: 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+              <div style="font-weight: 800; font-size: 14px; color: var(--admin-dark);" id="bulkQueueStatusText">Queue in Progress...</div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--admin-primary);" id="bulkQueuePercentText">0%</div>
+            </div>
+
+            <!-- Progress Bar Track -->
+            <div style="width: 100%; height: 10px; background: #e2e8f0; border-radius: 9999px; overflow: hidden; margin-bottom: 14px;">
+              <div id="bulkQueueProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0d9488, #10b981); transition: width 0.3s ease;"></div>
+            </div>
+
+            <!-- Stat Counters Badges -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; font-weight: 700;">
+              <span class="badge" style="background: #f1f5f9; color: #475569; padding: 4px 10px;" id="statBulkTotal">Total: 0</span>
+              <span class="badge" style="background: #ecfdf5; color: #047857; padding: 4px 10px;" id="statBulkCreated">Added: 0</span>
+              <span class="badge" style="background: #eff6ff; color: #1d4ed8; padding: 4px 10px;" id="statBulkUpdated">Updated: 0</span>
+              <span class="badge" style="background: #fefce8; color: #854d0e; padding: 4px 10px;" id="statBulkSkipped">Skipped: 0</span>
+              <span class="badge" style="background: #fef2f2; color: #b91c1c; padding: 4px 10px;" id="statBulkFailed">Failed: 0</span>
+            </div>
+          </div>
+
+          <!-- Live Status Item Banner -->
+          <div id="bulkCurrentTaskBanner" style="font-size: 13px; background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; display: none;"></div>
+
+          <!-- Queue Item Table -->
+          <div style="border: 1px solid var(--admin-border); border-radius: 8px; overflow: hidden; max-height: 320px; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; text-align: left;">
+              <thead style="background: #f8fafc; border-bottom: 1px solid var(--admin-border); color: #64748b; font-weight: 700; position: sticky; top: 0; z-index: 2;">
+                <tr>
+                  <th style="padding: 10px 14px; width: 45px;">#</th>
+                  <th style="padding: 10px 14px;">Source Link</th>
+                  <th style="padding: 10px 14px; width: 140px;">Status</th>
+                  <th style="padding: 10px 14px;">Imported Device Details</th>
+                </tr>
+              </thead>
+              <tbody id="bulkQueueTableBody">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Controls -->
+      <div class="admin-modal-footer" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--admin-border); padding: 16px 24px; background: #f8fafc;">
+        <div id="bulkFooterLeft">
+          <button type="button" id="btnBulkClear" class="btn btn-outline btn-sm" onclick="clearBulkQueueForm()">Clear Links</button>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button type="button" id="btnCancelBulkQueue" class="btn btn-danger btn-sm" style="display: none;" onclick="stopBulkQueue()">⏹ Stop Queue</button>
+          <button type="button" id="btnPauseBulkQueue" class="btn btn-outline btn-sm" style="display: none;" onclick="pauseBulkQueue()">⏸ Pause</button>
+          <button type="button" id="btnResumeBulkQueue" class="btn btn-primary btn-sm" style="display: none;" onclick="resumeBulkQueue()">▶ Resume</button>
+          <button type="button" id="btnStartBulkQueue" class="btn btn-primary" onclick="startBulkQueue()" style="padding: 8px 22px; font-weight: 700;">▶ Start Import Queue</button>
+          <button type="button" id="btnCloseBulkModal" class="btn btn-outline" onclick="closeBulkImportModal()">Close</button>
+        </div>
+      </div>
     </div>
-  </main>
+  </div>
 
   <script src="/js/app.js"></script>
   <script src="/js/icons.js"></script>

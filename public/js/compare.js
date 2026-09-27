@@ -22,8 +22,41 @@ async function initCompare() {
   // Setup header search picker immediately
   setupHeaderPhoneSearchPicker();
 
+  // Setup side-by-side compare widget immediately
+  setupQuickCompareWidget();
+
   // Load comparison data
   await loadComparisonData();
+}
+
+function setupQuickCompareWidget() {
+  const btn = document.getElementById('btnLaunchQuickCompare');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const s1 = document.getElementById('quickComparePhone1')?.value;
+      const s2 = document.getElementById('quickComparePhone2')?.value;
+      if (!s1 || !s2) {
+        alert('Please select two phones to compare.');
+        return;
+      }
+      if (s1 === s2) {
+        alert('Please select two different phones to compare.');
+        return;
+      }
+      setComparisonPair(s1, s2);
+    });
+  }
+}
+
+function syncQuickCompareDropdowns() {
+  const p1 = document.getElementById('quickComparePhone1');
+  const p2 = document.getElementById('quickComparePhone2');
+  if (p1 && compareSlugs[0]) {
+    p1.value = compareSlugs[0];
+  }
+  if (p2 && compareSlugs[1]) {
+    p2.value = compareSlugs[1];
+  }
 }
 
 function updateUrl() {
@@ -100,6 +133,7 @@ async function loadComparisonData() {
     const returnedSlugs = json.data.map(p => p.slug);
     compareSlugs = returnedSlugs;
     updateUrl();
+    syncQuickCompareDropdowns();
 
     renderCompareMatrix(json.data);
   } catch (err) {
@@ -129,16 +163,12 @@ function getSpecVal(phone, section, keys) {
 }
 
 function renderEmptyState(container) {
+  syncQuickCompareDropdowns();
   container.innerHTML = `
-    <div style="text-align: center; padding: 60px 24px; background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); max-width: 640px; margin: 0 auto;">
+    <div style="text-align: center; padding: 48px 24px; background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); max-width: 640px; margin: 0 auto;">
       <div style="font-size: 40px; margin-bottom: 12px;">⚖️</div>
-      <h2 style="color: var(--dark); font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">Select Phones to Compare</h2>
-      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Search and add any two smartphones to compare specs, performance, battery, cameras, and prices.</p>
-
-      <div style="margin-bottom: 28px;">
-        <input type="text" id="emptySearchInput" class="form-control" placeholder="Search phone name (e.g. Galaxy, Infinix, Vivo)..." style="max-width: 380px; margin: 0 auto; height: 46px;" autocomplete="off">
-        <div class="search-results-dropdown" id="emptySearchDropdown" style="max-width: 380px; margin: 0 auto; position: relative;"></div>
-      </div>
+      <h2 style="color: var(--dark); font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;">Select Two Phones to Compare</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Choose any two smartphones from the dropdowns above and click <strong>"Compare Now"</strong>, or pick one of these popular comparisons:</p>
 
       <div style="border-top: 1px solid var(--border-color); padding-top: 20px;">
         <div style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase;">Popular Comparisons:</div>

@@ -4621,6 +4621,433 @@ window.removeLogoFile = removeLogoFile;
 window.handleFaviconSelect = handleFaviconSelect;
 window.triggerFaviconUpload = triggerFaviconUpload;
 window.removeFaviconFile = removeFaviconFile;
+// =============================================================================
+// Bulk Phone Import Queue Controller
+// =============================================================================
+let bulkQueue = [];
+let bulkQueueRunning = false;
+let bulkQueuePaused = false;
+let bulkQueueIndex = 0;
+let bulkStats = { total: 0, created: 0, updated: 0, skipped: 0, failed: 0 };
+
+function openBulkImportModal() {
+  const modal = document.getElementById('bulkImportModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    updateBulkLinksCount();
+  }
+}
+
+function closeBulkImportModal() {
+  if (bulkQueueRunning && !bulkQueuePaused) {
+    if (!confirm('The import queue is currently running. Are you sure you want to close and stop the queue?')) {
+      return;
+    }
+    stopBulkQueue();
+  }
+  const modal = document.getElementById('bulkImportModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+}
+
+function clearBulkQueueForm() {
+  if (bulkQueueRunning) return;
+  const textarea = document.getElementById('bulkImportUrlsInput');
+  if (textarea) textarea.value = '';
+  updateBulkLinksCount();
+  const dash = document.getElementById('bulkQueueDashboard');
+  if (dash) dash.style.display = 'none';
+  const tbody = document.getElementById('bulkQueueTableBody');
+  if (tbody) tbody.innerHTML = '';
+  const bar = document.getElementById('bulkQueueProgressBar');
+  if (bar) bar.style.width = '0%';
+  const pct = document.getElementById('bulkQueuePercentText');
+  if (pct) pct.textContent = '0%';
+}
+
+function parseBulkUrls(rawText) {
+  if (!rawText || typeof rawText !== 'string') return [];
+  const lines = rawText.split('\n');
+  const valid = [];
+  const seen = new Set();
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) continue;
+    try {
+      const u = new URL(line);
+      const host = u.hostname.toLowerCase();
+      if ((host.includes('whatmobile.com.pk') || host.includes('gsmarena.com')) && !seen.has(line)) {
+        seen.add(line);
+        valid.push(line);
+      }
+    } catch (_) {
+      // not a valid URL
+    }
+  }
+  return valid;
+}
+
+function updateBulkLinksCount() {
+  const textarea = document.getElementById('bulkImportUrlsInput');
+  const badge = document.getElementById('bulkUrlsCountBadge');
+  if (!textarea || !badge) return;
+
+  const urls = parseBulkUrls(textarea.value);
+  badge.textContent = `${urls.length} link${urls.length === 1 ? '' : 's'} detected`;
+  if (urls.length > 0) {
+    badge.style.background = '#ecfdf5';
+    badge.style.color = '#047857';
+    badge.style.borderColor = '#a7f3d0';
+  } else {
+    badge.style.background = 'var(--admin-primary-light)';
+    badge.style.color = 'var(--admin-primary)';
+    badge.style.borderColor = 'var(--admin-primary-border)';
+  }
+}
+
+async function startBulkQueue() {
+  const textarea = document.getElementById('bulkImportUrlsInput');
+  if (!textarea) return;
+
+  const urls = parseBulkUrls(textarea.value);
+  if (urls.length === 0) {
+    alert('Please paste at least one valid phone URL from WhatMobile or GSMArena.');
+    textarea.focus();
+    return;
+  }
+
+  const defaultStatus = document.getElementById('bulkDefaultStatus')?.value || 'Available';
+  const overwrite = document.getElementById('bulkOverwriteExisting')?.checked ?? true;
+  const autoAddBrand = document.getElementById('bulkAutoAddBrand')?.checked ?? true;
+
+  bulkQueue = urls.map((url, i) => ({
+    id: i + 1,
+    url,
+    status: 'pending',
+    result: null,
+    error: null,
+    defaultStatus,
+    overwrite,
+    autoAddBrand
+  }));
+
+  bulkStats = {
+    total: bulkQueue.length,
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    failed: 0
+  };
+
+  bulkQueueRunning = true;
+  bulkQueuePaused = false;
+  bulkQueueIndex = 0;
+
+  // Update UI to running state
+  const dash = document.getElementById('bulkQueueDashboard');
+  if (dash) dash.style.display = 'block';
+  document.getElementById('btnStartBulkQueue').style.display = 'none';
+  document.getElementById('btnPauseBulkQueue').style.display = 'inline-block';
+  document.getElementById('btnResumeBulkQueue').style.display = 'none';
+  document.getElementById('btnCancelBulkQueue').style.display = 'inline-block';
+  document.getElementById('btnCloseBulkModal').disabled = true;
+  document.getElementById('bulkImportUrlsInput').disabled = true;
+
+  renderBulkQueueTable();
+  updateBulkProgressUI();
+
+  // Run the queue
+  processNextQueueItem();
+}
+
+function renderBulkQueueTable() {
+  const tbody = document.getElementById('bulkQueueTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = bulkQueue.map((item, idx) => {
+    let statusBadge = '<span style="color: #94a3b8; font-weight: 600;">⏳ Pending</span>';
+    let detailsHtml = '<span style="color: #94a3b8;">Waiting in queue...</span>';
+    let rowClass = 'bulk-queue-row';
+
+    if (item.status === 'running') {
+      statusBadge = '<span style="color: #0d9488; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><span style="display: inline-block;">🔄</span> Crawling...</span>';
+      detailsHtml = '<span style="color: #0d9488; font-weight: 600;">Downloading specs &amp; optimizing gallery images...</span>';
+      rowClass += ' running';
+    } else if (item.status === 'created') {
+      statusBadge = '<span style="background: #ecfdf5; color: #047857; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">✅ Added</span>';
+      const p = item.result?.phone || {};
+      detailsHtml = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <span style="font-weight: 700; color: #0f172a;">${escapeHtml(p.name || '')}</span>
+          <div style="display: flex; gap: 6px;">
+            <a href="/phone/${escapeAttr(p.slug)}" target="_blank" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 2px 8px; text-decoration: none;">View ↗</a>
+          </div>
+        </div>
+        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+          ${p.price > 0 ? (typeof formatPKR === 'function' ? formatPKR(p.price) : 'Rs. ' + Number(p.price).toLocaleString()) : 'Price N/A'} • ${p.imagesCount || 1} photo(s)
+        </div>
+      `;
+      rowClass += ' success';
+    } else if (item.status === 'updated') {
+      statusBadge = '<span style="background: #eff6ff; color: #1d4ed8; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">🔁 Updated</span>';
+      const p = item.result?.phone || {};
+      detailsHtml = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <span style="font-weight: 700; color: #0f172a;">${escapeHtml(p.name || '')} (Updated)</span>
+          <div style="display: flex; gap: 6px;">
+            <a href="/phone/${escapeAttr(p.slug)}" target="_blank" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 2px 8px; text-decoration: none;">View ↗</a>
+          </div>
+        </div>
+        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+          ${p.price > 0 ? (typeof formatPKR === 'function' ? formatPKR(p.price) : 'Rs. ' + Number(p.price).toLocaleString()) : 'Price N/A'} • ${p.imagesCount || 1} photo(s)
+        </div>
+      `;
+      rowClass += ' success';
+    } else if (item.status === 'skipped') {
+      statusBadge = '<span style="background: #fefce8; color: #854d0e; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">⚠️ Skipped</span>';
+      detailsHtml = `<span style="color: #854d0e;">${escapeHtml(item.result?.message || 'Phone already exists')}</span>`;
+      rowClass += ' skipped';
+    } else if (item.status === 'failed') {
+      statusBadge = '<span style="background: #fef2f2; color: #b91c1c; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">❌ Failed</span>';
+      detailsHtml = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <span style="color: #b91c1c; font-size: 11.5px;">${escapeHtml(item.error || 'Failed to crawl phone.')}</span>
+          <button type="button" class="btn btn-outline btn-sm" onclick="retryBulkQueueItem(${idx})" style="font-size: 11px; padding: 2px 8px;">Retry ↺</button>
+        </div>
+      `;
+      rowClass += ' failed';
+    }
+
+    let domainTag = item.url.includes('whatmobile.com.pk')
+      ? '<span style="background: #ecfdf5; color: #047857; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-right: 4px;">WhatMobile</span>'
+      : '<span style="background: #eff6ff; color: #1d4ed8; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-right: 4px;">GSMArena</span>';
+
+    return `
+      <tr class="${rowClass}" id="queueRow_${idx}">
+        <td style="padding: 10px 14px; font-weight: 700; color: #64748b;">${idx + 1}</td>
+        <td style="padding: 10px 14px;">
+          <div>${domainTag}</div>
+          <a href="${escapeAttr(item.url)}" target="_blank" style="color: #0369a1; text-decoration: none; word-break: break-all; font-family: monospace; font-size: 11.5px;">${escapeHtml(item.url)}</a>
+        </td>
+        <td style="padding: 10px 14px;">${statusBadge}</td>
+        <td style="padding: 10px 14px;">${detailsHtml}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateBulkProgressUI() {
+  const completed = bulkStats.created + bulkStats.updated + bulkStats.skipped + bulkStats.failed;
+  const pct = bulkStats.total > 0 ? Math.round((completed / bulkStats.total) * 100) : 0;
+
+  const bar = document.getElementById('bulkQueueProgressBar');
+  if (bar) bar.style.width = `${pct}%`;
+  const pctText = document.getElementById('bulkQueuePercentText');
+  if (pctText) pctText.textContent = `${pct}% (${completed}/${bulkStats.total})`;
+
+  const sTotal = document.getElementById('statBulkTotal');
+  if (sTotal) sTotal.textContent = `Total: ${bulkStats.total}`;
+  const sCreated = document.getElementById('statBulkCreated');
+  if (sCreated) sCreated.textContent = `Added: ${bulkStats.created}`;
+  const sUpdated = document.getElementById('statBulkUpdated');
+  if (sUpdated) sUpdated.textContent = `Updated: ${bulkStats.updated}`;
+  const sSkipped = document.getElementById('statBulkSkipped');
+  if (sSkipped) sSkipped.textContent = `Skipped: ${bulkStats.skipped}`;
+  const sFailed = document.getElementById('statBulkFailed');
+  if (sFailed) sFailed.textContent = `Failed: ${bulkStats.failed}`;
+
+  if (!bulkQueueRunning) {
+    const statusText = document.getElementById('bulkQueueStatusText');
+    if (statusText) statusText.innerHTML = `🎉 <strong>Queue Completed!</strong> (${completed}/${bulkStats.total} processed)`;
+    const banner = document.getElementById('bulkCurrentTaskBanner');
+    if (banner) banner.style.display = 'none';
+
+    const pBtn = document.getElementById('btnPauseBulkQueue');
+    if (pBtn) pBtn.style.display = 'none';
+    const rBtn = document.getElementById('btnResumeBulkQueue');
+    if (rBtn) rBtn.style.display = 'none';
+    const cBtn = document.getElementById('btnCancelBulkQueue');
+    if (cBtn) cBtn.style.display = 'none';
+
+    const sBtn = document.getElementById('btnStartBulkQueue');
+    if (sBtn) {
+      sBtn.style.display = 'inline-block';
+      sBtn.textContent = '▶ Import More Links';
+    }
+    const closeBtn = document.getElementById('btnCloseBulkModal');
+    if (closeBtn) closeBtn.disabled = false;
+    const txtArea = document.getElementById('bulkImportUrlsInput');
+    if (txtArea) txtArea.disabled = false;
+
+    // Refresh phone list table if function is present
+    if (typeof loadAdminPhones === 'function') {
+      loadAdminPhones();
+    }
+  }
+}
+
+async function processNextQueueItem() {
+  if (!bulkQueueRunning || bulkQueuePaused) return;
+
+  if (bulkQueueIndex >= bulkQueue.length) {
+    bulkQueueRunning = false;
+    updateBulkProgressUI();
+    return;
+  }
+
+  const item = bulkQueue[bulkQueueIndex];
+  item.status = 'running';
+  renderBulkQueueTable();
+
+  const banner = document.getElementById('bulkCurrentTaskBanner');
+  if (banner) {
+    banner.style.display = 'block';
+    banner.innerHTML = `⏳ <strong>Processing Item ${bulkQueueIndex + 1} of ${bulkQueue.length}:</strong> Crawling specifications &amp; gallery photos from <code>${escapeHtml(item.url)}</code>...`;
+  }
+
+  // Scroll current row into view
+  const row = document.getElementById(`queueRow_${bulkQueueIndex}`);
+  if (row) row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  try {
+    const res = await fetch('/api/phones/bulk-import-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: item.url,
+        overwrite: item.overwrite,
+        defaultStatus: item.defaultStatus,
+        autoAddBrand: item.autoAddBrand
+      })
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      item.status = 'failed';
+      item.error = json.message || 'Server returned an error.';
+      bulkStats.failed++;
+    } else {
+      item.result = json;
+      if (json.action === 'created') {
+        item.status = 'created';
+        bulkStats.created++;
+      } else if (json.action === 'updated') {
+        item.status = 'updated';
+        bulkStats.updated++;
+      } else {
+        item.status = 'skipped';
+        bulkStats.skipped++;
+      }
+    }
+  } catch (err) {
+    console.error('Queue item error:', err);
+    item.status = 'failed';
+    item.error = err.message || 'Network error.';
+    bulkStats.failed++;
+  }
+
+  bulkQueueIndex++;
+  updateBulkProgressUI();
+  renderBulkQueueTable();
+
+  if (bulkQueueRunning && !bulkQueuePaused) {
+    setTimeout(processNextQueueItem, 300);
+  }
+}
+
+function pauseBulkQueue() {
+  if (!bulkQueueRunning || bulkQueuePaused) return;
+  bulkQueuePaused = true;
+  document.getElementById('bulkQueueStatusText').innerHTML = '⏸ <strong>Queue Paused</strong>';
+  document.getElementById('btnPauseBulkQueue').style.display = 'none';
+  document.getElementById('btnResumeBulkQueue').style.display = 'inline-block';
+  document.getElementById('bulkCurrentTaskBanner').innerHTML = '⏸ Queue is paused. Click <strong>Resume</strong> to continue processing.';
+}
+
+function resumeBulkQueue() {
+  if (!bulkQueueRunning || !bulkQueuePaused) return;
+  bulkQueuePaused = false;
+  document.getElementById('bulkQueueStatusText').innerHTML = 'Queue in Progress...';
+  document.getElementById('btnPauseBulkQueue').style.display = 'inline-block';
+  document.getElementById('btnResumeBulkQueue').style.display = 'none';
+  processNextQueueItem();
+}
+
+function stopBulkQueue() {
+  if (!bulkQueueRunning) return;
+  if (!confirm('Are you sure you want to stop the import queue? Remaining items will be cancelled.')) return;
+  bulkQueueRunning = false;
+  bulkQueuePaused = false;
+  document.getElementById('bulkQueueStatusText').innerHTML = '⏹ <strong>Queue Stopped by User</strong>';
+  updateBulkProgressUI();
+}
+
+async function retryBulkQueueItem(index) {
+  if (index < 0 || index >= bulkQueue.length) return;
+  const item = bulkQueue[index];
+  item.status = 'running';
+  item.error = null;
+  renderBulkQueueTable();
+
+  try {
+    const res = await fetch('/api/phones/bulk-import-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: item.url,
+        overwrite: item.overwrite,
+        defaultStatus: item.defaultStatus,
+        autoAddBrand: item.autoAddBrand
+      })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      item.status = 'failed';
+      item.error = json.message || 'Retry failed.';
+    } else {
+      item.result = json;
+      item.status = json.action === 'created' ? 'created' : (json.action === 'updated' ? 'updated' : 'skipped');
+      bulkStats.failed = Math.max(0, bulkStats.failed - 1);
+      if (item.status === 'created') bulkStats.created++;
+      else if (item.status === 'updated') bulkStats.updated++;
+      else bulkStats.skipped++;
+      updateBulkProgressUI();
+    }
+  } catch (err) {
+    item.status = 'failed';
+    item.error = err.message || 'Network error.';
+  }
+  renderBulkQueueTable();
+}
+
+function initBulkImportModalListener() {
+  const textarea = document.getElementById('bulkImportUrlsInput');
+  if (textarea) {
+    textarea.addEventListener('input', updateBulkLinksCount);
+    textarea.addEventListener('paste', () => setTimeout(updateBulkLinksCount, 50));
+  }
+
+  // Check if URL has ?action=bulk-import
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('action') === 'bulk-import') {
+    openBulkImportModal();
+  }
+}
+
+// Window global bindings
+window.openBulkImportModal = openBulkImportModal;
+window.closeBulkImportModal = closeBulkImportModal;
+window.clearBulkQueueForm = clearBulkQueueForm;
+window.startBulkQueue = startBulkQueue;
+window.pauseBulkQueue = pauseBulkQueue;
+window.resumeBulkQueue = resumeBulkQueue;
+window.stopBulkQueue = stopBulkQueue;
+window.retryBulkQueueItem = retryBulkQueueItem;
 window.openAddUserModal = openAddUserModal;
 window.editUser = editUser;
 window.deleteUser = deleteUser;
@@ -4641,6 +5068,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBrandsList();
   initSettings();
   initAdminBranding();
+  initBulkImportModalListener();
 });
 
 

@@ -375,6 +375,8 @@ body.admin-body {
 }
 
 .form-control {
+  width: 100%;
+  box-sizing: border-box;
   padding: 9px 12px;
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius);
@@ -1203,6 +1205,69 @@ body.admin-sidebar-open {
   .settings-subnav-btn span:first-child {
     font-size: 13px !important;
   }
+}
+
+/* ==========================================================================
+   Admin Modal & Bulk Import Queue Styles
+   ========================================================================== */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.admin-modal-box {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(20px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.bulk-queue-row {
+  border-bottom: 1px solid var(--admin-border);
+  transition: background 0.15s ease;
+}
+
+.bulk-queue-row:hover {
+  background: #f8fafc;
+}
+
+.bulk-queue-row.running {
+  background: #f0fdfa !important;
+}
+
+.bulk-queue-row.success {
+  background: #f0fdf4 !important;
+}
+
+.bulk-queue-row.skipped {
+  background: #fefce8 !important;
+}
+
+.bulk-queue-row.failed {
+  background: #fef2f2 !important;
 }
 
 

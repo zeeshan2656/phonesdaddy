@@ -16,6 +16,7 @@ router.get('/:id', cacheMiddleware(600, ['phones']), PhoneController.getById);
 
 // Protected admin & mobile manager routes
 router.post('/fetch-external-specs', requirePhonePermission, PhoneController.fetchExternalSpecs);
+router.post('/bulk-import-url', requirePhonePermission, PhoneController.importSingleUrl);
 router.post('/', requirePhonePermission, upload.single('image'), PhoneController.create);
 router.put('/:id', requirePhonePermission, upload.single('image'), PhoneController.update);
 router.post('/bulk-delete', requirePhonePermission, PhoneController.bulkDeletePhones);
