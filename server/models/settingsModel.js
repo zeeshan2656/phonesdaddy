@@ -140,12 +140,17 @@ class SettingsModel {
 
     // Helper: Google Analytics GA4 gtag
     if (settings.google_analytics_id && settings.google_analytics_id.trim()) {
-      const gaId = settings.google_analytics_id.trim();
+      let gaId = settings.google_analytics_id.trim();
+      if (gaId.startsWith('b64:')) {
+        try {
+          gaId = Buffer.from(gaId.slice(4), 'base64').toString('utf8').trim();
+        } catch (_) {}
+      }
       // Check if user already manually pasted GA ID in raw head snippets to prevent duplicate
       const rawText = settings.head_snippets || '';
-      if (!rawText.includes(gaId)) {
+      if (gaId && !rawText.includes(gaId)) {
         snippets.push(`<!-- Google tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeAttr(gaId)}"></script>
+<script defer src="https://www.googletagmanager.com/gtag/js?id=${escapeAttr(gaId)}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -157,11 +162,16 @@ class SettingsModel {
 
     // Helper: Google AdSense Auto Ads tag
     if (settings.google_adsense_client && settings.google_adsense_client.trim()) {
-      const adClient = settings.google_adsense_client.trim();
+      let adClient = settings.google_adsense_client.trim();
+      if (adClient.startsWith('b64:')) {
+        try {
+          adClient = Buffer.from(adClient.slice(4), 'base64').toString('utf8').trim();
+        } catch (_) {}
+      }
       const rawText = settings.head_snippets || '';
-      if (!rawText.includes(adClient)) {
+      if (adClient && !rawText.includes(adClient)) {
         snippets.push(`<!-- Google AdSense -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeAttr(adClient)}"
+<script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeAttr(adClient)}"
      crossorigin="anonymous"></script>`);
       }
     }
@@ -329,7 +339,7 @@ class SettingsModel {
 
     if (b.site_logo && b.site_logo.trim()) {
       return `
-        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-header-logo-img" style="max-height: 38px; width: auto; object-fit: contain; vertical-align: middle;">
+        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-header-logo-img" width="160" height="38" style="max-height: 38px; width: auto; object-fit: contain; vertical-align: middle;">
         <span class="brand-text">${titleHtml}</span>
       `;
     }
@@ -351,7 +361,7 @@ class SettingsModel {
 
     if (b.site_logo && b.site_logo.trim()) {
       return `
-        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-footer-logo-img" style="max-height: 36px; width: auto; object-fit: contain; vertical-align: middle;">
+        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-footer-logo-img" width="160" height="36" style="max-height: 36px; width: auto; object-fit: contain; vertical-align: middle;">
         <span class="brand-text">${titleHtml}</span>
       `;
     }

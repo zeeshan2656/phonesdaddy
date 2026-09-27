@@ -15,7 +15,7 @@ async function initBrandsPage() {
 
     container.innerHTML = json.data.map(b => `
       <a href="/brand/${b.slug}" class="brand-card">
-        <img src="${b.logo || '/images/brands/' + b.slug + '-logo.svg'}" alt="${b.name}" class="brand-card-logo" onerror="this.src='/images/placeholder.svg'">
+        <img src="${b.logo || '/images/brands/' + b.slug + '-logo.svg'}" alt="${b.name}" class="brand-card-logo" width="80" height="40" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.svg'">
         <div class="brand-card-name">${b.name}</div>
         <div class="brand-card-count">${b.phone_count} models</div>
       </a>

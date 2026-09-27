@@ -142,7 +142,7 @@
           <div class="hero-phone-stage">
             <div class="phone-halo-glow"></div>
             <div class="hero-phone-card">
-              <img src="${escapeAttr(phone.image || '/images/placeholder.svg')}" alt="${escapeAttr(brand + ' ' + model)}" class="hero-phone-img" loading="${index === 0 ? 'eager' : 'lazy'}">
+              <img src="${escapeAttr(phone.image || '/images/placeholder.svg')}" alt="${escapeAttr(brand + ' ' + model)}" class="hero-phone-img" width="460" height="460" decoding="async" loading="${index === 0 ? 'eager' : 'lazy'}">
             </div>
             <div class="floating-callout-badge badge-top-right">
               <span>🎯</span> ${escapeHtml(specs.camera ? specs.camera.split(',')[0].trim() : '50MP Camera')}
@@ -185,32 +185,34 @@
     const nextBtn = document.getElementById('heroNextBtn');
     const ambientGlow = slider.querySelector('.hero-ambient-glow');
 
-    // Fetch at least 5 latest uploaded real phones from API
-    try {
-      const res = await fetch('/api/phones/latest?limit=5');
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-        const phones = json.data;
-        if (wrapper) {
-          wrapper.innerHTML = phones.map((p, i) => buildSlideHTML(p, i)).join('');
-        }
-        if (tabsContainer) {
-          tabsContainer.innerHTML = phones.map((p, i) => buildTabHTML(p, i)).join('');
-        }
-      }
-    } catch (err) {
-      console.warn('Hero slider dynamic fetch fallback:', err);
-    }
+    // If slides are already present in DOM (SSR / Static), use them without extra network fetch
+    let slides = Array.from(slider.querySelectorAll('.hero-slide'));
+    let tabs = Array.from(slider.querySelectorAll('.hero-slider-tab'));
 
-    const slides = Array.from(slider.querySelectorAll('.hero-slide'));
-    const tabs = Array.from(slider.querySelectorAll('.hero-slider-tab'));
+    if (slides.length === 0) {
+      try {
+        const res = await fetch('/api/phones/latest?limit=5');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const phones = json.data;
+          if (wrapper) {
+            wrapper.innerHTML = phones.map((p, i) => buildSlideHTML(p, i)).join('');
+          }
+          if (tabsContainer) {
+            tabsContainer.innerHTML = phones.map((p, i) => buildTabHTML(p, i)).join('');
+          }
+          slides = Array.from(slider.querySelectorAll('.hero-slide'));
+          tabs = Array.from(slider.querySelectorAll('.hero-slider-tab'));
+        }
+      } catch (err) {
+        console.warn('Hero slider dynamic fetch fallback:', err);
+      }
+    }
 
     if (slides.length === 0) return;
 
     let currentIndex = 0;
     let timer = null;
-    let progressTimer = null;
-    let progressStartTime = 0;
     const SLIDE_DURATION = 6000; // 6 seconds per slide
     let isPaused = false;
 
@@ -231,17 +233,14 @@
         }
       });
 
-      // Update tabs active state & reset progress
+      // Update tabs active state (CSS keyframe automatically animates progress bar)
       tabs.forEach((tab, i) => {
-        const progressBar = tab.querySelector('.hero-tab-progress');
         if (i === currentIndex) {
           tab.classList.add('active');
           tab.setAttribute('aria-selected', 'true');
-          if (progressBar) progressBar.style.width = '0%';
         } else {
           tab.classList.remove('active');
           tab.setAttribute('aria-selected', 'false');
-          if (progressBar) progressBar.style.width = '0%';
         }
       });
 
@@ -269,46 +268,9 @@
       goToSlide(currentIndex - 1);
     }
 
-    function startProgress() {
-      stopProgress();
-      progressStartTime = Date.now();
-
-      function updateProgress() {
-        if (isPaused) {
-          progressTimer = requestAnimationFrame(updateProgress);
-          return;
-        }
-
-        const elapsed = Date.now() - progressStartTime;
-        const progress = Math.min(100, (elapsed / SLIDE_DURATION) * 100);
-
-        const activeTab = tabs[currentIndex];
-        if (activeTab) {
-          const bar = activeTab.querySelector('.hero-tab-progress');
-          if (bar) bar.style.width = progress + '%';
-        }
-
-        if (elapsed < SLIDE_DURATION) {
-          progressTimer = requestAnimationFrame(updateProgress);
-        }
-      }
-
-      progressTimer = requestAnimationFrame(updateProgress);
-    }
-
-    function stopProgress() {
-      if (progressTimer) {
-        cancelAnimationFrame(progressTimer);
-        progressTimer = null;
-      }
-    }
-
     function resetAutoPlay() {
       if (timer) clearInterval(timer);
-      stopProgress();
-
       if (!isPaused) {
-        startProgress();
         timer = setInterval(() => {
           if (!isPaused) {
             nextSlide();

@@ -167,7 +167,7 @@ function renderCompareMatrix(phones) {
             ${phones.map(p => `
               <th class="compare-phone-card">
                 <button onclick="removePhone('${p.slug}')" title="Remove" style="position: absolute; top: 10px; right: 10px; background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-weight: bold; font-size: 14px;">&times;</button>
-                <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="compare-phone-thumb">
+                <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="compare-phone-thumb" width="160" height="212" loading="lazy" decoding="async">
                 <div class="compare-phone-title"><a href="/phone/${p.slug}">${p.name}</a></div>
                 <div class="compare-phone-price">${p.price > 0 ? formatPKR(p.price) : 'Rumored'}</div>
               </th>
@@ -227,7 +227,7 @@ function setupPhoneSearchPicker() {
       if (json.success && json.data.length > 0) {
         dropdown.innerHTML = json.data.map(p => `
           <div class="search-item" onclick="addPhoneToCompare('${p.slug}'); document.getElementById('compareSearchDropdown').classList.remove('show'); document.getElementById('compareSearchInput').value = '';" style="cursor: pointer;">
-            <img src="${p.image || '/images/placeholder.svg'}" class="search-thumb" alt="${p.name}">
+            <img src="${p.image || '/images/placeholder.svg'}" class="search-thumb" alt="${p.name}" width="36" height="48" loading="lazy" decoding="async">
             <div class="search-item-info">
               <div class="search-item-name">${p.name}</div>
               <div class="search-item-meta">${p.brand_name}</div>

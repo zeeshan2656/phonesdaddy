@@ -404,11 +404,13 @@ button, input, select, textarea {
   z-index: 1;
   transition: background 0.8s ease;
   animation: ambientPulse 8s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 @keyframes ambientPulse {
-  0% { transform: scale(0.95) translate(0, 0); opacity: 0.75; }
-  100% { transform: scale(1.1) translate(20px, 25px); opacity: 0.95; }
+  0% { transform: translate3d(0, 0, 0) scale(0.95); opacity: 0.75; }
+  100% { transform: translate3d(20px, 25px, 0) scale(1.1); opacity: 0.95; }
 }
 
 /* Subtle Cyber Tech Grid Pattern */
@@ -487,11 +489,13 @@ button, input, select, textarea {
   background: #38bdf8;
   box-shadow: 0 0 10px #38bdf8;
   animation: beaconPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 @keyframes beaconPing {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.35); opacity: 0.5; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  50% { transform: translate3d(0, 0, 0) scale(1.35); opacity: 0.5; }
 }
 
 .hero-phone-heading {
@@ -691,11 +695,13 @@ button, input, select, textarea {
   z-index: 1;
   pointer-events: none;
   animation: haloBreathe 5s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 @keyframes haloBreathe {
-  0% { transform: scale(0.9); opacity: 0.6; }
-  100% { transform: scale(1.15); opacity: 0.9; }
+  0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.6; }
+  100% { transform: translate3d(0, 0, 0) scale(1.15); opacity: 0.9; }
 }
 
 .hero-phone-card {
@@ -708,11 +714,13 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
   animation: phoneFloat 6s ease-in-out infinite;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 @keyframes phoneFloat {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(0.8deg); }
+  0%, 100% { transform: translate3d(0, 0px, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -12px, 0) rotate(0.8deg); }
 }
 
 .hero-phone-img {
@@ -746,6 +754,8 @@ button, input, select, textarea {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   pointer-events: none;
   white-space: nowrap;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .floating-callout-badge.badge-top-right {
@@ -767,18 +777,18 @@ button, input, select, textarea {
 }
 
 @keyframes floatBadge1 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
 }
 
 @keyframes floatBadge2 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, 8px, 0); }
 }
 
 @keyframes floatBadge3 {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -6px, 0); }
 }
 
 /* Slider Controls & Tabs Bar */
@@ -865,10 +875,25 @@ button, input, select, textarea {
 
 .hero-tab-progress {
   height: 100%;
-  width: 0%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
   background: linear-gradient(90deg, #0d9488, #38bdf8);
   border-radius: 2px;
-  transition: width 0.1s linear;
+  will-change: transform;
+}
+
+.hero-slider-tab.active .hero-tab-progress {
+  animation: heroTabProgress 6s linear forwards;
+}
+
+@keyframes heroTabProgress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.hero-slider-section:hover .hero-slider-tab.active .hero-tab-progress {
+  animation-play-state: paused;
 }
 
 .hero-slider-arrows {
@@ -941,6 +966,8 @@ button, input, select, textarea {
    ========================================================================== */
 .section {
   padding: 22px 0;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 400px;
 }
 
 .section-header {

@@ -250,7 +250,7 @@ function renderSidebarNews(newsList, phoneName, brandName) {
     const dateStr = art.created_at ? new Date(art.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
     return `
       <a href="/news/${art.slug}" class="gsm-news-item">
-        <img src="${imgUrl}" alt="${escapeAttr(art.title)}" class="gsm-news-thumb" loading="lazy" onerror="this.src='/images/placeholder.svg'">
+        <img src="${imgUrl}" alt="${escapeAttr(art.title)}" class="gsm-news-thumb" width="80" height="50" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.svg'">
         <div class="gsm-news-info">
           <div class="gsm-news-title">${art.title}</div>
           <div class="gsm-news-meta">
@@ -291,7 +291,7 @@ function renderSidebarRelatedDevices(phones, brandSlug) {
 
   grid.innerHTML = phones.slice(0, 6).map(p => `
     <a href="/phone/${p.slug}" class="gsm-device-item" title="${p.name}">
-      <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="gsm-device-thumb" loading="lazy" onerror="this.src='/images/placeholder.svg'">
+      <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="gsm-device-thumb" width="54" height="72" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.svg'">
       <span class="gsm-device-name">${p.name}</span>
     </a>
   `).join('');
@@ -318,7 +318,7 @@ function renderSidebarPopularBrand(phones, brandName, brandSlug) {
 
   grid.innerHTML = phones.slice(0, 6).map(p => `
     <a href="/phone/${p.slug}" class="gsm-device-item" title="${p.name}">
-      <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="gsm-device-thumb" loading="lazy" onerror="this.src='/images/placeholder.svg'">
+      <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="gsm-device-thumb" width="54" height="72" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.svg'">
       <span class="gsm-device-name">${p.name}</span>
     </a>
   `).join('');
@@ -1187,7 +1187,7 @@ function renderRelatedPhones(phones = [], brandName = '') {
       <div class="phone-card-image-wrap" style="min-height:150px;padding:12px;">
         <a href="/phone/${p.slug}">
           <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}"
-               style="max-height:120px;" loading="lazy">
+               width="120" height="120" style="max-height:120px;" loading="lazy" decoding="async">
         </a>
       </div>
       <div class="phone-card-body" style="padding:12px;">

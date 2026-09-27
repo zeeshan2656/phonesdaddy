@@ -7,6 +7,7 @@
   <meta name="description" content="{{SITE_DESCRIPTION}}">
   <link rel="canonical" href="{{SITE_URL}}/">
   {{SITE_FAVICON_TAG}}
+  <link rel="preload" href="/images/hero/galaxy-s26-ultra.webp" as="image" type="image/webp" fetchpriority="high">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -134,7 +135,7 @@
             <div class="hero-phone-stage">
               <div class="phone-halo-glow"></div>
               <div class="hero-phone-card">
-                <img src="/images/hero/galaxy-s26-ultra.jpg" alt="Samsung Galaxy S26 Ultra" class="hero-phone-img" loading="eager" fetchpriority="high" width="460" height="460">
+                <img src="/images/hero/galaxy-s26-ultra.webp" alt="Samsung Galaxy S26 Ultra" class="hero-phone-img" loading="eager" fetchpriority="high" width="460" height="460">
               </div>
               <div class="floating-callout-badge badge-top-right">
                 <span>🎯</span> 200MP Quad Zoom
@@ -226,7 +227,7 @@
             <div class="hero-phone-stage">
               <div class="phone-halo-glow"></div>
               <div class="hero-phone-card">
-                <img src="/images/hero/iphone-17-pro.jpg" alt="Apple iPhone 17 Pro Max" class="hero-phone-img" loading="lazy">
+                <img src="/images/hero/iphone-17-pro.webp" alt="Apple iPhone 17 Pro Max" class="hero-phone-img" loading="lazy" decoding="async" width="460" height="460">
               </div>
               <div class="floating-callout-badge badge-top-right">
                 <span>🚀</span> A20 Pro 2nm
@@ -318,7 +319,7 @@
             <div class="hero-phone-stage">
               <div class="phone-halo-glow"></div>
               <div class="hero-phone-card">
-                <img src="/images/hero/flagship-titanium.jpg" alt="OnePlus 13 Flagship" class="hero-phone-img" loading="lazy">
+                <img src="/images/hero/flagship-titanium.webp" alt="OnePlus 13 Flagship" class="hero-phone-img" loading="lazy" decoding="async" width="460" height="460">
               </div>
               <div class="floating-callout-badge badge-top-right">
                 <span>⚡</span> 100W SuperVOOC
@@ -410,7 +411,7 @@
             <div class="hero-phone-stage">
               <div class="phone-halo-glow"></div>
               <div class="hero-phone-card">
-                <img src="/images/phones/xiaomi-15-ultra.svg" alt="Xiaomi 15 Ultra" class="hero-phone-img" loading="lazy">
+                <img src="/images/phones/xiaomi-15-ultra.svg" alt="Xiaomi 15 Ultra" class="hero-phone-img" loading="lazy" decoding="async" width="460" height="460">
               </div>
               <div class="floating-callout-badge badge-top-right">
                 <span>🔴</span> Leica 200MP Zoom
@@ -510,7 +511,7 @@
         <a href="/phones?sort=newest" class="view-all-link">View all latest phones &rarr;</a>
       </div>
       <div class="phones-grid" id="latestPhonesGrid">
-        <div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">Loading latest mobiles...</div>
+        {{LATEST_PHONES_HTML}}
       </div>
     </section>
 
@@ -521,7 +522,7 @@
         <a href="/phones?sort=popular" class="view-all-link">View all popular &rarr;</a>
       </div>
       <div class="phones-grid" id="popularPhonesGrid">
-        <div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">Loading popular mobiles...</div>
+        {{POPULAR_PHONES_HTML}}
       </div>
     </section>
 
@@ -541,6 +542,7 @@
             <label style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">First Phone</label>
             <select id="quickComparePhone1" class="form-control" style="width: 100%; height: 44px; font-weight: 600;">
               <option value="">Select first phone...</option>
+              {{QUICK_COMPARE_OPTIONS}}
             </select>
           </div>
 
@@ -550,6 +552,7 @@
             <label style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Second Phone</label>
             <select id="quickComparePhone2" class="form-control" style="width: 100%; height: 44px; font-weight: 600;">
               <option value="">Select second phone...</option>
+              {{QUICK_COMPARE_OPTIONS}}
             </select>
           </div>
 
@@ -567,7 +570,7 @@
         <a href="/phones?status=Upcoming" class="view-all-link">View upcoming &rarr;</a>
       </div>
       <div class="phones-grid" id="upcomingPhonesGrid">
-        <div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">Loading upcoming mobiles...</div>
+        {{UPCOMING_PHONES_HTML}}
       </div>
     </section>
 
@@ -578,7 +581,7 @@
         <a href="/brands" class="view-all-link">View all brands &rarr;</a>
       </div>
       <div class="brands-grid" id="homeBrandsGrid">
-        <div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">Loading brands...</div>
+        {{HOME_BRANDS_HTML}}
       </div>
     </section>
 
@@ -589,7 +592,7 @@
         <a href="/news" class="view-all-link">View all news &amp; leaks &rarr;</a>
       </div>
       <div id="homeHotNewsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-        <div style="text-align: center; color: #64748b; padding: 24px; grid-column: 1/-1;">Loading trending mobile news...</div>
+        {{HOT_NEWS_HTML}}
       </div>
     </section>
 
@@ -658,107 +661,86 @@
   <script defer src="/js/app.js"></script>
   <script defer src="/js/hero-slider.js"></script>
   <script>
-    // Home-specific data loading (Parallel Promise.all for instant ≤2s load)
+    // Home-specific data handling: Instant SSR cards with fallback
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const [latestRes, popularRes, upcomingRes, brandsRes, newsRes] = await Promise.all([
-          fetch('/api/phones/latest?limit=16').then(r => r.json()).catch(() => null),
-          fetch('/api/phones/popular?limit=16').then(r => r.json()).catch(() => null),
-          fetch('/api/phones/upcoming?limit=16').then(r => r.json()).catch(() => null),
-          fetch('/api/brands?active=true').then(r => r.json()).catch(() => null),
-          fetch('/api/news/hot?limit=4').then(r => r.json()).catch(() => null)
-        ]);
+      const latestGrid = document.getElementById('latestPhonesGrid');
+      const hasSsr = latestGrid && latestGrid.querySelector('.phone-card');
 
-        // 1. Latest Phones
-        if (latestRes && latestRes.success && latestRes.data) {
-          const el = document.getElementById('latestPhonesGrid');
-          if (el) el.innerHTML = latestRes.data.map(p => renderHomeCard(p)).join('');
-        }
+      if (!hasSsr) {
+        try {
+          const [latestRes, popularRes, upcomingRes, brandsRes, newsRes] = await Promise.all([
+            fetch('/api/phones/latest?limit=16').then(r => r.json()).catch(() => null),
+            fetch('/api/phones/popular?limit=16').then(r => r.json()).catch(() => null),
+            fetch('/api/phones/upcoming?limit=16').then(r => r.json()).catch(() => null),
+            fetch('/api/brands?active=true').then(r => r.json()).catch(() => null),
+            fetch('/api/news/hot?limit=4').then(r => r.json()).catch(() => null)
+          ]);
 
-        // 2. Popular Phones
-        if (popularRes && popularRes.success && popularRes.data) {
-          const el = document.getElementById('popularPhonesGrid');
-          if (el) el.innerHTML = popularRes.data.map(p => renderHomeCard(p)).join('');
-        }
-
-        // 3. Upcoming Phones
-        if (upcomingRes && upcomingRes.success && upcomingRes.data) {
-          const el = document.getElementById('upcomingPhonesGrid');
-          if (el) el.innerHTML = upcomingRes.data.map(p => renderHomeCard(p)).join('');
-        }
-
-        // 4. Popular Brands Grid
-        if (brandsRes && brandsRes.success && brandsRes.data) {
-          const topBrands = brandsRes.data.slice(0, 12);
-          const el = document.getElementById('homeBrandsGrid');
-          if (el) {
-            el.innerHTML = topBrands.map(b => `
-              <a href="/brand/${b.slug}" class="brand-card">
-                <img src="${b.logo || '/images/placeholder.svg'}" alt="${b.name}" class="brand-card-logo" loading="lazy" decoding="async" width="80" height="40">
-                <div class="brand-card-name">${b.name}</div>
-                <div class="brand-card-count">${b.phone_count} phones</div>
-              </a>
-            `).join('');
+          if (latestRes && latestRes.success && latestRes.data && latestGrid) {
+            latestGrid.innerHTML = latestRes.data.map(p => renderHomeCard(p)).join('');
           }
 
-          // Populate Quick Compare Dropdowns asynchronously
-          const p1Select = document.getElementById('quickComparePhone1');
-          const p2Select = document.getElementById('quickComparePhone2');
-          if (p1Select && p2Select) {
-            fetch('/api/phones?limit=50')
-              .then(r => r.json())
-              .then(phonesJson => {
-                if (phonesJson && phonesJson.success && phonesJson.data) {
-                  const options = phonesJson.data.map(p => `<option value="${p.slug}">${p.name}</option>`).join('');
-                  p1Select.innerHTML += options;
-                  p2Select.innerHTML += options;
-                  if (phonesJson.data.length >= 2) {
-                    p1Select.value = phonesJson.data[0].slug;
-                    p2Select.value = phonesJson.data[1].slug;
-                  }
-                }
-              })
-              .catch(console.error);
+          if (popularRes && popularRes.success && popularRes.data) {
+            const el = document.getElementById('popularPhonesGrid');
+            if (el) el.innerHTML = popularRes.data.map(p => renderHomeCard(p)).join('');
           }
-        }
 
-        // 5. Hot News
-        const newsGrid = document.getElementById('homeHotNewsGrid');
-        if (newsRes && newsRes.success && newsRes.data && newsRes.data.length > 0 && newsGrid) {
-          newsGrid.innerHTML = newsRes.data.map(a => {
-            const thumb = a.image || '/images/placeholder.svg';
-            const dateStr = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-            return `
-              <article class="news-card" style="box-shadow: var(--shadow-sm); border-radius: 8px;">
-                <a href="/news/${a.slug}" class="news-card-thumb-wrap" style="height: 160px;">
-                  <img src="${thumb}" alt="${a.title}" class="news-card-thumb" loading="lazy" decoding="async" width="280" height="160">
-                  <span class="news-card-badge">${a.category || 'Hot News'}</span>
-                  ${a.is_hot ? '<span class="news-card-hot"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> HOT</span>' : ''}
+          if (upcomingRes && upcomingRes.success && upcomingRes.data) {
+            const el = document.getElementById('upcomingPhonesGrid');
+            if (el) el.innerHTML = upcomingRes.data.map(p => renderHomeCard(p)).join('');
+          }
+
+          if (brandsRes && brandsRes.success && brandsRes.data) {
+            const topBrands = brandsRes.data.slice(0, 12);
+            const el = document.getElementById('homeBrandsGrid');
+            if (el) {
+              el.innerHTML = topBrands.map(b => `
+                <a href="/brand/${b.slug}" class="brand-card">
+                  <img src="${b.logo || '/images/placeholder.svg'}" alt="${escapeHtml(b.name)}" class="brand-card-logo" loading="lazy" decoding="async" width="80" height="40">
+                  <div class="brand-card-name">${escapeHtml(b.name)}</div>
+                  <div class="brand-card-count">${b.phone_count} phones</div>
                 </a>
-                <div class="news-card-body" style="padding: 16px;">
-                  <div class="news-card-meta" style="font-size: 11px; margin-bottom: 6px;">
-                    <span>${ICONS.calendar} ${dateStr}</span>
-                    <span>•</span>
-                    <span>${ICONS.penLine} ${a.author || 'Editorial'}</span>
-                  </div>
-                  <h3 class="news-card-title" style="font-size: 15px; margin-bottom: 6px;">
-                    <a href="/news/${a.slug}">${a.title}</a>
-                  </h3>
-                  <p class="news-card-excerpt" style="font-size: 12.5px; margin-bottom: 10px;">
-                    ${a.summary || ''}
-                  </p>
-                  <div class="news-card-footer" style="padding-top: 8px;">
-                    <a href="/news/${a.slug}" style="text-decoration: none; color: var(--primary);">Read Story &rarr;</a>
-                  </div>
-                </div>
-              </article>
-            `;
-          }).join('');
-        } else if (newsGrid) {
-          newsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 24px;">No hot stories published yet. Stay tuned!</div>`;
+              `).join('');
+            }
+          }
+
+          const newsGrid = document.getElementById('homeHotNewsGrid');
+          if (newsRes && newsRes.success && newsRes.data && newsRes.data.length > 0 && newsGrid) {
+            newsGrid.innerHTML = newsRes.data.map(a => renderNewsCard(a)).join('');
+          }
+        } catch (e) {
+          console.error('Parallel home load error:', e);
         }
-      } catch (e) {
-        console.error('Parallel home load error:', e);
+      }
+
+      // Populate Quick Compare Dropdowns if not already populated by SSR
+      const p1Select = document.getElementById('quickComparePhone1');
+      const p2Select = document.getElementById('quickComparePhone2');
+      if (p1Select && p2Select && p1Select.options.length <= 1) {
+        const fetchComparePhones = () => {
+          fetch('/api/phones?limit=50')
+            .then(r => r.json())
+            .then(phonesJson => {
+              if (phonesJson && phonesJson.success && phonesJson.data) {
+                const options = phonesJson.data.map(p => `<option value="${p.slug}">${escapeHtml(p.name)}</option>`).join('');
+                p1Select.innerHTML += options;
+                p2Select.innerHTML += options;
+                if (phonesJson.data.length >= 2) {
+                  p1Select.value = phonesJson.data[0].slug;
+                  p2Select.value = phonesJson.data[1].slug;
+                }
+              }
+            })
+            .catch(console.error);
+        };
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(fetchComparePhones, { timeout: 2000 });
+        } else {
+          setTimeout(fetchComparePhones, 500);
+        }
+      } else if (p1Select && p2Select && p1Select.options.length >= 3 && !p1Select.value) {
+        p1Select.selectedIndex = 1;
+        p2Select.selectedIndex = 2;
       }
 
       // Launch Quick Compare Button
@@ -779,6 +761,36 @@
         });
       }
     });
+
+    function renderNewsCard(a) {
+      const thumb = a.image || '/images/placeholder.svg';
+      const dateStr = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      return `
+        <article class="news-card" style="box-shadow: var(--shadow-sm); border-radius: 8px;">
+          <a href="/news/${a.slug}" class="news-card-thumb-wrap" style="height: 160px;">
+            <img src="${thumb}" alt="${escapeHtml(a.title)}" class="news-card-thumb" loading="lazy" decoding="async" width="280" height="160">
+            <span class="news-card-badge">${escapeHtml(a.category || 'Hot News')}</span>
+            ${a.is_hot ? '<span class="news-card-hot"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> HOT</span>' : ''}
+          </a>
+          <div class="news-card-body" style="padding: 16px;">
+            <div class="news-card-meta" style="font-size: 11px; margin-bottom: 6px;">
+              <span>${typeof ICONS !== 'undefined' ? ICONS.calendar : '📅'} ${dateStr}</span>
+              <span>•</span>
+              <span>${typeof ICONS !== 'undefined' ? ICONS.penLine : '✍️'} ${escapeHtml(a.author || 'Editorial')}</span>
+            </div>
+            <h3 class="news-card-title" style="font-size: 15px; margin-bottom: 6px;">
+              <a href="/news/${a.slug}">${escapeHtml(a.title)}</a>
+            </h3>
+            <p class="news-card-excerpt" style="font-size: 12.5px; margin-bottom: 10px;">
+              ${escapeHtml(a.summary || '')}
+            </p>
+            <div class="news-card-footer" style="padding-top: 8px;">
+              <a href="/news/${a.slug}" style="text-decoration: none; color: var(--primary);">Read Story &rarr;</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }
 
     function renderHomeCard(phone) {
       return `

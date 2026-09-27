@@ -13,6 +13,8 @@ const {
   requirePhonePermission, 
   requireArticlePermission 
 } = require('../middleware/auth');
+const { pool } = require('../config/database');
+const { cache } = require('../utils/cache');
 
 const viewsDir = path.join(__dirname, '../../views');
 const adminDir = path.join(__dirname, '../../admin');
@@ -110,10 +112,124 @@ async function renderViewWithSnippets(res, templateFile, replacements = {}, stat
   res.status(statusCode).send(html);
 }
 
+// Cache key & TTL for Homepage SSR
+const HOME_SSR_CACHE_KEY = 'view_home_ssr_replacements';
+const HOME_SSR_TTL_SECONDS = 180; // 3 minutes
+
+async function getHomeSsrReplacements() {
+  const cached = cache.get(HOME_SSR_CACHE_KEY);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const [latestData, popularData, upcomingData, brandsData, newsData, comparePhones] = await Promise.all([
+      PhoneModel.getPhones({ page: 1, limit: 16, sort: 'newest', skipCount: true }).catch(() => ({ phones: [] })),
+      PhoneModel.getPhones({ page: 1, limit: 16, sort: 'popular', skipCount: true }).catch(() => ({ phones: [] })),
+      PhoneModel.getPhones({ page: 1, limit: 16, status: 'Upcoming', skipCount: true }).catch(() => ({ phones: [] })),
+      BrandModel.getAllBrands(true).catch(() => []),
+      NewsModel.getArticles({ page: 1, limit: 4, is_hot: 1, status: 'published' }).catch(() => ({ articles: [] })),
+      pool.query(`SELECT slug, name FROM phones ORDER BY popular DESC, views DESC, id DESC LIMIT 50`).then(([rows]) => rows).catch(() => [])
+    ]);
+
+    const renderCard = (p) => `
+      <div class="phone-card home-phone-card" onclick="window.location.href='/phone/${escapeAttr(p.slug)}'">
+        <div class="phone-card-image-wrap">
+          <span class="phone-card-brand-badge">${escapeHtml(p.brand_name || '')}</span>
+          <a href="/phone/${escapeAttr(p.slug)}" onclick="event.stopPropagation()">
+            <img src="${escapeAttr(p.image || '/images/placeholder.svg')}" alt="${escapeAttr(p.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
+          </a>
+        </div>
+        <div class="phone-card-body">
+          <a href="/phone/${escapeAttr(p.slug)}" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; width: 100%; text-decoration: none;">
+            <h3 class="phone-card-title" title="${escapeAttr(p.name)}">${escapeHtml(p.name)}</h3>
+          </a>
+        </div>
+      </div>
+    `;
+
+    const latestHtml = (latestData.phones || []).map(renderCard).join('');
+    const popularHtml = (popularData.phones || []).map(renderCard).join('');
+    const upcomingHtml = (upcomingData.phones || []).map(renderCard).join('');
+
+    const topBrands = (brandsData || []).slice(0, 12);
+    const brandsHtml = topBrands.map(b => `
+      <a href="/brand/${escapeAttr(b.slug)}" class="brand-card">
+        <img src="${escapeAttr(b.logo || '/images/placeholder.svg')}" alt="${escapeAttr(b.name)}" class="brand-card-logo" loading="lazy" decoding="async" width="80" height="40">
+        <div class="brand-card-name">${escapeHtml(b.name)}</div>
+        <div class="brand-card-count">${parseInt(b.phone_count, 10) || 0} phones</div>
+      </a>
+    `).join('');
+
+    const articles = newsData.articles || [];
+    let newsHtml = '';
+    if (articles.length > 0) {
+      newsHtml = articles.map(a => {
+        const thumb = a.image || '/images/placeholder.svg';
+        const dateStr = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        return `
+          <article class="news-card" style="box-shadow: var(--shadow-sm); border-radius: 8px;">
+            <a href="/news/${escapeAttr(a.slug)}" class="news-card-thumb-wrap" style="height: 160px;">
+              <img src="${escapeAttr(thumb)}" alt="${escapeAttr(a.title)}" class="news-card-thumb" loading="lazy" decoding="async" width="280" height="160">
+              <span class="news-card-badge">${escapeHtml(a.category || 'Hot News')}</span>
+              ${a.is_hot ? '<span class="news-card-hot"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> HOT</span>' : ''}
+            </a>
+            <div class="news-card-body" style="padding: 16px;">
+              <div class="news-card-meta" style="font-size: 11px; margin-bottom: 6px;">
+                <span>📅 ${dateStr}</span>
+                <span>•</span>
+                <span>✍️ ${escapeHtml(a.author || 'Editorial')}</span>
+              </div>
+              <h3 class="news-card-title" style="font-size: 15px; margin-bottom: 6px;">
+                <a href="/news/${escapeAttr(a.slug)}">${escapeHtml(a.title)}</a>
+              </h3>
+              <p class="news-card-excerpt" style="font-size: 12.5px; margin-bottom: 10px;">
+                ${escapeHtml(a.summary || '')}
+              </p>
+              <div class="news-card-footer" style="padding-top: 8px;">
+                <a href="/news/${escapeAttr(a.slug)}" style="text-decoration: none; color: var(--primary);">Read Story &rarr;</a>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    } else {
+      newsHtml = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 24px;">No hot stories published yet. Stay tuned!</div>`;
+    }
+
+    const quickCompareOptions = (comparePhones || []).map(p =>
+      `<option value="${escapeAttr(p.slug)}">${escapeHtml(p.name)}</option>`
+    ).join('');
+
+    const replacements = {
+      '{{LATEST_PHONES_HTML}}': latestHtml || '<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">No phones found.</div>',
+      '{{POPULAR_PHONES_HTML}}': popularHtml || '<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">No popular phones found.</div>',
+      '{{UPCOMING_PHONES_HTML}}': upcomingHtml || '<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">No upcoming phones found.</div>',
+      '{{HOME_BRANDS_HTML}}': brandsHtml,
+      '{{HOT_NEWS_HTML}}': newsHtml,
+      '{{QUICK_COMPARE_OPTIONS}}': quickCompareOptions
+    };
+
+    cache.set(HOME_SSR_CACHE_KEY, replacements, HOME_SSR_TTL_SECONDS, ['home', 'phones', 'brands', 'news']);
+    return replacements;
+  } catch (err) {
+    console.error('Error generating home SSR data:', err);
+    return {
+      '{{LATEST_PHONES_HTML}}': '',
+      '{{POPULAR_PHONES_HTML}}': '',
+      '{{UPCOMING_PHONES_HTML}}': '',
+      '{{HOME_BRANDS_HTML}}': '',
+      '{{HOT_NEWS_HTML}}': '',
+      '{{QUICK_COMPARE_OPTIONS}}': ''
+    };
+  }
+}
+
 // Homepage
 router.get('/', async (req, res, next) => {
   try {
-    await renderViewWithSnippets(res, 'home.html');
+    const ssrReplacements = await getHomeSsrReplacements();
+    await renderViewWithSnippets(res, 'home.html', ssrReplacements);
   } catch (err) {
     next(err);
   }
@@ -549,6 +665,11 @@ router.get('/admin/users', requireMasterAdmin, (req, res) => {
 router.get('/admin/profile', requireAdminAuth, (req, res) => {
   res.sendFile(path.join(adminDir, 'profile.html'));
 });
+
+function escapeAttr(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 
 function escapeHtml(str) {
   if (!str) return '';

@@ -82,7 +82,7 @@ function initSearch(inputId, dropdownId) {
       if (json.success && json.data.length > 0) {
         dropdown.innerHTML = json.data.map(p => `
           <a href="/phone/${p.slug}" class="search-item">
-            <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="search-thumb">
+            <img src="${p.image || '/images/placeholder.svg'}" alt="${p.name}" class="search-thumb" width="36" height="48" loading="lazy" decoding="async">
             <div class="search-item-info">
               <div class="search-item-name">${p.name}</div>
               <div class="search-item-meta">${p.brand_name} • ${p.status}</div>

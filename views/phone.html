@@ -164,7 +164,7 @@
           </div>
           <div class="gsm-widget-body" style="padding: 10px;">
             <div class="gsm-review-banner" id="sidebarReviewCard" onclick="document.getElementById('reviewsSection')?.scrollIntoView({behavior: 'smooth'})">
-              <img id="sidebarReviewImg" src="/images/placeholder.svg" alt="{{PHONE_NAME}}" class="gsm-review-banner-img">
+              <img id="sidebarReviewImg" src="/images/placeholder.svg" alt="{{PHONE_NAME}}" class="gsm-review-banner-img" width="280" height="140" loading="lazy" decoding="async">
               <div class="gsm-review-banner-overlay">
                 <span class="gsm-review-banner-tag">In-Depth Review</span>
                 <div class="gsm-review-banner-title" id="sidebarReviewCardTitle">{{PHONE_NAME}} Review</div>
@@ -224,7 +224,7 @@
             <!-- Phone Visual Column -->
             <div class="phone-visual-col">
               <div class="phone-main-card">
-                <img id="phoneDetailImage" src="/images/placeholder.svg" alt="{{PHONE_NAME}}" class="phone-main-image" style="cursor:pointer;" onclick="openCurrentInGallery()" title="Click to view full-size gallery">
+                <img id="phoneDetailImage" src="/images/placeholder.svg" alt="{{PHONE_NAME}}" class="phone-main-image" width="300" height="400" fetchpriority="high" style="cursor:pointer;" onclick="openCurrentInGallery()" title="Click to view full-size gallery">
                 <button type="button" id="btnGalleryCountBadge" class="gallery-count-pill" onclick="openCurrentInGallery()" style="display:none;" title="Click to view all photos">
                   <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span> <span id="galleryCountText">0 Photos</span>
                 </button>
