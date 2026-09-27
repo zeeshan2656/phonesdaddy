@@ -350,8 +350,8 @@
     </div>
   </footer>
 
-  <script src="/js/icons.js"></script>
-  <script src="/js/app.js"></script>
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/app.js"></script>
   <script>
     let currentCategory = '';
     let currentSearch = '';
@@ -426,7 +426,7 @@
           return `
             <article class="news-card">
               <a href="/news/${a.slug}" class="news-card-thumb-wrap">
-                <img src="${thumb}" alt="${a.title}" class="news-card-thumb" loading="lazy">
+                <img src="${thumb}" alt="${a.title}" class="news-card-thumb" loading="lazy" decoding="async" width="300" height="180">
                 <span class="news-card-badge">${a.category || 'News'}</span>
                 ${hotBadge}
               </a>

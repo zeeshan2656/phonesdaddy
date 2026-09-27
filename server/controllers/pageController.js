@@ -1,4 +1,5 @@
 const PageModel = require('../models/pageModel');
+const { cache } = require('../utils/cache');
 
 class PageController {
   /**
@@ -102,6 +103,8 @@ class PageController {
         show_in_footer: show_in_footer === '1' || show_in_footer === 1 || show_in_footer === true || show_in_footer === 'true'
       });
 
+      cache.invalidateTags(['pages']);
+
       return res.status(201).json({
         success: true,
         message: 'Page created successfully',
@@ -144,6 +147,8 @@ class PageController {
         show_in_footer: show_in_footer === '1' || show_in_footer === 1 || show_in_footer === true || show_in_footer === 'true'
       });
 
+      cache.invalidateTags(['pages']);
+
       return res.json({
         success: true,
         message: 'Page updated successfully',
@@ -168,6 +173,7 @@ class PageController {
 
       // Check if it is one of the core protected pages, or let user delete with confirmation
       await PageModel.deletePage(id);
+      cache.invalidateTags(['pages']);
       return res.json({ success: true, message: 'Page deleted successfully' });
     } catch (err) {
       next(err);

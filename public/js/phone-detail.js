@@ -1,6 +1,11 @@
 // PhonesDaddy - Phone Detail Page Script
 
 async function initPhoneDetail() {
+  if (window.__INITIAL_PHONE__) {
+    renderPhoneDetail(window.__INITIAL_PHONE__);
+    return;
+  }
+
   const pathParts = window.location.pathname.split('/');
   const slug = pathParts[pathParts.length - 1];
 

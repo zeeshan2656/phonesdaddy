@@ -1,4 +1,5 @@
 const CategoryModel = require('../models/categoryModel');
+const { cache } = require('../utils/cache');
 
 class CategoryController {
   /**
@@ -56,6 +57,8 @@ class CategoryController {
         description: description ? description.trim() : null
       });
 
+      cache.invalidateTags(['news']);
+
       return res.status(201).json({
         success: true,
         message: 'Category created successfully',
@@ -101,6 +104,8 @@ class CategoryController {
         description: description !== undefined ? (description ? description.trim() : null) : existing.description
       });
 
+      cache.invalidateTags(['news']);
+
       return res.json({
         success: true,
         message: 'Category updated successfully',
@@ -124,6 +129,7 @@ class CategoryController {
       }
 
       await CategoryModel.delete(id);
+      cache.invalidateTags(['news']);
       return res.json({ success: true, message: 'Category deleted successfully' });
     } catch (err) {
       next(err);

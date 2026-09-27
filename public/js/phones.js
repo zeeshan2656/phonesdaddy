@@ -221,7 +221,7 @@ function createPhoneCardHtml(phone) {
       <div class="phone-card-image-wrap">
         <span class="phone-card-brand-badge">${escapeHtml(phone.brand_name || '')}</span>
         <a href="/phone/${phone.slug}" onclick="event.stopPropagation()">
-          <img src="${phone.image || '/images/placeholder.svg'}" alt="${escapeHtml(phone.name)}" class="phone-card-image" loading="lazy">
+          <img src="${phone.image || '/images/placeholder.svg'}" alt="${escapeHtml(phone.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
         </a>
       </div>
       <div class="phone-card-body">

@@ -8,12 +8,14 @@ const upload = require('../middleware/upload');
 // Upload image for rich comments & reviews
 router.post('/upload-image', upload.single('image'), ReviewController.uploadImage);
 
-// Mobile Phone Reviews & Ratings
-router.get('/phone/:identifier', ReviewController.getPhoneReviews);
+const { cacheMiddleware } = require('../utils/cache');
+
+// Mobile Phone Reviews & Ratings (Cached with 'reviews' tag)
+router.get('/phone/:identifier', cacheMiddleware(60, ['reviews']), ReviewController.getPhoneReviews);
 router.post('/phone/:identifier', ReviewController.postPhoneReview);
 
-// Blog & News Comments
-router.get('/news/:identifier', ReviewController.getNewsComments);
+// Blog & News Comments (Cached with 'reviews' tag)
+router.get('/news/:identifier', cacheMiddleware(60, ['reviews']), ReviewController.getNewsComments);
 router.post('/news/:identifier', ReviewController.postNewsComment);
 
 // Public Threaded Reply (User-to-User)

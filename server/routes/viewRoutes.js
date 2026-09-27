@@ -17,35 +17,27 @@ const {
 const viewsDir = path.join(__dirname, '../../views');
 const adminDir = path.join(__dirname, '../../admin');
 
+const templateCache = new Map();
+
+function getTemplateHtml(templateFile) {
+  if (templateCache.has(templateFile)) {
+    return templateCache.get(templateFile);
+  }
+  const filePath = path.join(viewsDir, templateFile);
+  const content = fs.readFileSync(filePath, 'utf8');
+  templateCache.set(templateFile, content);
+  return content;
+}
+
 /**
  * Helper to render HTML view with custom <head> and <body> snippets, and dynamic branding injected
+ * High performance: Uses in-memory template cache and unified settings bundle
  */
 async function renderViewWithSnippets(res, templateFile, replacements = {}, statusCode = 200) {
-  const filePath = path.join(viewsDir, templateFile);
-  let html = fs.readFileSync(filePath, 'utf8');
+  let html = getTemplateHtml(templateFile);
 
-  // Fetch dynamic branding
-  let branding = {
-    site_name: 'PhonesDaddy',
-    site_tagline: 'Mobile Phone Specifications, Prices & Comparisons',
-    site_description: 'Discover latest mobile phone prices in Pakistan, detailed technical specifications, camera benchmarks, battery life ratings, and phone comparisons.',
-    site_url: 'http://localhost:3000',
-    site_logo: '',
-    site_favicon: '',
-    footer_copyright: '© 2026 PhonesDaddy. All rights reserved. Clean, fast, and authentic mobile phone specifications.'
-  };
-  let headerLogoHtml = `<div class="brand-icon">P</div><span>Phones<span class="brand-highlight">Daddy</span></span>`;
-  let footerLogoHtml = headerLogoHtml;
-  let faviconTag = `<link rel="icon" type="image/svg+xml" href="/images/placeholder.svg">`;
-
-  try {
-    branding = await SettingsModel.getBranding();
-    headerLogoHtml = await SettingsModel.getHeaderLogoHtml();
-    footerLogoHtml = await SettingsModel.getFooterLogoHtml();
-    faviconTag = await SettingsModel.getFaviconTag();
-  } catch (brandErr) {
-    console.error('Error fetching branding in view renderer:', brandErr);
-  }
+  const bundle = await SettingsModel.getViewSnippetsBundle();
+  const branding = bundle.branding;
 
   // If footer_copyright has hardcoded PhonesDaddy and buyer changed site_name
   let footerCopyright = branding.footer_copyright || '';
@@ -60,9 +52,9 @@ async function renderViewWithSnippets(res, templateFile, replacements = {}, stat
     '{{SITE_DESCRIPTION}}': escapeHtml(branding.site_description),
     '{{SITE_URL}}': branding.site_url,
     '{{SITE_LOGO_URL}}': branding.site_logo || '/images/logo.png',
-    '{{SITE_LOGO_HTML}}': headerLogoHtml,
-    '{{SITE_FOOTER_LOGO_HTML}}': footerLogoHtml,
-    '{{SITE_FAVICON_TAG}}': faviconTag,
+    '{{SITE_LOGO_HTML}}': bundle.headerLogoHtml,
+    '{{SITE_FOOTER_LOGO_HTML}}': bundle.footerLogoHtml,
+    '{{SITE_FAVICON_TAG}}': bundle.faviconTag,
     '{{FOOTER_COPYRIGHT}}': escapeHtml(footerCopyright),
     '{{FOOTER_ABOUT}}': escapeHtml(branding.site_description)
   };
@@ -80,60 +72,41 @@ async function renderViewWithSnippets(res, templateFile, replacements = {}, stat
 
   // Ensure favicon is present in <head>
   if (html.includes('</head>')) {
-    // If not already injected, add favicon right before </head>
     if (!html.includes('rel="icon"') && !html.includes("rel='icon'")) {
-      html = html.replace('</head>', `\n  ${faviconTag}\n</head>`);
+      html = html.replace('</head>', `\n  ${bundle.faviconTag}\n</head>`);
     }
   }
 
-  // Inject Custom Head & Body Snippets (AdSense, Google Analytics, Adsterra, Meta Tags, etc.)
-  try {
-    const headCode = await SettingsModel.getCombinedHeadCode();
-    if (headCode) {
-      if (html.includes('</head>')) {
-        html = html.replace('</head>', `\n<!-- Custom Head Snippets (AdSense / Analytics / Adsterra / Custom) -->\n${headCode}\n</head>`);
-      } else {
-        html = headCode + '\n' + html;
-      }
+  // Inject Custom Head & Body Snippets
+  if (bundle.headCode) {
+    if (html.includes('</head>')) {
+      html = html.replace('</head>', `\n<!-- Custom Head Snippets (AdSense / Analytics / Adsterra / Custom) -->\n${bundle.headCode}\n</head>`);
+    } else {
+      html = bundle.headCode + '\n' + html;
     }
-
-    const bodyCode = await SettingsModel.getCombinedBodyCode();
-    if (bodyCode) {
-      if (html.includes('</body>')) {
-        html = html.replace('</body>', `\n<!-- Custom Body Snippets -->\n${bodyCode}\n</body>`);
-      }
-    }
-
-    // Inject Custom Ad Placements (Google AdSense Units)
-    const adPhoneTop = await SettingsModel.getAdSlotHtml('ad_phone_top', 'Sponsored');
-    const adPhoneMid = await SettingsModel.getAdSlotHtml('ad_phone_mid', 'Advertisement');
-    const adPhoneSpec2 = await SettingsModel.getAdSlotHtml('ad_phone_spec_2', 'Sponsored Spec Link');
-    const adPhoneBottom = await SettingsModel.getAdSlotHtml('ad_phone_bottom', 'Sponsored Link');
-    const adSidebarTop = await SettingsModel.getAdSlotHtml('ad_sidebar_top', 'Advertisement');
-    const adSidebarBottom = await SettingsModel.getAdSlotHtml('ad_sidebar_bottom', 'Sponsored');
-    const adArticleTop = await SettingsModel.getAdSlotHtml('ad_article_top', 'Advertisement');
-    const adArticleMid = await SettingsModel.getAdSlotHtml('ad_article_mid', 'Sponsored');
-    const adArticleBottom = await SettingsModel.getAdSlotHtml('ad_article_bottom', 'Advertisement');
-
-    html = html
-      .replace(/\{\{AD_PHONE_TOP\}\}/g, adPhoneTop)
-      .replace(/\{\{AD_PHONE_MID\}\}/g, adPhoneMid)
-      .replace(/\{\{AD_PHONE_SPEC_2\}\}/g, adPhoneSpec2)
-      .replace(/\{\{AD_PHONE_BOTTOM\}\}/g, adPhoneBottom)
-      .replace(/\{\{AD_SIDEBAR_TOP\}\}/g, adSidebarTop)
-      .replace(/\{\{AD_SIDEBAR_BOTTOM\}\}/g, adSidebarBottom)
-      .replace(/\{\{AD_ARTICLE_TOP\}\}/g, adArticleTop)
-      .replace(/\{\{AD_ARTICLE_MID\}\}/g, adArticleMid)
-      .replace(/\{\{AD_ARTICLE_BOTTOM\}\}/g, adArticleBottom);
-  } catch (snippetErr) {
-    console.error('Error injecting head/body snippets or ad placements:', snippetErr);
   }
 
-  // Prevent browser from caching old branding when user changes settings
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
+  if (bundle.bodyCode) {
+    if (html.includes('</body>')) {
+      html = html.replace('</body>', `\n<!-- Custom Body Snippets -->\n${bundle.bodyCode}\n</body>`);
+    }
+  }
 
+  // Inject Custom Ad Placements (Google AdSense Units)
+  const ads = bundle.adSlots;
+  html = html
+    .replace(/\{\{AD_PHONE_TOP\}\}/g, ads.adPhoneTop)
+    .replace(/\{\{AD_PHONE_MID\}\}/g, ads.adPhoneMid)
+    .replace(/\{\{AD_PHONE_SPEC_2\}\}/g, ads.adPhoneSpec2)
+    .replace(/\{\{AD_PHONE_BOTTOM\}\}/g, ads.adPhoneBottom)
+    .replace(/\{\{AD_SIDEBAR_TOP\}\}/g, ads.adSidebarTop)
+    .replace(/\{\{AD_SIDEBAR_BOTTOM\}\}/g, ads.adSidebarBottom)
+    .replace(/\{\{AD_ARTICLE_TOP\}\}/g, ads.adArticleTop)
+    .replace(/\{\{AD_ARTICLE_MID\}\}/g, ads.adArticleMid)
+    .replace(/\{\{AD_ARTICLE_BOTTOM\}\}/g, ads.adArticleBottom);
+
+  // Fast revalidation browser cache header for HTML views
+  res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
   res.status(statusCode).send(html);
 }
 
@@ -209,7 +182,8 @@ router.get('/phone/:slug', async (req, res, next) => {
       '{{CANONICAL_URL}}': canonicalUrl,
       '{{PHONE_NAME}}': escapeHtml(phone.name),
       '{{PHONE_SLUG}}': escapeHtml(phone.slug),
-      '{{SCHEMA_JSON}}': JSON.stringify(schemaData, null, 2)
+      '{{SCHEMA_JSON}}': JSON.stringify(schemaData, null, 2),
+      '{{PHONE_DATA_JSON}}': JSON.stringify(phone).replace(/</g, '\\u003c')
     };
 
     await renderViewWithSnippets(res, 'phone.html', replacements);
@@ -250,7 +224,8 @@ router.get('/brand/:slug', async (req, res, next) => {
       '{{META_DESCRIPTION}}': escapeHtml(pageDescription),
       '{{CANONICAL_URL}}': canonicalUrl,
       '{{BRAND_NAME}}': escapeHtml(brand.name),
-      '{{BRAND_SLUG}}': escapeHtml(brand.slug)
+      '{{BRAND_SLUG}}': escapeHtml(brand.slug),
+      '{{BRAND_DATA_JSON}}': JSON.stringify(brand).replace(/</g, '\\u003c')
     };
 
     await renderViewWithSnippets(res, 'brand.html', replacements);

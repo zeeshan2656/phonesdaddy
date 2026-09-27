@@ -1,4 +1,6 @@
 const BrandModel = require('../models/brandModel');
+const { cache } = require('../utils/cache');
+const { optimizeBrandLogo } = require('../utils/imageOptimizer');
 
 const BRAND_PALETTE = [
   '#1428a0', // Royal Blue (Samsung)
@@ -84,7 +86,12 @@ class BrandController {
 
       let logoPath = '';
       if (req.file) {
-        logoPath = `/uploads/brands/${req.file.filename}`;
+        try {
+          const { url } = await optimizeBrandLogo(req.file.path, slug);
+          logoPath = url;
+        } catch (_) {
+          logoPath = `/uploads/brands/${req.file.filename}`;
+        }
       } else if (req.body.logo) {
         logoPath = req.body.logo;
       }
@@ -93,7 +100,7 @@ class BrandController {
         const fs = require('fs');
         const path = require('path');
         const logoFilename = `${slug.trim().toLowerCase()}-logo.svg`;
-        const logoDir = path.join(__dirname, '../../public/images/brands');
+        const logoDir = path.join(__dirname, '../../public/webfiles/brands');
         if (!fs.existsSync(logoDir)) fs.mkdirSync(logoDir, { recursive: true });
 
         const chosenColor = brand_color || color || getBrandColor(name);
@@ -104,7 +111,7 @@ class BrandController {
   </text>
 </svg>`;
         fs.writeFileSync(path.join(logoDir, logoFilename), logoSvg);
-        logoPath = `/images/brands/${logoFilename}`;
+        logoPath = `/webfiles/brands/${logoFilename}`;
       }
 
       const brandId = await BrandModel.createBrand({
@@ -114,6 +121,9 @@ class BrandController {
         description: description || '',
         status: status || 'active'
       });
+
+      // Invalidate brand and related phone caches
+      cache.invalidateTags(['brands', 'phones', 'home']);
 
       return res.status(201).json({
         success: true,
@@ -141,11 +151,16 @@ class BrandController {
       if ((remove_logo === 'true' || remove_logo === true || req.file) && id) {
         try {
           const currentBrand = await BrandModel.getBrandById(id);
-          if (currentBrand && currentBrand.logo && currentBrand.logo.startsWith('/uploads/brands/')) {
+          if (currentBrand && currentBrand.logo) {
             const fs = require('fs');
             const path = require('path');
-            const oldFilePath = path.join(__dirname, '../../server', currentBrand.logo);
-            if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
+            let oldFilePath = null;
+            if (currentBrand.logo.startsWith('/uploads/brands/')) {
+              oldFilePath = path.join(__dirname, '../../server', currentBrand.logo);
+            } else if (currentBrand.logo.startsWith('/webfiles/brands/')) {
+              oldFilePath = path.join(__dirname, '../../public', currentBrand.logo);
+            }
+            if (oldFilePath && fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
           }
         } catch (e) {
           console.error('Error removing old brand logo file:', e);
@@ -154,12 +169,17 @@ class BrandController {
 
       let logoPath = req.body.logo;
       if (req.file) {
-        logoPath = `/uploads/brands/${req.file.filename}`;
+        try {
+          const { url } = await optimizeBrandLogo(req.file.path, slug);
+          logoPath = url;
+        } catch (_) {
+          logoPath = `/uploads/brands/${req.file.filename}`;
+        }
       } else if (remove_logo === 'true' || remove_logo === true || !logoPath || logoPath.endsWith('-logo.svg')) {
         const fs = require('fs');
         const path = require('path');
         const logoFilename = `${slug.trim().toLowerCase()}-logo.svg`;
-        const logoDir = path.join(__dirname, '../../public/images/brands');
+        const logoDir = path.join(__dirname, '../../public/webfiles/brands');
         if (!fs.existsSync(logoDir)) fs.mkdirSync(logoDir, { recursive: true });
 
         const chosenColor = brand_color || color || getBrandColor(name);
@@ -170,7 +190,7 @@ class BrandController {
   </text>
 </svg>`;
         fs.writeFileSync(path.join(logoDir, logoFilename), logoSvg);
-        logoPath = `/images/brands/${logoFilename}`;
+        logoPath = `/webfiles/brands/${logoFilename}`;
       }
 
       const updated = await BrandModel.updateBrand(id, {
@@ -184,6 +204,9 @@ class BrandController {
       if (!updated) {
         return res.status(404).json({ success: false, message: 'Brand not found' });
       }
+
+      // Invalidate brand and related phone caches
+      cache.invalidateTags(['brands', 'phones', 'home']);
 
       return res.json({ success: true, message: 'Brand updated successfully' });
     } catch (err) {
@@ -202,6 +225,9 @@ class BrandController {
       if (!deleted) {
         return res.status(404).json({ success: false, message: 'Brand not found' });
       }
+
+      // Invalidate brand and related phone caches
+      cache.invalidateTags(['brands', 'phones', 'home']);
 
       return res.json({ success: true, message: 'Brand deleted successfully' });
     } catch (err) {

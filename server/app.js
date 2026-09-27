@@ -5,6 +5,8 @@ const helmet = require('helmet');
 const cors = require('cors');
 require('dotenv').config();
 
+const compression = require('compression');
+
 // Route handlers
 const phoneRoutes = require('./routes/phoneRoutes');
 const brandRoutes = require('./routes/brandRoutes');
@@ -26,9 +28,28 @@ const app = express();
 // Trust reverse proxy (Hostinger, Cloudflare, Nginx, LiteSpeed, etc.)
 app.set('trust proxy', 1);
 
-// Request Logger
+// HTTP Compression (Gzip / Deflate for fast TTFB and payload reduction)
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+  threshold: 1024
+}));
+
+// Request Logger (filters static assets to reduce event loop pressure)
 app.use((req, res, next) => {
-  console.log(`[REQ] ${req.method} ${req.originalUrl}`);
+  const url = req.originalUrl;
+  if (!url.startsWith('/webfiles') && 
+      !url.startsWith('/css') && 
+      !url.startsWith('/js') && 
+      !url.startsWith('/uploads') && 
+      !url.startsWith('/images') &&
+      !url.endsWith('.ico') && 
+      !url.endsWith('.png') && 
+      !url.endsWith('.webp')) {
+    console.log(`[REQ] ${req.method} ${url}`);
+  }
   next();
 });
 
@@ -62,9 +83,32 @@ app.use(session({
   }
 }));
 
-// Static Folders
-app.use(express.static(path.join(__dirname, '../public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static Folders with optimized HTTP Cache-Control headers
+const staticOptions = {
+  maxAge: '7d',
+  setHeaders: (res, filePath) => {
+    if (filePath.includes('webfiles')) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    } else if (/\.(css|js|woff2|woff|ttf|ico|svg|png|jpg|jpeg|webp)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
+    }
+  }
+};
+
+app.use(express.static(path.join(__dirname, '../public'), staticOptions));
+app.use('/webfiles', express.static(path.join(__dirname, '../public/webfiles'), {
+  maxAge: '30d',
+  immutable: true,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+  }
+}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  maxAge: '7d',
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'public, max-age=604800');
+  }
+}));
 
 // REST API Endpoints
 app.use('/api/phones', searchRoutes); // Handles /api/phones/search

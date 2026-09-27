@@ -4,8 +4,10 @@ const SettingsController = require('../controllers/settingsController');
 const { requireMasterAdmin } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
-// Public Branding Endpoint (no auth needed)
-router.get('/public', SettingsController.getPublicBranding);
+const { cacheMiddleware } = require('../utils/cache');
+
+// Public Branding Endpoint (Cached with 'settings' tag)
+router.get('/public', cacheMiddleware(3600, ['settings']), SettingsController.getPublicBranding);
 
 // Admin Protected Routes (Master Admin only)
 router.get('/', requireMasterAdmin, SettingsController.getSettings);

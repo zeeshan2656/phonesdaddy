@@ -3,8 +3,10 @@ const router = express.Router();
 const CategoryController = require('../controllers/categoryController');
 const { requireArticlePermission } = require('../middleware/auth');
 
-// Public endpoint
-router.get('/', CategoryController.list);
+const { cacheMiddleware } = require('../utils/cache');
+
+// Public endpoint (Cached with 'news' tag)
+router.get('/', cacheMiddleware(600, ['news']), CategoryController.list);
 
 // Admin endpoints (Protected for Article Writers & Admins)
 router.post('/admin', requireArticlePermission, CategoryController.create);

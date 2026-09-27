@@ -1,6 +1,7 @@
 const NewsModel = require('../models/newsModel');
 const path = require('path');
 const fs = require('fs');
+const { cache } = require('../utils/cache');
 
 class NewsController {
   /**
@@ -157,6 +158,8 @@ class NewsController {
         image
       });
 
+      cache.invalidateTags(['news', 'home']);
+
       return res.status(201).json({
         success: true,
         message: 'Article published successfully',
@@ -211,6 +214,8 @@ class NewsController {
         image
       });
 
+      cache.invalidateTags(['news', 'home']);
+
       return res.json({
         success: true,
         message: 'Article updated successfully',
@@ -237,6 +242,7 @@ class NewsController {
       }
 
       await NewsModel.deleteArticle(id);
+      cache.invalidateTags(['news', 'home']);
       return res.json({ success: true, message: 'Article deleted successfully' });
     } catch (err) {
       next(err);
@@ -259,6 +265,7 @@ class NewsController {
       }
 
       const affected = await NewsModel.deleteArticles(cleanIds);
+      cache.invalidateTags(['news', 'home']);
       return res.json({
         success: true,
         message: `Successfully deleted ${affected} article(s).`,

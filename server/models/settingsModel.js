@@ -1,8 +1,10 @@
 const { pool } = require('../config/database');
+const { cache } = require('../utils/cache');
 
 let _cachedSettings = null;
+let _cachedBundle = null;
 let _lastCacheTime = 0;
-const CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL
 
 class SettingsModel {
   /**
@@ -29,7 +31,6 @@ class SettingsModel {
     }
 
     try {
-      await this.ensureTable();
       const [rows] = await pool.query(`SELECT setting_key, setting_value FROM site_settings`);
       
       const settings = {
@@ -117,7 +118,9 @@ class SettingsModel {
 
     // Invalidate cache immediately
     _cachedSettings = null;
+    _cachedBundle = null;
     _lastCacheTime = 0;
+    cache.invalidateTags(['settings', 'home']);
 
     return true;
   }
@@ -234,6 +237,58 @@ class SettingsModel {
       site_favicon: settings.site_favicon || '',
       footer_copyright: settings.footer_copyright || `© ${new Date().getFullYear()} ${settings.site_name || 'PhonesDaddy'}. All rights reserved.`
     };
+  }
+
+  /**
+   * Bundles all branding, logo HTML, favicon, head code, body code, and ad slots
+   * in a single fast in-memory object to eliminate repeated database queries and computations.
+   */
+  static async getViewSnippetsBundle() {
+    if (_cachedBundle && (Date.now() - _lastCacheTime < CACHE_TTL_MS)) {
+      return _cachedBundle;
+    }
+
+    const settings = await this.getAllSettings();
+    const branding = {
+      site_name: settings.site_name || 'PhonesDaddy',
+      site_tagline: settings.site_tagline || 'Mobile Phone Specifications, Prices & Comparisons',
+      site_description: settings.site_description || 'Discover latest mobile phone prices in Pakistan, detailed technical specifications, camera benchmarks, battery life ratings, and phone comparisons.',
+      site_url: settings.site_url || 'http://localhost:3000',
+      site_logo: settings.site_logo || '',
+      site_favicon: settings.site_favicon || '',
+      footer_copyright: settings.footer_copyright || '© 2026 PhonesDaddy. All rights reserved. Clean, fast, and authentic mobile phone specifications.',
+      footer_about: settings.footer_about || settings.site_description || ''
+    };
+
+    const headerLogoHtml = await this.getHeaderLogoHtml();
+    const footerLogoHtml = await this.getFooterLogoHtml();
+    const faviconTag = await this.getFaviconTag();
+    const headCode = await this.getCombinedHeadCode();
+    const bodyCode = await this.getCombinedBodyCode();
+
+    const adSlots = {
+      adPhoneTop: await this.getAdSlotHtml('ad_phone_top', 'Sponsored'),
+      adPhoneMid: await this.getAdSlotHtml('ad_phone_mid', 'Advertisement'),
+      adPhoneSpec2: await this.getAdSlotHtml('ad_phone_spec_2', 'Sponsored Spec Link'),
+      adPhoneBottom: await this.getAdSlotHtml('ad_phone_bottom', 'Sponsored Link'),
+      adSidebarTop: await this.getAdSlotHtml('ad_sidebar_top', 'Advertisement'),
+      adSidebarBottom: await this.getAdSlotHtml('ad_sidebar_bottom', 'Sponsored'),
+      adArticleTop: await this.getAdSlotHtml('ad_article_top', 'Advertisement'),
+      adArticleMid: await this.getAdSlotHtml('ad_article_mid', 'Sponsored'),
+      adArticleBottom: await this.getAdSlotHtml('ad_article_bottom', 'Advertisement')
+    };
+
+    _cachedBundle = {
+      branding,
+      headerLogoHtml,
+      footerLogoHtml,
+      faviconTag,
+      headCode,
+      bodyCode,
+      adSlots
+    };
+
+    return _cachedBundle;
   }
 
   /**

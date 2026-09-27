@@ -25,12 +25,62 @@ async function initBrandsPage() {
   }
 }
 
+function renderBrandData(brand, phonesGrid) {
+  if (!brand || !phonesGrid) return;
+
+  // Populate Brand Header
+  const nameEl = document.getElementById('brandPageName');
+  if (nameEl) nameEl.innerText = brand.name;
+
+  const descEl = document.getElementById('brandPageDesc');
+  if (descEl) descEl.innerText = brand.description || `Browse the latest ${brand.name} smartphones with prices in Pakistan and technical specifications.`;
+
+  const countEl = document.getElementById('brandPagePhoneCount');
+  const phonesList = brand.phones || [];
+  if (countEl) countEl.innerText = `${phonesList.length} phones available`;
+
+  const logoEl = document.getElementById('brandPageLogo');
+  if (logoEl) {
+    logoEl.src = brand.logo || `/images/brands/${brand.slug}-logo.svg`;
+    logoEl.alt = brand.name;
+  }
+
+  // Render Phones Grid
+  if (phonesList.length === 0) {
+    phonesGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">No phones currently listed for ${brand.name}.</div>`;
+    return;
+  }
+
+  phonesGrid.innerHTML = phonesList.map(p => `
+    <div class="phone-card" onclick="window.location.href='/phone/${p.slug}'">
+      <div class="phone-card-image-wrap">
+        <span class="phone-card-brand-badge">${escapeHtml(brand.name || '')}</span>
+        <a href="/phone/${p.slug}" onclick="event.stopPropagation()">
+          <img src="${p.image || '/images/placeholder.svg'}" alt="${escapeHtml(p.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
+        </a>
+      </div>
+      <div class="phone-card-body">
+        <a href="/phone/${p.slug}" onclick="event.stopPropagation()">
+          <h3 class="phone-card-title" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h3>
+        </a>
+        <div class="phone-card-price">${p.price > 0 ? formatPKR(p.price) : 'Rumored Price'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
 async function initSingleBrandPage() {
+  const phonesGrid = document.getElementById('brandPhonesGrid');
+  if (!phonesGrid) return;
+
+  if (window.__INITIAL_BRAND__) {
+    renderBrandData(window.__INITIAL_BRAND__, phonesGrid);
+    return;
+  }
+
   const pathParts = window.location.pathname.split('/');
   const brandSlug = pathParts[pathParts.length - 1];
-
-  const phonesGrid = document.getElementById('brandPhonesGrid');
-  if (!phonesGrid || !brandSlug) return;
+  if (!brandSlug) return;
 
   try {
     const res = await fetch(`/api/brands/slug/${brandSlug}`);
@@ -46,46 +96,7 @@ async function initSingleBrandPage() {
       return;
     }
 
-    const brand = json.data;
-
-    // Populate Brand Header
-    const nameEl = document.getElementById('brandPageName');
-    if (nameEl) nameEl.innerText = brand.name;
-
-    const descEl = document.getElementById('brandPageDesc');
-    if (descEl) descEl.innerText = brand.description || `Browse the latest ${brand.name} smartphones with prices in Pakistan and technical specifications.`;
-
-    const countEl = document.getElementById('brandPagePhoneCount');
-    if (countEl) countEl.innerText = `${brand.phones.length} phones available`;
-
-    const logoEl = document.getElementById('brandPageLogo');
-    if (logoEl) {
-      logoEl.src = brand.logo || `/images/brands/${brand.slug}-logo.svg`;
-      logoEl.alt = brand.name;
-    }
-
-    // Render Phones Grid
-    if (brand.phones.length === 0) {
-      phonesGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">No phones currently listed for ${brand.name}.</div>`;
-      return;
-    }
-
-    phonesGrid.innerHTML = brand.phones.map(p => `
-      <div class="phone-card" onclick="window.location.href='/phone/${p.slug}'">
-        <div class="phone-card-image-wrap">
-          <span class="phone-card-brand-badge">${escapeHtml(brand.name || '')}</span>
-          <a href="/phone/${p.slug}" onclick="event.stopPropagation()">
-            <img src="${p.image || '/images/placeholder.svg'}" alt="${escapeHtml(p.name)}" class="phone-card-image" loading="lazy">
-          </a>
-        </div>
-        <div class="phone-card-body">
-          <a href="/phone/${p.slug}" onclick="event.stopPropagation()">
-            <h3 class="phone-card-title" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h3>
-          </a>
-          <div class="phone-card-price">${p.price > 0 ? formatPKR(p.price) : 'Rumored Price'}</div>
-        </div>
-      </div>
-    `).join('');
+    renderBrandData(json.data, phonesGrid);
   } catch (err) {
     console.error('Error loading brand phones:', err);
   }

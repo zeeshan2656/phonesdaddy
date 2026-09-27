@@ -1,6 +1,8 @@
 const PhoneModel = require('../models/phoneModel');
 const BrandModel = require('../models/brandModel');
 const { scrapePhoneFromUrl } = require('../utils/phoneScraper');
+const { cache } = require('../utils/cache');
+const { optimizePhoneImage } = require('../utils/imageOptimizer');
 
 class PhoneController {
   static async list(req, res, next) {
@@ -50,7 +52,7 @@ class PhoneController {
   static async getLatest(req, res, next) {
     try {
       const limit = req.query.limit || 8;
-      const result = await PhoneModel.getPhones({ page: 1, limit, sort: 'newest' });
+      const result = await PhoneModel.getPhones({ page: 1, limit, sort: 'newest', skipCount: true });
       return res.json({ success: true, data: result.phones });
     } catch (err) {
       next(err);
@@ -60,7 +62,7 @@ class PhoneController {
   static async getPopular(req, res, next) {
     try {
       const limit = req.query.limit || 8;
-      const result = await PhoneModel.getPhones({ page: 1, limit, sort: 'popular' });
+      const result = await PhoneModel.getPhones({ page: 1, limit, sort: 'popular', skipCount: true });
       return res.json({ success: true, data: result.phones });
     } catch (err) {
       next(err);
@@ -70,7 +72,7 @@ class PhoneController {
   static async getUpcoming(req, res, next) {
     try {
       const limit = req.query.limit || 8;
-      const result = await PhoneModel.getPhones({ page: 1, limit, status: 'Upcoming' });
+      const result = await PhoneModel.getPhones({ page: 1, limit, status: 'Upcoming', skipCount: true });
       return res.json({ success: true, data: result.phones });
     } catch (err) {
       next(err);
@@ -134,7 +136,12 @@ class PhoneController {
 
       let imagePath = '/images/placeholder.svg';
       if (req.file) {
-        imagePath = `/uploads/phones/${req.file.filename}`;
+        try {
+          const { url } = await optimizePhoneImage(req.file.path, slug);
+          imagePath = url;
+        } catch (_) {
+          imagePath = `/uploads/phones/${req.file.filename}`;
+        }
       } else if (req.body.image && req.body.image.trim()) {
         imagePath = req.body.image.trim();
       }
@@ -193,6 +200,9 @@ class PhoneController {
 
       const phoneId = await PhoneModel.createPhone(phoneData, parsedSpecs, parsedPrices);
 
+      // Invalidate relevant cache groups
+      cache.invalidateTags(['phones', 'home']);
+
       return res.status(201).json({
         success: true,
         message: 'Phone created successfully',
@@ -244,7 +254,12 @@ class PhoneController {
       };
 
       if (req.file) {
-        phoneData.image = `/uploads/phones/${req.file.filename}`;
+        try {
+          const { url } = await optimizePhoneImage(req.file.path, slug);
+          phoneData.image = url;
+        } catch (_) {
+          phoneData.image = `/uploads/phones/${req.file.filename}`;
+        }
       } else if (req.body.remove_image === 'true' || req.body.remove_image === true) {
         phoneData.image = '/images/placeholder.svg';
       } else if (req.body.image) {
@@ -288,6 +303,9 @@ class PhoneController {
 
       await PhoneModel.updatePhone(id, phoneData, parsedSpecs, parsedPrices);
 
+      // Invalidate relevant cache groups
+      cache.invalidateTags(['phones', 'home']);
+
       return res.json({
         success: true,
         message: 'Phone updated successfully'
@@ -309,6 +327,9 @@ class PhoneController {
         return res.status(404).json({ success: false, message: 'Phone not found' });
       }
 
+      // Invalidate relevant cache groups
+      cache.invalidateTags(['phones', 'home']);
+
       return res.json({ success: true, message: 'Phone deleted successfully' });
     } catch (err) {
       next(err);
@@ -328,6 +349,10 @@ class PhoneController {
       }
 
       const affected = await PhoneModel.deletePhones(cleanIds);
+
+      // Invalidate relevant cache groups
+      cache.invalidateTags(['phones', 'home']);
+
       return res.json({
         success: true,
         message: `Successfully deleted ${affected} phone(s).`,

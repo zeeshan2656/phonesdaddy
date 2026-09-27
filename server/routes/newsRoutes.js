@@ -28,11 +28,13 @@ function handleUpload(fieldName) {
   };
 }
 
-// Public endpoints
-router.get('/', NewsController.list);
-router.get('/hot', NewsController.getHot);
-router.get('/categories', NewsController.getCategories);
-router.get('/slug/:slug', NewsController.getBySlug);
+const { cacheMiddleware } = require('../utils/cache');
+
+// Public endpoints (Cached with 'news' and 'home' tags)
+router.get('/', cacheMiddleware(180, ['news']), NewsController.list);
+router.get('/hot', cacheMiddleware(300, ['news', 'home']), NewsController.getHot);
+router.get('/categories', cacheMiddleware(600, ['news']), NewsController.getCategories);
+router.get('/slug/:slug', cacheMiddleware(300, ['news']), NewsController.getBySlug);
 
 // Admin endpoints (Protected for Article Writers & Admins)
 router.get('/admin/stats', requireArticlePermission, NewsController.getStats);

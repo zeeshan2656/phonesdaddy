@@ -1,6 +1,7 @@
 const ReviewModel = require('../models/reviewModel');
 const PhoneModel = require('../models/phoneModel');
 const NewsModel = require('../models/newsModel');
+const { cache } = require('../utils/cache');
 
 class ReviewController {
   /**
@@ -105,6 +106,7 @@ class ReviewController {
       });
 
       const updatedStats = await ReviewModel.getPhoneRatingStats(phone.id);
+      cache.invalidateTags(['reviews']);
 
       return res.status(201).json({
         success: true,
@@ -194,6 +196,8 @@ class ReviewController {
         ip_address
       });
 
+      cache.invalidateTags(['reviews']);
+
       return res.status(201).json({
         success: true,
         message: 'Thank you! Your comment has been published.',
@@ -265,6 +269,8 @@ class ReviewController {
         return res.status(404).json({ success: false, message: 'Review / Comment not found' });
       }
 
+      cache.invalidateTags(['reviews']);
+
       return res.json({
         success: true,
         message: `Item has been ${status === 'approved' ? 'approved' : 'rejected'} successfully`
@@ -285,6 +291,8 @@ class ReviewController {
       if (!deleted) {
         return res.status(404).json({ success: false, message: 'Review / Comment not found' });
       }
+
+      cache.invalidateTags(['reviews']);
 
       return res.json({
         success: true,
@@ -332,6 +340,8 @@ class ReviewController {
         is_admin: false,
         ip_address
       });
+
+      cache.invalidateTags(['reviews']);
 
       return res.status(201).json({
         success: true,
@@ -396,6 +406,8 @@ class ReviewController {
         is_admin: true,
         ip_address
       });
+
+      cache.invalidateTags(['reviews']);
 
       return res.status(201).json({
         success: true,

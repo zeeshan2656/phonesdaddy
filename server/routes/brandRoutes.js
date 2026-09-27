@@ -4,10 +4,12 @@ const BrandController = require('../controllers/brandController');
 const { requirePhonePermission } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
-// Public routes
-router.get('/', BrandController.list);
-router.get('/slug/:slug', BrandController.getBySlug);
-router.get('/:id', BrandController.getById);
+const { cacheMiddleware } = require('../utils/cache');
+
+// Public routes (Cached with tag 'brands' and 'home')
+router.get('/', cacheMiddleware(300, ['brands', 'home']), BrandController.list);
+router.get('/slug/:slug', cacheMiddleware(300, ['brands']), BrandController.getBySlug);
+router.get('/:id', cacheMiddleware(300, ['brands']), BrandController.getById);
 
 // Protected admin & mobile manager routes
 router.post('/', requirePhonePermission, upload.single('logo'), BrandController.create);
