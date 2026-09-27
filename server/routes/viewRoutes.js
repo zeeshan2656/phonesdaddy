@@ -123,13 +123,53 @@ async function getHomeSsrReplacements() {
   }
 
   try {
-    const [latestData, popularData, upcomingData, brandsData, newsData, comparePhones] = await Promise.all([
-      PhoneModel.getPhones({ page: 1, limit: 16, sort: 'newest', skipCount: true }).catch(() => ({ phones: [] })),
-      PhoneModel.getPhones({ page: 1, limit: 16, sort: 'popular', skipCount: true }).catch(() => ({ phones: [] })),
-      PhoneModel.getPhones({ page: 1, limit: 16, status: 'Upcoming', skipCount: true }).catch(() => ({ phones: [] })),
-      BrandModel.getAllBrands(true).catch(() => []),
-      NewsModel.getArticles({ page: 1, limit: 4, is_hot: 1, status: 'published' }).catch(() => ({ articles: [] })),
-      pool.query(`SELECT slug, name FROM phones ORDER BY popular DESC, views DESC, id DESC LIMIT 50`).then(([rows]) => rows).catch(() => [])
+    const [latestPhones, popularPhones, upcomingPhones, topBrands, articles, comparePhones] = await Promise.all([
+      pool.query(`
+        SELECT p.id, p.name, p.slug, p.image, b.name AS brand_name
+        FROM phones p
+        JOIN brands b ON p.brand_id = b.id
+        ORDER BY p.id DESC
+        LIMIT 16
+      `).then(([rows]) => rows).catch(() => []),
+
+      pool.query(`
+        SELECT p.id, p.name, p.slug, p.image, b.name AS brand_name
+        FROM phones p
+        JOIN brands b ON p.brand_id = b.id
+        ORDER BY p.popular DESC, p.views DESC, p.id DESC
+        LIMIT 16
+      `).then(([rows]) => rows).catch(() => []),
+
+      pool.query(`
+        SELECT p.id, p.name, p.slug, p.image, b.name AS brand_name
+        FROM phones p
+        JOIN brands b ON p.brand_id = b.id
+        WHERE p.status = 'Upcoming'
+        ORDER BY p.id DESC
+        LIMIT 16
+      `).then(([rows]) => rows).catch(() => []),
+
+      pool.query(`
+        SELECT b.id, b.name, b.slug, b.logo, COUNT(p.id) AS phone_count
+        FROM brands b
+        LEFT JOIN phones p ON b.id = p.brand_id
+        WHERE b.status = 'active'
+        GROUP BY b.id
+        ORDER BY phone_count DESC, b.name ASC
+        LIMIT 12
+      `).then(([rows]) => rows).catch(() => []),
+
+      pool.query(`
+        SELECT id, title, slug, summary, image, author, category, is_hot, created_at
+        FROM news
+        WHERE status = 'published'
+        ORDER BY is_hot DESC, created_at DESC
+        LIMIT 4
+      `).then(([rows]) => rows).catch(() => []),
+
+      pool.query(`
+        SELECT slug, name FROM phones ORDER BY popular DESC, views DESC, id DESC LIMIT 50
+      `).then(([rows]) => rows).catch(() => [])
     ]);
 
     const renderCard = (p) => `
@@ -148,12 +188,11 @@ async function getHomeSsrReplacements() {
       </div>
     `;
 
-    const latestHtml = (latestData.phones || []).map(renderCard).join('');
-    const popularHtml = (popularData.phones || []).map(renderCard).join('');
-    const upcomingHtml = (upcomingData.phones || []).map(renderCard).join('');
+    const latestHtml = (latestPhones || []).map(renderCard).join('');
+    const popularHtml = (popularPhones || []).map(renderCard).join('');
+    const upcomingHtml = (upcomingPhones || []).map(renderCard).join('');
 
-    const topBrands = (brandsData || []).slice(0, 12);
-    const brandsHtml = topBrands.map(b => `
+    const brandsHtml = (topBrands || []).map(b => `
       <a href="/brand/${escapeAttr(b.slug)}" class="brand-card">
         <img src="${escapeAttr(b.logo || '/images/placeholder.svg')}" alt="${escapeAttr(b.name)}" class="brand-card-logo" loading="lazy" decoding="async" width="80" height="40">
         <div class="brand-card-name">${escapeHtml(b.name)}</div>
@@ -161,9 +200,8 @@ async function getHomeSsrReplacements() {
       </a>
     `).join('');
 
-    const articles = newsData.articles || [];
     let newsHtml = '';
-    if (articles.length > 0) {
+    if (articles && articles.length > 0) {
       newsHtml = articles.map(a => {
         const thumb = a.image || '/images/placeholder.svg';
         const dateStr = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';

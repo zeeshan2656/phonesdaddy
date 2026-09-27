@@ -85,12 +85,12 @@ app.use(session({
 
 // Static Folders with optimized HTTP Cache-Control headers
 const staticOptions = {
-  maxAge: '7d',
+  maxAge: '30d',
   setHeaders: (res, filePath) => {
     if (filePath.includes('webfiles')) {
-      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     } else if (/\.(css|js|woff2|woff|ttf|ico|svg|png|jpg|jpeg|webp)$/i.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
+      res.setHeader('Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
     }
   }
 };

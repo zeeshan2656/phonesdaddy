@@ -138,42 +138,67 @@ class SettingsModel {
 
     const snippets = [];
 
-    // Helper: Google Analytics GA4 gtag
+    // Helper: Non-blocking, interaction-loaded Google Analytics & AdSense
+    let gaId = '';
     if (settings.google_analytics_id && settings.google_analytics_id.trim()) {
-      let gaId = settings.google_analytics_id.trim();
+      gaId = settings.google_analytics_id.trim();
       if (gaId.startsWith('b64:')) {
-        try {
-          gaId = Buffer.from(gaId.slice(4), 'base64').toString('utf8').trim();
-        } catch (_) {}
-      }
-      // Check if user already manually pasted GA ID in raw head snippets to prevent duplicate
-      const rawText = settings.head_snippets || '';
-      if (gaId && !rawText.includes(gaId)) {
-        snippets.push(`<!-- Google tag (gtag.js) - Google Analytics -->
-<script defer src="https://www.googletagmanager.com/gtag/js?id=${escapeAttr(gaId)}"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', '${escapeAttr(gaId)}');
-</script>`);
+        try { gaId = Buffer.from(gaId.slice(4), 'base64').toString('utf8').trim(); } catch (_) {}
       }
     }
 
-    // Helper: Google AdSense Auto Ads tag
+    let adClient = '';
     if (settings.google_adsense_client && settings.google_adsense_client.trim()) {
-      let adClient = settings.google_adsense_client.trim();
+      adClient = settings.google_adsense_client.trim();
       if (adClient.startsWith('b64:')) {
-        try {
-          adClient = Buffer.from(adClient.slice(4), 'base64').toString('utf8').trim();
-        } catch (_) {}
+        try { adClient = Buffer.from(adClient.slice(4), 'base64').toString('utf8').trim(); } catch (_) {}
       }
-      const rawText = settings.head_snippets || '';
-      if (adClient && !rawText.includes(adClient)) {
-        snippets.push(`<!-- Google AdSense -->
-<script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeAttr(adClient)}"
-     crossorigin="anonymous"></script>`);
-      }
+    }
+
+    const rawText = settings.head_snippets || '';
+    const shouldLoadGa = gaId && !rawText.includes(gaId);
+    const shouldLoadAds = adClient && !rawText.includes(adClient);
+
+    if (shouldLoadGa || shouldLoadAds) {
+      snippets.push(`<!-- Optimized Non-Blocking Google Services (Zero impact on FCP/LCP/TBT) -->
+<script>
+(function() {
+  var loaded = false;
+  function initThirdParty() {
+    if (loaded) return;
+    loaded = true;
+    ['scroll', 'mousemove', 'touchstart', 'keydown'].forEach(function(ev) {
+      window.removeEventListener(ev, initThirdParty, { passive: true });
+    });
+    ${shouldLoadGa ? `
+    var ga = document.createElement('script');
+    ga.async = true;
+    ga.src = 'https://www.googletagmanager.com/gtag/js?id=${escapeAttr(gaId)}';
+    document.head.appendChild(ga);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', '${escapeAttr(gaId)}');
+    ` : ''}
+    ${shouldLoadAds ? `
+    var ads = document.createElement('script');
+    ads.async = true;
+    ads.crossOrigin = 'anonymous';
+    ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeAttr(adClient)}';
+    document.head.appendChild(ads);
+    ` : ''}
+  }
+  ['scroll', 'mousemove', 'touchstart', 'keydown'].forEach(function(ev) {
+    window.addEventListener(ev, initThirdParty, { passive: true, once: true });
+  });
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(function() { setTimeout(initThirdParty, 3500); });
+  } else {
+    setTimeout(initThirdParty, 3500);
+  }
+})();
+</script>`);
     }
 
     // Helper: Adsterra Code if provided separately
