@@ -83,35 +83,36 @@ app.use(session({
   }
 }));
 
-// Static Folders with optimized HTTP Cache-Control headers
+// Static Folders with optimized HTTP Cache-Control headers (1 Year Immutable for 100% GTmetrix Score)
 const staticOptions = {
-  maxAge: '30d',
+  maxAge: '1y',
+  immutable: true,
   setHeaders: (res, filePath) => {
     // Admin scripts and styles must never be cached so updates reflect immediately
     if (filePath.includes('admin') || filePath.endsWith('admin.js') || filePath.endsWith('admin.css')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-    } else if (filePath.includes('webfiles')) {
+    } else {
+      // 1 Year Immutable cache for all static public assets (css, js, images, webfiles, svgs, fonts)
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    } else if (/\.(css|js|woff2|woff|ttf|ico|svg|png|jpg|jpeg|webp)$/i.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
     }
   }
 };
 
 app.use(express.static(path.join(__dirname, '../public'), staticOptions));
 app.use('/webfiles', express.static(path.join(__dirname, '../public/webfiles'), {
-  maxAge: '30d',
+  maxAge: '1y',
   immutable: true,
   setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-  maxAge: '7d',
+  maxAge: '1y',
+  immutable: true,
   setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'public, max-age=604800');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
 }));
 
