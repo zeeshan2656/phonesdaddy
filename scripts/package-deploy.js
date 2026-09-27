@@ -32,7 +32,9 @@ const INCLUDE_PATHS = [
   'package.json',
   'package-lock.json',
   '.htaccess',
-  'README.md'
+  'safe-deploy.sh',   // ← Server-side safe deploy script (backs up images before overwriting)
+  'README.md',
+  'DEPLOYMENT_GUIDE.md'
 ];
 
 // Empty upload directories to preserve structure without overwriting live files
@@ -143,13 +145,19 @@ async function run() {
     console.log('  ✅ server/uploads/ IS EXCLUDED: Existing articles, phone photos & branding on server are SAFE.');
     console.log('  ✅ public/webfiles/ IS EXCLUDED: Existing gallery photos on server are SAFE.');
     console.log('  ✅ node_modules/ IS EXCLUDED: Fast, clean ~2MB upload instead of ~200MB.');
-    console.log('\n🚀 HOW TO DEPLOY TO SERVER:');
-    console.log('  1. Upload "deploy-bundle.zip" to your server (Hostinger / cPanel / VPS).');
-    console.log('  2. Extract it over your project root directory.');
-    console.log('  3. In Node.js terminal or SSH, run:');
-    console.log('     npm install --omit=dev');
-    console.log('  4. Restart your Node.js application.');
-    console.log('  5. Done! All existing phones, articles, images, and settings remain 100% intact.\n');
+    console.log('  ✅ safe-deploy.sh INCLUDED: Server script that backs up images before extracting.');
+    console.log('\n🚀 HOW TO DEPLOY TO SERVER (Image-Safe Method):');
+    console.log('  1. Upload "deploy-bundle.zip" to your server project root.');
+    console.log('  ⚠️  DO NOT use Hostinger File Manager "Extract" button — it will wipe uploads!');
+    console.log('  2. Open SSH or Hostinger Terminal and run:');
+    console.log('       bash safe-deploy.sh');
+    console.log('  That script will:');
+    console.log('     → Backup all existing images from server/uploads/ and public/webfiles/');
+    console.log('     → Extract the new code bundle');
+    console.log('     → Restore all your images back');
+    console.log('     → Run npm install');
+    console.log('     → Restart the app');
+    console.log('  3. Done! All existing phones, articles, images, and settings remain 100% intact.\n');
   } catch (err) {
     console.error('❌ Failed to create zip file:', err.message);
     console.log(`💡 You can still upload the clean files located in: ${OUT_DIR}`);

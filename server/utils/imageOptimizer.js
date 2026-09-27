@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const { UPLOADS_BASE, WEBFILES_BASE } = require('./paths');
 
 // Dedicated web-accessible image root
-const WEBFILES_ROOT = path.join(__dirname, '../../public/webfiles');
+const WEBFILES_ROOT = WEBFILES_BASE;
 const DIRS = {
   phones: path.join(WEBFILES_ROOT, 'phones'),
   brands: path.join(WEBFILES_ROOT, 'brands'),
@@ -130,9 +131,6 @@ async function optimizeNewsImage(input, baseName = 'news') {
 function deleteMediaFiles(urls) {
   if (!urls) return;
   const list = Array.isArray(urls) ? urls : [urls];
-  const ROOT = path.resolve(__dirname, '../../');
-  const validWebfiles = path.normalize(path.join(ROOT, 'public', 'webfiles'));
-  const validUploads = path.normalize(path.join(ROOT, 'server', 'uploads'));
 
   for (const item of list) {
     if (!item || typeof item !== 'string') continue;
@@ -144,20 +142,20 @@ function deleteMediaFiles(urls) {
 
     let targetFilePath = null;
     if (cleanUrl.startsWith('/webfiles/')) {
-      targetFilePath = path.join(ROOT, 'public', cleanUrl.replace(/^\//, ''));
+      targetFilePath = path.join(WEBFILES_BASE, cleanUrl.replace(/^\/webfiles\//, ''));
     } else if (cleanUrl.startsWith('/uploads/')) {
-      targetFilePath = path.join(ROOT, 'server', cleanUrl.replace(/^\//, ''));
+      targetFilePath = path.join(UPLOADS_BASE, cleanUrl.replace(/^\/uploads\//, ''));
     } else if (cleanUrl.startsWith('webfiles/')) {
-      targetFilePath = path.join(ROOT, 'public', cleanUrl);
+      targetFilePath = path.join(WEBFILES_BASE, cleanUrl.replace(/^webfiles\//, ''));
     } else if (cleanUrl.startsWith('uploads/')) {
-      targetFilePath = path.join(ROOT, 'server', cleanUrl);
+      targetFilePath = path.join(UPLOADS_BASE, cleanUrl.replace(/^uploads\//, ''));
     }
 
     if (!targetFilePath) continue;
 
-    // Security check: ensure path is strictly inside public/webfiles or server/uploads
+    // Security check: ensure path is strictly inside WEBFILES_BASE or UPLOADS_BASE
     const normalized = path.normalize(targetFilePath);
-    if (!normalized.startsWith(validWebfiles) && !normalized.startsWith(validUploads)) {
+    if (!normalized.startsWith(path.normalize(WEBFILES_BASE)) && !normalized.startsWith(path.normalize(UPLOADS_BASE))) {
       console.warn(`[Security] Blocked attempt to delete path outside uploads/webfiles: ${normalized}`);
       continue;
     }

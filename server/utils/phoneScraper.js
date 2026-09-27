@@ -196,7 +196,7 @@ async function downloadAllImages(imageUrls, slug) {
   // Limit to first 12 images
   const limited = unique.slice(0, 12);
 
-  const uploadDir = path.join(__dirname, '..', 'uploads', 'phones');
+  const uploadDir = require('./paths').getUploadPath('phones');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }

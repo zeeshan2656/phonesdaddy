@@ -1,22 +1,22 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { getUploadPath } = require('../utils/paths');
 
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    let dest = path.join(__dirname, '../uploads/phones');
+    let dest;
     if (req.baseUrl.includes('settings') || req.path.includes('branding') || req.path.includes('logo') || req.path.includes('favicon')) {
-      dest = path.join(__dirname, '../uploads/branding');
+      dest = getUploadPath('branding');
     } else if (req.baseUrl.includes('brands') || req.path.includes('brand')) {
-      dest = path.join(__dirname, '../uploads/brands');
+      dest = getUploadPath('brands');
     } else if (req.baseUrl.includes('news') || req.path.includes('news')) {
-      dest = path.join(__dirname, '../uploads/news');
+      dest = getUploadPath('news');
     } else if (req.baseUrl.includes('reviews') || req.baseUrl.includes('comments') || req.path.includes('review') || req.path.includes('comment')) {
-      dest = path.join(__dirname, '../uploads/reviews');
-    }
-    if (!fs.existsSync(dest)) {
-      fs.mkdirSync(dest, { recursive: true });
+      dest = getUploadPath('reviews');
+    } else {
+      dest = getUploadPath('phones');
     }
     cb(null, dest);
   },

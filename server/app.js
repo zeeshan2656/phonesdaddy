@@ -4,6 +4,7 @@ const session = require('express-session');
 const helmet = require('helmet');
 const cors = require('cors');
 require('dotenv').config();
+const { UPLOADS_BASE, WEBFILES_BASE } = require('./utils/paths');
 
 const compression = require('compression');
 
@@ -101,14 +102,14 @@ const staticOptions = {
 };
 
 app.use(express.static(path.join(__dirname, '../public'), staticOptions));
-app.use('/webfiles', express.static(path.join(__dirname, '../public/webfiles'), {
+app.use('/uploads', express.static(UPLOADS_BASE, {
   maxAge: '1y',
   immutable: true,
   setHeaders: (res) => {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
 }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+app.use('/webfiles', express.static(WEBFILES_BASE, {
   maxAge: '1y',
   immutable: true,
   setHeaders: (res) => {

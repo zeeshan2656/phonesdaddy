@@ -1,98 +1,131 @@
-# 🛡️ PhonesDaddy - Safe Production Deployment Guide
+# 🛡️ PhonesDaddy — Safe Production Deployment Guide
 
-This guide explains how changes made on your local computer can be safely deployed to your live production server (Hostinger, cPanel, or VPS) **WITHOUT disturbing, overwriting, or losing any existing server data** (such as live articles, phones, specs, uploaded images, reviews, or settings).
-
----
-
-## 🔒 The 4 Safeguards Built Into Your Project
-
-### 1. Zero Data Loss Auto-Migrations (`database/migrate.js`)
-* **Never runs `DROP TABLE` or `TRUNCATE`**: All queries use `CREATE TABLE IF NOT EXISTS`.
-* **Safe Column Expansion**: If you add new columns to your database locally, the migrator checks `information_schema.COLUMNS` and only executes `ALTER TABLE ADD COLUMN` if the column doesn't exist yet. Existing rows are never touched.
-* **Runs Automatically on Boot**: Every time your Node.js server restarts on the server, it automatically runs migrations in milliseconds before handling requests.
-
-### 2. Live Media & Image Protection
-* **Uploaded Photos Are Never Overwritten**: When visitors or admins upload photos for phones, news articles, or branding logos, they are stored in `server/uploads/` and `public/webfiles/`.
-* Both `.gitignore` and our packaging script strictly **exclude** local uploads from being deployed over the server's live files.
-* Only empty folder structures with `.gitkeep` are kept so the directory hierarchy always exists.
-
-### 3. Production Environment Isolation (`.env`)
-* Production database credentials (DB host, user, password, database name) and secret keys are stored in the server's `.env` file.
-* Deploy packages and Git pushes **never include** your local `.env`. Your production credentials and domain settings remain 100% untouched.
-
-### 4. Instant 1-Click Database Backups (`npm run db:backup`)
-* Before doing any major maintenance, you can run a pure Node.js backup script that dumps the entire database into a timestamped `.sql` file in the `backups/` folder.
-* No external `mysqldump` CLI required.
+> **CRITICAL**: Never use Hostinger's "Extract" button directly on `deploy-bundle.zip`.  
+> Always use `bash safe-deploy.sh` on the server instead. This is the only method that protects your images.
 
 ---
 
-## 🚀 How to Deploy Changes (Step-by-Step)
+## ⚡ Why Images Were Getting Deleted
 
-### Method 1: The 1-Command Safe Zip Package (Recommended)
+When you upload `deploy-bundle.zip` and click **Extract** in Hostinger's File Manager, it:
+1. Extracts the ZIP contents, **overwriting** every matching file and folder
+2. The ZIP contains an **empty** `server/uploads/` folder (with only `.gitkeep`)
+3. That empty folder **replaces** the live `server/uploads/` — wiping all your phone images, news images, brand logos, etc.
 
-This is the easiest, safest method. It produces a lightweight **~2 MB** ZIP file containing only code, routes, views, styles, and migrations.
+The solution is to run `safe-deploy.sh` on the server, which **backs up your images first**, then extracts, then **restores them back**.
 
-#### Step 1: Create the Safe Deploy Bundle (on your computer)
-In your local project terminal, run:
+---
+
+## 🚀 How to Deploy (Step-by-Step — Image-Safe)
+
+### Step 1: Package the new code (on your local computer)
 ```bash
 npm run package:deploy
 ```
-This script will:
-* Verify all required code and assets are present.
-* Exclude `.env`, `node_modules`, `server/uploads/*`, `public/webfiles/*`, and local database dumps.
-* Create a clean `deploy-bundle.zip` in your project root.
-
-#### Step 2: Upload to Your Server
-1. Log into your hosting control panel (e.g. **Hostinger File Manager**, **cPanel File Manager**, or SFTP).
-2. Navigate to your website's root folder (e.g. `public_html` or `/var/www/phonesdaddy`).
-3. Upload `deploy-bundle.zip`.
-4. Right-click `deploy-bundle.zip` and select **Extract** (Overwrite existing files).
-
-#### Step 3: Install Dependencies & Restart
-In your hosting terminal (or SSH / Node.js panel):
-```bash
-npm install --omit=dev
-```
-Then restart your Node.js application (via PM2, Hostinger Node.js App Manager, or cPanel Node.js App).
-
-**That's it!** On startup, the server automatically checks the database schema, adds any new columns if required, and serves your new updates while preserving all existing phones, news articles, and photos.
+This creates `deploy-bundle.zip` (≈2–3 MB). It includes `safe-deploy.sh` and excludes uploads, .env, and node_modules.
 
 ---
 
-### Method 2: Deploying via Git (GitHub / GitLab / Bitbucket)
+### Step 2: Upload the ZIP to your server
 
-If your server pulls directly from a Git repository:
+**Option A — Hostinger File Manager:**
+1. Login to Hostinger hPanel
+2. Go to **Files → File Manager**
+3. Navigate to your project root (e.g. `domains/yourdomain.com/public_html` or the Node.js app folder)
+4. Click **Upload** and select `deploy-bundle.zip`
+5. ⚠️ **DO NOT click Extract yet!**
 
-1. **Commit and Push Locally**:
+**Option B — SFTP / FTP:**
+Upload `deploy-bundle.zip` to your project root using FileZilla or WinSCP.
+
+---
+
+### Step 3: Run the safe deploy script on the server
+
+**Option A — Hostinger SSH Terminal:**
+1. In hPanel go to **Advanced → SSH Access** or open the Terminal
+2. Navigate to your project root:
    ```bash
-   git add .
-   git commit -m "Update website features"
-   git push origin main
+   cd ~/domains/yourdomain.com/public_html
    ```
-   *(Notice: `.gitignore` already protects `.env`, `uploads`, and `webfiles` from being committed).*
-
-2. **Pull and Restart on Server**:
+3. Run:
    ```bash
-   git pull origin main
-   npm install --omit=dev
-   pm2 restart phonesdaddy
+   bash safe-deploy.sh
    ```
+
+**Option B — VPS via SSH:**
+```bash
+ssh user@your-server-ip
+cd /var/www/phonesdaddy
+bash safe-deploy.sh
+```
+
+### What `safe-deploy.sh` does automatically:
+| Step | Action | Your Images |
+|---|---|---|
+| 1 | Backs up `server/uploads/` and `public/webfiles/` to temp folder | ✅ Safe |
+| 2 | Extracts `deploy-bundle.zip` (new code) | ✅ Backup in temp |
+| 3 | Restores all your images from the temp backup | ✅ Fully Restored |
+| 4 | Runs `npm install --omit=dev` | — |
+| 5 | Restarts the app via PM2 or prints manual instructions | — |
+| 6 | Deletes temp backup + ZIP file | ✅ Clean |
+
+---
+
+## 🔒 What Is Always Protected
+
+| Protected Item | Why | How |
+|---|---|---|
+| `server/uploads/phones/` | Phone images (WebP + thumbnails) | Backed up & restored by `safe-deploy.sh` |
+| `server/uploads/news/` | News article images | Backed up & restored by `safe-deploy.sh` |
+| `server/uploads/brands/` | Brand logos | Backed up & restored by `safe-deploy.sh` |
+| `server/uploads/branding/` | Site logo & favicon | Backed up & restored by `safe-deploy.sh` |
+| `server/uploads/reviews/` | User review images | Backed up & restored by `safe-deploy.sh` |
+| `public/webfiles/phones/` | Scraped gallery images | Backed up & restored by `safe-deploy.sh` |
+| `public/webfiles/news/` | Scraped news thumbnails | Backed up & restored by `safe-deploy.sh` |
+| `.env` | DB credentials & secrets | Never included in ZIP |
+| `node_modules/` | Dependencies | Never included in ZIP |
+| MySQL Database | All phones, articles, reviews | Auto-migrate only adds columns, never drops |
 
 ---
 
 ## 🗄️ Database Commands Reference
 
 | Command | Description | Safe on Live Server? |
-| :--- | :--- | :--- |
-| `npm run db:backup` | Creates an instant timestamped `.sql` backup in `backups/`. | ✅ 100% Safe (Read-only) |
-| `npm run migrate` | Runs schema updates / adds missing columns non-destructively. | ✅ 100% Safe (Non-destructive) |
-| `npm run package:deploy` | Creates a clean, safe `deploy-bundle.zip` for server upload. | ✅ 100% Safe (Local only) |
-| `npm start` | Starts production server with auto-migrations on boot. | ✅ 100% Safe |
+|---|---|---|
+| `npm run db:backup` | Creates a timestamped `.sql` backup in `backups/` | ✅ 100% Safe |
+| `npm run migrate` | Adds missing columns non-destructively | ✅ 100% Safe |
+| `npm run package:deploy` | Creates `deploy-bundle.zip` for upload | ✅ Local only |
+| `npm start` | Starts server with auto-migrations on boot | ✅ 100% Safe |
 
 ---
 
-## ⚠️ Things to NEVER Do on Production
+## ⚠️ Things to NEVER Do
 
-1. ❌ **NEVER import `schema.sql` directly into phpMyAdmin** without checking if it contains `DROP TABLE` or `TRUNCATE`. (Always let `npm run migrate` or `server.js` handle updates).
-2. ❌ **NEVER upload your local `.env`** to the server. Keep your server's `.env` configured with production database credentials.
-3. ❌ **NEVER replace the entire `server/uploads` or `public/webfiles` directory** with local folders.
+1. ❌ **NEVER click "Extract" on the ZIP directly in Hostinger File Manager** — it will wipe `server/uploads/`
+2. ❌ **NEVER upload your local `.env`** to the server
+3. ❌ **NEVER run `DROP TABLE` or `TRUNCATE`** in phpMyAdmin
+4. ❌ **NEVER manually replace `server/uploads/`** with your local folder (your local uploads are empty)
+
+---
+
+## 🔁 Quick Reference: Full Deploy Flow
+
+```
+[Your PC]                          [Server]
+   │                                  │
+   ├─ npm run package:deploy           │
+   │  → Creates deploy-bundle.zip      │
+   │                                  │
+   ├─ Upload deploy-bundle.zip ──────► │
+   │                                  │
+   │                                  ├─ bash safe-deploy.sh
+   │                                  │   ├─ Backup images
+   │                                  │   ├─ Extract ZIP
+   │                                  │   ├─ Restore images
+   │                                  │   ├─ npm install
+   │                                  │   └─ Restart app
+   │                                  │
+   │                            ✅ Site Updated
+   │                            ✅ All Images Safe
+```
