@@ -52,6 +52,11 @@ class SettingsModel {
         footer_copyright: '© 2026 PhonesDaddy. All rights reserved. Clean, fast, and authentic mobile phone specifications.',
         footer_about: 'Discover latest mobile phone prices in Pakistan, authentic technical specifications, camera benchmarks, battery life ratings, and fair side-by-side phone comparisons.',
 
+        // Floating WhatsApp Contact Button
+        whatsapp_number: '',
+        whatsapp_message: 'Hello! I have an inquiry from PhonesDaddy.',
+        whatsapp_enabled: '1',
+
         // Mobile Phone Ad Placements
         ad_phone_top: '',
         ad_phone_top_enabled: '1',
@@ -120,7 +125,7 @@ class SettingsModel {
     _cachedSettings = null;
     _cachedBundle = null;
     _lastCacheTime = 0;
-    cache.invalidateTags(['settings', 'home']);
+    cache.clear();
 
     return true;
   }
@@ -270,8 +275,117 @@ class SettingsModel {
       site_url: (settings.site_url || 'http://localhost:3000').replace(/\/+$/, ''),
       site_logo: settings.site_logo || '',
       site_favicon: settings.site_favicon || '',
-      footer_copyright: settings.footer_copyright || `© ${new Date().getFullYear()} ${settings.site_name || 'PhonesDaddy'}. All rights reserved.`
+      footer_copyright: settings.footer_copyright || `© ${new Date().getFullYear()} ${settings.site_name || 'PhonesDaddy'}. All rights reserved.`,
+      whatsapp_number: settings.whatsapp_number || '',
+      whatsapp_message: settings.whatsapp_message || '',
+      whatsapp_enabled: settings.whatsapp_enabled !== '0' && settings.whatsapp_enabled !== false ? '1' : '0'
     };
+  }
+
+  /**
+   * Generates floating WhatsApp button HTML positioned right above scroll-to-top button
+   */
+  static async getWhatsAppButtonHtml() {
+    const settings = await this.getAllSettings();
+    const isEnabled = settings.whatsapp_enabled !== '0' && settings.whatsapp_enabled !== false;
+    const rawNumber = (settings.whatsapp_number || '').trim();
+
+    if (!isEnabled || !rawNumber) {
+      return '';
+    }
+
+    const cleanNumber = rawNumber.replace(/[^\d]/g, '');
+    if (!cleanNumber) return '';
+
+    const defaultMsg = settings.whatsapp_message || 'Hello! I have an inquiry from PhonesDaddy.';
+    const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(defaultMsg)}`;
+
+    return `
+<!-- WhatsApp Floating Contact Button (Positioned above Scroll-To-Top) -->
+<style id="waFloatBtnStyle">
+#whatsappFloatBtn {
+  position: fixed;
+  bottom: 86px;
+  right: 24px;
+  z-index: 9998;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.42), 0 2px 8px rgba(0, 0, 0, 0.18);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  animation: waPulseSubtle 3s infinite ease-in-out;
+}
+#whatsappFloatBtn:hover {
+  transform: translateY(-3px) scale(1.08);
+  background: linear-gradient(135deg, #2ae06e 0%, #0d796c 100%);
+  box-shadow: 0 8px 28px rgba(37, 211, 102, 0.65), 0 4px 12px rgba(0, 0, 0, 0.22);
+  color: #fff;
+}
+#whatsappFloatBtn svg, #whatsappFloatBtn .whatsapp-icon {
+  width: 26px;
+  height: 26px;
+  fill: #fff;
+  flex-shrink: 0;
+}
+#whatsappFloatBtn .whatsapp-tooltip {
+  position: absolute;
+  right: 58px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+#whatsappFloatBtn:hover .whatsapp-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+@media (max-width: 768px) {
+  #whatsappFloatBtn {
+    bottom: 68px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+  }
+  #whatsappFloatBtn svg, #whatsappFloatBtn .whatsapp-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+@keyframes waPulseSubtle {
+  0%, 100% {
+    box-shadow: 0 4px 18px rgba(37, 211, 102, 0.42), 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+  50% {
+    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.62), 0 0 0 8px rgba(37, 211, 102, 0.14);
+  }
+}
+</style>
+<a href="${waUrl}" id="whatsappFloatBtn" target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" aria-label="Chat on WhatsApp" title="Chat with Admin on WhatsApp">
+  <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
+    <path d="M16 2a13.9 13.9 0 0 0-12 21L2 30l7.2-1.9A13.9 13.9 0 1 0 16 2zm0 25.5a11.6 11.6 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.6 11.6 0 1 1 16 27.5zm6.4-8.7c-.3-.2-2-.9-2.3-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.4 0-.6.2-.8s.3-.4.5-.6.2-.4.3-.6 0-.4 0-.6-.7-1.8-1-2.4c-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 1 5.3 5.3 0 0 0 1.6 3.9 12.3 12.3 0 0 0 4.8 4.3 15.6 15.6 0 0 0 1.6.6c.7.2 1.4.2 1.9.1.6-.1 2-.8 2.3-1.6s.3-1.4.2-1.6-.3-.3-.6-.5z"/>
+  </svg>
+  <span class="whatsapp-tooltip">Chat with us</span>
+</a>`;
   }
 
   /**
@@ -292,7 +406,10 @@ class SettingsModel {
       site_logo: settings.site_logo || '',
       site_favicon: settings.site_favicon || '',
       footer_copyright: settings.footer_copyright || '© 2026 PhonesDaddy. All rights reserved. Clean, fast, and authentic mobile phone specifications.',
-      footer_about: settings.footer_about || settings.site_description || ''
+      footer_about: settings.footer_about || settings.site_description || '',
+      whatsapp_number: settings.whatsapp_number || '',
+      whatsapp_message: settings.whatsapp_message || '',
+      whatsapp_enabled: settings.whatsapp_enabled !== '0' && settings.whatsapp_enabled !== false ? '1' : '0'
     };
 
     const headerLogoHtml = await this.getHeaderLogoHtml();
@@ -300,6 +417,7 @@ class SettingsModel {
     const faviconTag = await this.getFaviconTag();
     const headCode = await this.getCombinedHeadCode();
     const bodyCode = await this.getCombinedBodyCode();
+    const whatsappButtonHtml = await this.getWhatsAppButtonHtml();
 
     const adSlots = {
       adPhoneTop: await this.getAdSlotHtml('ad_phone_top', 'Sponsored'),
@@ -320,6 +438,7 @@ class SettingsModel {
       faviconTag,
       headCode,
       bodyCode,
+      whatsappButtonHtml,
       adSlots
     };
 

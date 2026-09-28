@@ -325,3 +325,155 @@ async function loadDynamicFooterPages() {
     setTimeout(() => btn.classList.remove('ripple'), 450);
   });
 })();
+
+// ==========================================================================
+//  Floating WhatsApp Contact Button — directly above Scroll To Top Button
+// ==========================================================================
+(function initWhatsAppButton() {
+  function injectStyles() {
+    if (document.getElementById('waFloatBtnStyle')) return;
+    const style = document.createElement('style');
+    style.id = 'waFloatBtnStyle';
+    style.textContent = `
+#whatsappFloatBtn {
+  position: fixed;
+  bottom: 86px;
+  right: 24px;
+  z-index: 9998;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.42), 0 2px 8px rgba(0, 0, 0, 0.18);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  animation: waPulseSubtle 3s infinite ease-in-out;
+}
+#whatsappFloatBtn:hover {
+  transform: translateY(-3px) scale(1.08);
+  background: linear-gradient(135deg, #2ae06e 0%, #0d796c 100%);
+  box-shadow: 0 8px 28px rgba(37, 211, 102, 0.65), 0 4px 12px rgba(0, 0, 0, 0.22);
+  color: #fff;
+}
+#whatsappFloatBtn svg, #whatsappFloatBtn .whatsapp-icon {
+  width: 26px;
+  height: 26px;
+  fill: #fff;
+  flex-shrink: 0;
+}
+#whatsappFloatBtn .whatsapp-tooltip {
+  position: absolute;
+  right: 58px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+#whatsappFloatBtn:hover .whatsapp-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+@media (max-width: 768px) {
+  #whatsappFloatBtn {
+    bottom: 68px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+  }
+  #whatsappFloatBtn svg, #whatsappFloatBtn .whatsapp-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+@keyframes waPulseSubtle {
+  0%, 100% {
+    box-shadow: 0 4px 18px rgba(37, 211, 102, 0.42), 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+  50% {
+    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.62), 0 0 0 8px rgba(37, 211, 102, 0.14);
+  }
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function setupWhatsApp(number, message) {
+    if (!number) return;
+    const cleanNumber = String(number).replace(/[^\d]/g, '');
+    if (!cleanNumber) return;
+
+    injectStyles();
+
+    let btn = document.getElementById('whatsappFloatBtn');
+    const msg = message || 'Hello! I have an inquiry from PhonesDaddy.';
+    const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
+
+    if (btn) {
+      btn.href = waUrl;
+      return;
+    }
+
+    btn = document.createElement('a');
+    btn.id = 'whatsappFloatBtn';
+    btn.className = 'whatsapp-float-btn';
+    btn.href = waUrl;
+    btn.target = '_blank';
+    btn.rel = 'noopener noreferrer';
+    btn.setAttribute('aria-label', 'Chat on WhatsApp');
+    btn.setAttribute('title', 'Chat with Admin on WhatsApp');
+    btn.innerHTML = `
+      <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
+        <path d="M16 2a13.9 13.9 0 0 0-12 21L2 30l7.2-1.9A13.9 13.9 0 1 0 16 2zm0 25.5a11.6 11.6 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.6 11.6 0 1 1 16 27.5zm6.4-8.7c-.3-.2-2-.9-2.3-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.4 0-.6.2-.8s.3-.4.5-.6.2-.4.3-.6 0-.4 0-.6-.7-1.8-1-2.4c-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 1 5.3 5.3 0 0 0 1.6 3.9 12.3 12.3 0 0 0 4.8 4.3 15.6 15.6 0 0 0 1.6.6c.7.2 1.4.2 1.9.1.6-.1 2-.8 2.3-1.6s.3-1.4.2-1.6-.3-.3-.6-.5z"/>
+      </svg>
+      <span class="whatsapp-tooltip">Chat with us</span>`;
+    document.body.appendChild(btn);
+  }
+
+  function run() {
+    // 1. Check meta tags injected via SSR
+    const metaNum = document.querySelector('meta[name="whatsapp-number"]')?.getAttribute('content');
+    const metaMsg = document.querySelector('meta[name="whatsapp-message"]')?.getAttribute('content');
+
+    if (metaNum) {
+      setupWhatsApp(metaNum, metaMsg);
+      return;
+    }
+
+    // 2. Fallback to public branding API if not injected in static HTML
+    if (!document.getElementById('whatsappFloatBtn')) {
+      fetch(`/api/settings/public?_=${Date.now()}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && data.branding && data.branding.whatsapp_number && data.branding.whatsapp_enabled !== '0') {
+            setupWhatsApp(data.branding.whatsapp_number, data.branding.whatsapp_message);
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+

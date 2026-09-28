@@ -647,7 +647,72 @@
             </div>
           </div>
 
-          <!-- Card 4: Live Interactive Header & Footer Mockup -->
+          <!-- Card 4: Floating WhatsApp Contact Button -->
+          <div class="admin-card" style="margin-top: 20px; margin-bottom: 20px;">
+            <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--admin-border); padding-bottom: 12px; margin-bottom: 16px;">
+              <div>
+                <h3 class="admin-card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #25D366; border-radius: 50%; color: #fff; font-size: 14px;">💬</span>
+                  Floating WhatsApp Contact Button
+                </h3>
+                <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                  Displays a direct WhatsApp chat button on all public pages, positioned directly above the scroll-to-top button.
+                </p>
+              </div>
+              <div class="toggle-switch-wrapper">
+                <label class="switch">
+                  <input type="checkbox" id="whatsapp_enabled" checked>
+                  <span class="slider"></span>
+                </label>
+                <span id="whatsappStatusLabel" style="font-size: 13px; font-weight: 700; color: #0d9488;">Active</span>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+              <!-- WhatsApp Number -->
+              <div>
+                <label class="form-label" for="whatsapp_number" style="font-size: 12.5px; font-weight: 700;">
+                  Admin WhatsApp Number (With Country Code)
+                </label>
+                <div style="position: relative;">
+                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #25D366; font-size: 15px;">💬</span>
+                  <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control" placeholder="e.g. +923001234567 or 923001234567" style="padding-left: 38px; font-weight: 600;" oninput="updateWhatsAppPreview()">
+                </div>
+                <small style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">
+                  Enter full number with international country code (e.g. <code>+923001234567</code> or <code>14155552671</code>).
+                </small>
+              </div>
+
+              <!-- Default Pre-filled Message -->
+              <div>
+                <label class="form-label" for="whatsapp_message" style="font-size: 12.5px; font-weight: 700;">
+                  Default Pre-filled Message (Optional)
+                </label>
+                <input type="text" id="whatsapp_message" name="whatsapp_message" class="form-control" placeholder="e.g. Hello! I have an inquiry from PhonesDaddy." oninput="updateWhatsAppPreview()">
+                <small style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">
+                  This message is automatically typed in the visitor's WhatsApp when they tap the button.
+                </small>
+              </div>
+            </div>
+
+            <!-- WhatsApp Preview & Direct Test Box -->
+            <div style="margin-top: 18px; background: #0b1120; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(37,211,102,0.4); flex-shrink: 0;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="#fff"><path d="M16 2a13.9 13.9 0 0 0-12 21L2 30l7.2-1.9A13.9 13.9 0 1 0 16 2zm0 25.5a11.6 11.6 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.6 11.6 0 1 1 16 27.5zm6.4-8.7c-.3-.2-2-.9-2.3-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.4 0-.6.2-.8s.3-.4.5-.6.2-.4.3-.6 0-.4 0-.6-.7-1.8-1-2.4c-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 1 5.3 5.3 0 0 0 1.6 3.9 12.3 12.3 0 0 0 4.8 4.3 15.6 15.6 0 0 0 1.6.6c.7.2 1.4.2 1.9.1.6-.1 2-.8 2.3-1.6s.3-1.4.2-1.6-.3-.3-.6-.5z"/></svg>
+                </div>
+                <div>
+                  <div style="font-weight: 700; font-size: 13px; color: #f8fafc;">Position: Fixed on bottom-right, directly above "Scroll to Top" button</div>
+                  <div id="whatsappPreviewLinkText" style="font-size: 12px; color: #94a3b8; margin-top: 3px;">Status: Enter your number above to activate</div>
+                </div>
+              </div>
+              <a id="btnTestWhatsApp" href="#" target="_blank" class="btn btn-sm" style="background: #25D366; color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer;">
+                💬 Test WhatsApp Chat
+              </a>
+            </div>
+          </div>
+
+          <!-- Card 5: Live Interactive Header & Footer Mockup -->
           <div class="admin-card" style="margin-bottom: 24px;">
             <div class="admin-card-header">
               <div>

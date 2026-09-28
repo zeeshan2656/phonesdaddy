@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const SettingsModel = require('../models/settingsModel');
+const { cache } = require('../utils/cache');
 
 class SettingsController {
   /**
@@ -60,7 +61,10 @@ class SettingsController {
         ad_article_mid,
         ad_article_mid_enabled,
         ad_article_bottom,
-        ad_article_bottom_enabled
+        ad_article_bottom_enabled,
+        whatsapp_number,
+        whatsapp_message,
+        whatsapp_enabled
       } = req.body;
 
       const payload = {};
@@ -72,6 +76,13 @@ class SettingsController {
       if (site_url !== undefined) payload.site_url = String(site_url || '').trim().replace(/\/+$/, '');
       if (footer_copyright !== undefined) payload.footer_copyright = String(footer_copyright || '').trim();
       if (req.body.footer_about !== undefined) payload.footer_about = String(req.body.footer_about || '').trim();
+
+      // Floating WhatsApp Contact Button
+      if (whatsapp_number !== undefined) payload.whatsapp_number = String(whatsapp_number || '').trim();
+      if (whatsapp_message !== undefined) payload.whatsapp_message = String(whatsapp_message || '').trim();
+      if (whatsapp_enabled !== undefined) {
+        payload.whatsapp_enabled = (whatsapp_enabled === '1' || whatsapp_enabled === true || whatsapp_enabled === 'true') ? '1' : '0';
+      }
 
       // Helper to decode safe base64-encoded snippets to bypass Hostinger ModSecurity false positives
       const decodeSnippet = (val) => {
@@ -117,6 +128,7 @@ class SettingsController {
       if (ad_article_bottom_enabled !== undefined) payload.ad_article_bottom_enabled = ad_article_bottom_enabled ? '1' : '0';
 
       await SettingsModel.updateSettings(payload);
+      cache.clear();
 
       const updatedSettings = await SettingsModel.getAllSettings(true);
 

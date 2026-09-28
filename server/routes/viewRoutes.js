@@ -21,13 +21,19 @@ const adminDir = path.join(__dirname, '../../admin');
 
 const templateCache = new Map();
 
+function clearTemplateCache() {
+  templateCache.clear();
+}
+
 function getTemplateHtml(templateFile) {
-  if (templateCache.has(templateFile)) {
+  if (process.env.NODE_ENV === 'production' && templateCache.has(templateFile)) {
     return templateCache.get(templateFile);
   }
   const filePath = path.join(viewsDir, templateFile);
   const content = fs.readFileSync(filePath, 'utf8');
-  templateCache.set(templateFile, content);
+  if (process.env.NODE_ENV === 'production') {
+    templateCache.set(templateFile, content);
+  }
   return content;
 }
 
@@ -58,13 +64,16 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
     '{{SITE_FOOTER_LOGO_HTML}}': bundle.footerLogoHtml,
     '{{SITE_FAVICON_TAG}}': bundle.faviconTag,
     '{{FOOTER_COPYRIGHT}}': escapeHtml(footerCopyright),
-    '{{FOOTER_ABOUT}}': escapeHtml(branding.site_description)
+    '{{FOOTER_ABOUT}}': escapeHtml(branding.site_description),
+    '{{WHATSAPP_BUTTON_HTML}}': bundle.whatsappButtonHtml || '',
+    '{{WHATSAPP_NUMBER}}': escapeHtml(branding.whatsapp_number || ''),
+    '{{WHATSAPP_MESSAGE}}': escapeHtml(branding.whatsapp_message || '')
   };
 
   const allReplacements = { ...commonReplacements, ...replacements };
 
   for (const [key, val] of Object.entries(allReplacements)) {
-    html = html.replace(new RegExp(key, 'g'), val);
+    html = html.split(key).join(val !== undefined && val !== null ? val : '');
   }
 
   // If buyer changed site_name, clean up any residual PhonesDaddy strings in the rendered page
@@ -72,10 +81,29 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
     html = html.replace(/PhonesDaddy/g, escapeHtml(branding.site_name));
   }
 
-  // Ensure favicon is present in <head>
+  // Ensure favicon and WhatsApp meta are present in <head>
   if (html.includes('</head>')) {
+    let headInject = '';
     if (!html.includes('rel="icon"') && !html.includes("rel='icon'")) {
-      html = html.replace('</head>', `\n  ${bundle.faviconTag}\n</head>`);
+      headInject += `\n  ${bundle.faviconTag}`;
+    }
+    if (branding.whatsapp_number && branding.whatsapp_enabled !== '0') {
+      headInject += `\n  <meta name="whatsapp-number" content="${escapeAttr(branding.whatsapp_number)}">`;
+      headInject += `\n  <meta name="whatsapp-message" content="${escapeAttr(branding.whatsapp_message || '')}">`;
+    }
+    if (headInject) {
+      html = html.replace('</head>', `${headInject}\n</head>`);
+    }
+  }
+
+  // Inject Floating WhatsApp Button before </body>
+  if (bundle.whatsappButtonHtml && !html.includes('id="whatsappFloatBtn"')) {
+    if (html.includes('</body>')) {
+      html = html.replace('</body>', `\n${bundle.whatsappButtonHtml}\n</body>`);
+    } else if (html.includes('</BODY>')) {
+      html = html.replace('</BODY>', `\n${bundle.whatsappButtonHtml}\n</BODY>`);
+    } else {
+      html += `\n${bundle.whatsappButtonHtml}\n`;
     }
   }
 
@@ -325,9 +353,10 @@ async function getHomeSsrReplacements() {
 router.get('/', async (req, res, next) => {
   try {
     const isAdmin = req.session && req.session.admin;
+    const isDev = process.env.NODE_ENV !== 'production';
     const cacheKey = 'PAGE_FULL_HTML:/';
 
-    if (!isAdmin) {
+    if (!isAdmin && !isDev && !req.query.nocache) {
       const cached = cache.get(cacheKey);
       if (cached) {
         res.setHeader('X-Cache', 'HIT');
@@ -340,12 +369,12 @@ router.get('/', async (req, res, next) => {
     const ssrReplacements = await getHomeSsrReplacements();
     const html = await getRenderedViewHtml('home.html', ssrReplacements);
 
-    if (!isAdmin) {
+    if (!isAdmin && !isDev && !req.query.nocache) {
       cache.set(cacheKey, html, 600, ['home', 'phones', 'brands', 'news', 'settings']);
     }
 
     res.setHeader('X-Cache', 'MISS');
-    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+    res.setHeader('Cache-Control', isDev ? 'no-cache, must-revalidate' : 'public, max-age=300, stale-while-revalidate=600');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {
@@ -357,9 +386,10 @@ router.get('/', async (req, res, next) => {
 router.get('/phones', async (req, res, next) => {
   try {
     const isAdmin = req.session && req.session.admin;
+    const isDev = process.env.NODE_ENV !== 'production';
     const cacheKey = 'PAGE_FULL_HTML:/phones';
 
-    if (!isAdmin) {
+    if (!isAdmin && !isDev && !req.query.nocache) {
       const cached = cache.get(cacheKey);
       if (cached) {
         res.setHeader('X-Cache', 'HIT');
@@ -371,12 +401,12 @@ router.get('/phones', async (req, res, next) => {
 
     const html = await getRenderedViewHtml('phones.html');
 
-    if (!isAdmin) {
+    if (!isAdmin && !isDev && !req.query.nocache) {
       cache.set(cacheKey, html, 600, ['phones', 'settings']);
     }
 
     res.setHeader('X-Cache', 'MISS');
-    res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+    res.setHeader('Cache-Control', isDev ? 'no-cache, must-revalidate' : 'public, max-age=300, stale-while-revalidate=600');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {
@@ -872,5 +902,6 @@ function escapeHtml(str) {
             .replace(/'/g, '&#039;');
 }
 
+router.clearTemplateCache = clearTemplateCache;
 module.exports = router;
 

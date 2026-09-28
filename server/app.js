@@ -95,8 +95,11 @@ const staticOptions = {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+    } else if (process.env.NODE_ENV !== 'production') {
+      // In development / local testing, do not lock CSS/JS into 1-year immutable cache
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     } else {
-      // 1 Year Immutable cache for all static public assets (css, js, images, webfiles, svgs, fonts)
+      // 1 Year Immutable cache for all static public assets in production
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
   }

@@ -2564,6 +2564,30 @@ async function loadSettingsData() {
       updateBrandMockups();
       updateAdminSidebarBrand(currentBrandingState);
 
+      // Load WhatsApp Floating Contact Button Settings
+      const waNumberInput = document.getElementById('whatsapp_number');
+      const waMsgInput = document.getElementById('whatsapp_message');
+      const waToggle = document.getElementById('whatsapp_enabled');
+      const waStatusLabel = document.getElementById('whatsappStatusLabel');
+
+      if (waNumberInput) waNumberInput.value = s.whatsapp_number || '';
+      if (waMsgInput) waMsgInput.value = s.whatsapp_message || 'Hello! I have an inquiry from PhonesDaddy.';
+      if (waToggle) {
+        waToggle.checked = s.whatsapp_enabled !== '0' && s.whatsapp_enabled !== false;
+        if (waStatusLabel) {
+          waStatusLabel.innerText = waToggle.checked ? 'Active' : 'Disabled';
+          waStatusLabel.style.color = waToggle.checked ? '#0d9488' : '#ef4444';
+        }
+        waToggle.onchange = () => {
+          if (waStatusLabel) {
+            waStatusLabel.innerText = waToggle.checked ? 'Active' : 'Disabled';
+            waStatusLabel.style.color = waToggle.checked ? '#0d9488' : '#ef4444';
+          }
+          if (typeof updateWhatsAppPreview === 'function') updateWhatsAppPreview();
+        };
+      }
+      if (typeof updateWhatsAppPreview === 'function') updateWhatsAppPreview();
+
       const headToggle = document.getElementById('is_head_code_enabled');
       const bodyToggle = document.getElementById('is_body_code_enabled');
       const headStatusLabel = document.getElementById('headStatusLabel');
@@ -2666,6 +2690,11 @@ async function submitSettingsForm() {
     footer_copyright: (document.getElementById('footer_copyright') ? document.getElementById('footer_copyright').value : '').trim(),
     footer_about: (document.getElementById('footer_about') ? document.getElementById('footer_about').value : '').trim(),
 
+    // Floating WhatsApp Contact Button
+    whatsapp_number: (document.getElementById('whatsapp_number') ? document.getElementById('whatsapp_number').value : '').trim(),
+    whatsapp_message: (document.getElementById('whatsapp_message') ? document.getElementById('whatsapp_message').value : '').trim(),
+    whatsapp_enabled: document.getElementById('whatsapp_enabled') ? document.getElementById('whatsapp_enabled').checked : true,
+
     // Head & Body Code Snippets (Base64 safe encoded to prevent Hostinger ModSecurity WAF blocks)
     is_head_code_enabled: document.getElementById('is_head_code_enabled') ? document.getElementById('is_head_code_enabled').checked : true,
     head_snippets: safeSnippet(document.getElementById('head_snippets') ? document.getElementById('head_snippets').value.trim() : ''),
@@ -2747,6 +2776,47 @@ async function submitSettingsForm() {
     setSaving(false);
   }
 }
+
+/**
+ * Real-time preview and test link generator for WhatsApp contact button
+ */
+function updateWhatsAppPreview() {
+  const numberInput = document.getElementById('whatsapp_number');
+  const msgInput = document.getElementById('whatsapp_message');
+  const toggle = document.getElementById('whatsapp_enabled');
+  const linkText = document.getElementById('whatsappPreviewLinkText');
+  const testBtn = document.getElementById('btnTestWhatsApp');
+
+  if (!numberInput || !linkText || !testBtn) return;
+
+  const rawNumber = numberInput.value.trim();
+  const cleanNumber = rawNumber.replace(/[^\d]/g, '');
+  const msg = (msgInput ? msgInput.value.trim() : '') || 'Hello! I have an inquiry from PhonesDaddy.';
+  const isEnabled = toggle ? toggle.checked : true;
+
+  if (!cleanNumber) {
+    linkText.innerHTML = '<span style="color: #f59e0b; font-weight: 700;">⚠️ Inactive:</span> Enter your admin WhatsApp number above to activate the button.';
+    testBtn.removeAttribute('href');
+    testBtn.style.opacity = '0.4';
+    testBtn.style.pointerEvents = 'none';
+    return;
+  }
+
+  if (!isEnabled) {
+    linkText.innerHTML = '<span style="color: #ef4444; font-weight: 700;">🔴 Disabled:</span> The switch is currently turned off. Switch to Active to display on live site.';
+    testBtn.removeAttribute('href');
+    testBtn.style.opacity = '0.4';
+    testBtn.style.pointerEvents = 'none';
+    return;
+  }
+
+  const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
+  linkText.innerHTML = `<span style="color: #10b981; font-weight: 700;">🟢 Active:</span> Directs visitors to <strong style="color: #38bdf8;">+${cleanNumber}</strong> with pre-filled message.`;
+  testBtn.href = waUrl;
+  testBtn.style.opacity = '1';
+  testBtn.style.pointerEvents = 'auto';
+}
+window.updateWhatsAppPreview = updateWhatsAppPreview;
 
 function applyAdPreset(slotKey, sizeType) {
   const txt = document.getElementById(slotKey);
