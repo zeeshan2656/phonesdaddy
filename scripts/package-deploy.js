@@ -1,14 +1,15 @@
 /**
- * PhonesDaddy - Safe Production Deployment Packager
+ * PhonesDaddy - Zero-Risk Production Deployment Packager
  * 
  * Generates a clean, production-ready deploy package (deploy-bundle.zip).
  * 
- * 🛡️ SAFE DEPLOYMENT GUARANTEES:
- * 1. NEVER includes .env (Prevents overwriting production database credentials)
- * 2. NEVER includes server/uploads/* (Protects all photos and media uploaded on server)
- * 3. NEVER includes public/webfiles/* (Protects all crawled WebP images on server)
- * 4. NEVER includes node_modules or .git (Lightweight, fast upload ~2 MB instead of 200 MB)
- * 5. Includes empty upload folders with .gitkeep so folder structure is always intact
+ * 🛡️ ZERO-RISK DEPLOYMENT ARCHITECTURE:
+ * 1. ZERO MEDIA IN BUNDLE: Neither server/uploads nor public/webfiles are in the zip.
+ *    Extracting this zip on your server will NEVER overwrite, wipe, or replace existing images.
+ * 2. ZERO CREDENTIAL LEAK: Excludes .env, keeping live production database credentials untouched.
+ * 3. LIGHTWEIGHT (~2-3 MB): Excludes node_modules, .git, scratch files, and SQL backups.
+ * 4. COMPATIBLE WITH ALL HOSTS: Works seamlessly with Hostinger File Manager "Extract",
+ *    cPanel File Manager, Git auto-deploy, and SSH unzip.
  */
 
 const fs = require('fs');
@@ -19,7 +20,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(ROOT_DIR, 'deploy-bundle');
 const ZIP_FILE = path.join(ROOT_DIR, 'deploy-bundle.zip');
 
-// Items to copy
+// Core application folders and files to include
 const INCLUDE_PATHS = [
   'server',
   'views',
@@ -29,52 +30,60 @@ const INCLUDE_PATHS = [
   'public/images',
   'database/schema.sql',
   'database/migrate.js',
+  'scripts/setup-media.js',
   'package.json',
   'package-lock.json',
   '.htaccess',
-  'safe-deploy.sh',   // ← Server-side safe deploy script (backs up images before overwriting)
+  'setup-persistent-media.sh',
+  'git-deploy.sh',
+  'safe-deploy.sh',
   'README.md',
   'DEPLOYMENT_GUIDE.md'
 ];
 
-// Empty upload directories to preserve structure without overwriting live files
-const ENSURE_EMPTY_DIRS = [
-  'server/uploads/phones',
-  'server/uploads/brands',
-  'server/uploads/branding',
-  'server/uploads/news',
-  'server/uploads/reviews',
-  'public/webfiles/phones',
-  'public/webfiles/brands',
-  'public/webfiles/news',
+// Files and folder patterns to strictly blacklist from the package
+const EXCLUDE_PATTERNS = [
+  'node_modules',
+  '.git',
+  '.env',
+  '.env.local',
+  'deploy-bundle',
+  'deploy-bundle.zip',
+  'scratch',
+  'server/uploads',
+  'public/webfiles',
   'backups'
 ];
 
-function copyRecursive(src, dest) {
-  const stat = fs.statSync(src);
-  const relPath = path.relative(ROOT_DIR, src).replace(/\\/g, '/');
-
-  // Skip uploads folder contents
-  if (relPath.startsWith('server/uploads') && relPath !== 'server/uploads') {
-    return;
+function shouldExclude(relPath) {
+  const normalized = relPath.replace(/\\/g, '/').toLowerCase();
+  for (const pattern of EXCLUDE_PATTERNS) {
+    if (normalized === pattern || normalized.startsWith(pattern + '/')) {
+      return true;
+    }
   }
+  if (normalized.endsWith('.log') || normalized.endsWith('.sql') || normalized.endsWith('.zip')) {
+    return true;
+  }
+  return false;
+}
+
+function copyRecursive(src, dest) {
+  const relPath = path.relative(ROOT_DIR, src).replace(/\\/g, '/');
+  if (shouldExclude(relPath)) return;
+
+  const stat = fs.statSync(src);
 
   if (stat.isDirectory()) {
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
     const items = fs.readdirSync(src);
     for (const item of items) {
-      if (item === 'node_modules' || item === '.git' || item.endsWith('.log') || item === '.env') continue;
-      // If we are at server/uploads, don't copy files inside; ENSURE_EMPTY_DIRS handles directory creation
-      if (relPath === 'server' && item === 'uploads') {
-        const uploadDest = path.join(dest, 'uploads');
-        if (!fs.existsSync(uploadDest)) fs.mkdirSync(uploadDest, { recursive: true });
-        continue;
-      }
-      copyRecursive(path.join(src, item), path.join(dest, item));
+      const childSrc = path.join(src, item);
+      const childRel = path.relative(ROOT_DIR, childSrc).replace(/\\/g, '/');
+      if (shouldExclude(childRel)) continue;
+      copyRecursive(childSrc, path.join(dest, item));
     }
   } else {
-    // Only copy file if it's not .env or an SQL dump / backup
-    if (src.endsWith('.env') || src.endsWith('.sql') || src.endsWith('.log')) return;
     const parent = path.dirname(dest);
     if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true });
     fs.copyFileSync(src, dest);
@@ -83,7 +92,7 @@ function copyRecursive(src, dest) {
 
 async function run() {
   console.log('====================================================');
-  console.log('📦 PhonesDaddy - Building Safe Production Release...');
+  console.log('📦 PhonesDaddy - Packaging Zero-Risk Deployment...');
   console.log('====================================================');
 
   // Clean previous builds
@@ -108,17 +117,7 @@ async function run() {
     }
   }
 
-  // 2. Ensure empty upload directories with .gitkeep
-  for (const d of ENSURE_EMPTY_DIRS) {
-    const targetDir = path.join(OUT_DIR, d);
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-    }
-    fs.writeFileSync(path.join(targetDir, '.gitkeep'), '');
-  }
-  console.log('  ✓ Preserved empty upload folder structure (.gitkeep)');
-
-  // 3. Compress to ZIP
+  // 2. Compress to ZIP
   console.log('\n🗜️  Compressing into deploy-bundle.zip...');
   try {
     if (process.platform === 'win32') {
@@ -138,29 +137,22 @@ async function run() {
     }
 
     console.log('\n====================================================');
-    console.log(`🎉 Safe Deployment Bundle Created: deploy-bundle.zip (${sizeMb} MB)`);
+    console.log(`🎉 Zero-Risk Bundle Created: deploy-bundle.zip (${sizeMb} MB)`);
     console.log('====================================================');
-    console.log('\n🛡️  PROTECTIONS APPLIED:');
-    console.log('  ✅ .env IS EXCLUDED: Your production database credentials will NOT be overwritten.');
-    console.log('  ✅ server/uploads/ IS EXCLUDED: Existing articles, phone photos & branding on server are SAFE.');
-    console.log('  ✅ public/webfiles/ IS EXCLUDED: Existing gallery photos on server are SAFE.');
-    console.log('  ✅ node_modules/ IS EXCLUDED: Fast, clean ~2MB upload instead of ~200MB.');
-    console.log('  ✅ safe-deploy.sh INCLUDED: Server script that backs up images before extracting.');
-    console.log('\n🚀 HOW TO DEPLOY TO SERVER (Image-Safe Method):');
-    console.log('  1. Upload "deploy-bundle.zip" to your server project root.');
-    console.log('  ⚠️  DO NOT use Hostinger File Manager "Extract" button — it will wipe uploads!');
-    console.log('  2. Open SSH or Hostinger Terminal and run:');
-    console.log('       bash safe-deploy.sh');
-    console.log('  That script will:');
-    console.log('     → Backup all existing images from server/uploads/ and public/webfiles/');
-    console.log('     → Extract the new code bundle');
-    console.log('     → Restore all your images back');
-    console.log('     → Run npm install');
-    console.log('     → Restart the app');
-    console.log('  3. Done! All existing phones, articles, images, and settings remain 100% intact.\n');
+    console.log('\n🛡️  GUARANTEES:');
+    console.log('  ✅ ZERO empty media folders in ZIP (Extracting will NEVER wipe existing photos)');
+    console.log('  ✅ .env is excluded (Production database credentials stay untouched)');
+    console.log('  ✅ node_modules excluded (Lightweight upload)');
+    console.log('\n🚀 DEPLOYMENT INSTRUCTIONS:');
+    console.log('  OPTION A (ZIP via Hostinger / cPanel File Manager):');
+    console.log('    1. Upload "deploy-bundle.zip" to your server.');
+    console.log('    2. Click "Extract" in File Manager directly (100% safe — no media folders in zip).');
+    console.log('    3. Run: npm install --omit=dev');
+    console.log('    4. Restart your app in Node.js App Manager.');
+    console.log('\n  OPTION B (GitHub / Git Auto-Deploy):');
+    console.log('    Push changes to GitHub. Git pulls only code. Your external media folder is untouched.\n');
   } catch (err) {
     console.error('❌ Failed to create zip file:', err.message);
-    console.log(`💡 You can still upload the clean files located in: ${OUT_DIR}`);
   }
 }
 

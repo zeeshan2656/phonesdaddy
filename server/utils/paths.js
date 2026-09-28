@@ -1,50 +1,73 @@
 /**
- * PhonesDaddy — Persistent Storage Path Configuration
+ * PhonesDaddy — Persistent Media Storage Configuration
  *
  * WHY THIS EXISTS:
- * When deploying via GitHub (git pull / git clone), uploaded images stored
- * inside the project folder (server/uploads/) are lost because:
- *   - git pull on a fresh clone doesn't restore gitignored files
- *   - Some hosting panels wipe the directory before pulling
+ * When deploying via GitHub (git pull / webhooks) or ZIP extraction,
+ * media files (uploads, crawled phone photos, brand logos) stored INSIDE
+ * the deployment directory get wiped or replaced by the incoming code.
  *
- * THE FIX:
- * Set UPLOADS_DIR in your server's .env to a folder OUTSIDE the git repo.
- * Git can never touch that folder, so images are 100% safe on every deploy.
+ * THE ARCHITECTURAL FIX:
+ * All media is stored OUTSIDE the deployment directory (e.g. ../phonesdaddy_media or ~/phonesdaddy_media).
+ * Deployments (Git or ZIP) only update code. They can NEVER touch or overwrite the external media folder.
  *
- * HOW TO SET UP ON YOUR SERVER:
- *   In your server's .env file, add:
- *     UPLOADS_DIR=/home/yourusername/phonesdaddy_uploads
- *
- *   Then create that folder once on the server:
- *     mkdir -p /home/yourusername/phonesdaddy_uploads/phones
- *     mkdir -p /home/yourusername/phonesdaddy_uploads/brands
- *     mkdir -p /home/yourusername/phonesdaddy_uploads/branding
- *     mkdir -p /home/yourusername/phonesdaddy_uploads/news
- *     mkdir -p /home/yourusername/phonesdaddy_uploads/reviews
- *
- *   If UPLOADS_DIR is not set, it falls back to server/uploads/ (local dev default).
+ * ENV VARIABLES (all optional with smart auto-detection):
+ *   MEDIA_DIR     Unified base directory outside project (e.g., ../phonesdaddy_media or ~/phonesdaddy_media)
+ *   UPLOADS_DIR   Explicit uploads directory (overrides MEDIA_DIR/uploads)
+ *   WEBFILES_DIR  Explicit webfiles directory (overrides MEDIA_DIR/webfiles)
+ *   IMAGES_DIR    Explicit custom images directory (overrides MEDIA_DIR/images)
  */
 
 const path = require('path');
 const fs   = require('fs');
 
-// Root of the project (one level above /server)
+// Root of the deployed project (one level above /server)
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
-// Persistent uploads directory — outside git repo on production, inside on dev
-const UPLOADS_BASE = process.env.UPLOADS_DIR
-  ? path.resolve(process.env.UPLOADS_DIR)
-  : path.join(PROJECT_ROOT, 'server', 'uploads');
+// Check if an external persistent media directory exists or is configured
+function resolveMediaBase() {
+  if (process.env.MEDIA_DIR && process.env.MEDIA_DIR.trim()) {
+    return path.resolve(PROJECT_ROOT, process.env.MEDIA_DIR.trim());
+  }
 
-// Webfiles base (scraped/processed gallery images stored in public/webfiles)
-// These also live inside the project, so we protect them the same way via WEBFILES_DIR
-const WEBFILES_BASE = process.env.WEBFILES_DIR
-  ? path.resolve(process.env.WEBFILES_DIR)
-  : path.join(PROJECT_ROOT, 'public', 'webfiles');
+  // Default outside-repo candidate: one level above deployment root (e.g., ../phonesdaddy_media)
+  const defaultOutsideDir = path.resolve(PROJECT_ROOT, '..', 'phonesdaddy_media');
+
+  // On production or if the external folder already exists, use it automatically
+  if (process.env.NODE_ENV === 'production' || fs.existsSync(defaultOutsideDir)) {
+    return defaultOutsideDir;
+  }
+
+  return null;
+}
+
+const MEDIA_BASE = resolveMediaBase();
+
+// 1. Uploads directory (user-uploaded images: branding, phones, brands, news, reviews)
+const UPLOADS_BASE = process.env.UPLOADS_DIR && process.env.UPLOADS_DIR.trim()
+  ? path.resolve(PROJECT_ROOT, process.env.UPLOADS_DIR.trim())
+  : (MEDIA_BASE ? path.join(MEDIA_BASE, 'uploads') : path.join(PROJECT_ROOT, 'server', 'uploads'));
+
+// 2. Webfiles directory (scraped & optimized WebP phone photos, gallery images, news cards)
+const WEBFILES_BASE = process.env.WEBFILES_DIR && process.env.WEBFILES_DIR.trim()
+  ? path.resolve(PROJECT_ROOT, process.env.WEBFILES_DIR.trim())
+  : (MEDIA_BASE ? path.join(MEDIA_BASE, 'webfiles') : path.join(PROJECT_ROOT, 'public', 'webfiles'));
+
+// 3. Optional persistent custom images directory
+const IMAGES_BASE = process.env.IMAGES_DIR && process.env.IMAGES_DIR.trim()
+  ? path.resolve(PROJECT_ROOT, process.env.IMAGES_DIR.trim())
+  : (MEDIA_BASE ? path.join(MEDIA_BASE, 'images') : path.join(PROJECT_ROOT, 'public', 'images'));
+
+// Check if media is safely located outside the deployment repository
+function isPathOutsideProject(targetPath) {
+  const rel = path.relative(PROJECT_ROOT, targetPath);
+  return rel.startsWith('..') || path.isAbsolute(rel);
+}
+
+const isMediaOutsideProject = isPathOutsideProject(UPLOADS_BASE) && isPathOutsideProject(WEBFILES_BASE);
 
 /**
  * Get the absolute path for a specific upload subdirectory.
- * Creates the directory automatically if it doesn't exist.
+ * Automatically ensures the directory exists.
  * @param {'phones'|'brands'|'branding'|'news'|'reviews'} type
  * @returns {string} absolute path
  */
@@ -56,8 +79,8 @@ function getUploadPath(type) {
 
 /**
  * Get the absolute path for a specific webfiles subdirectory.
- * Creates the directory automatically if it doesn't exist.
- * @param {'phones'|'brands'|'news'} type
+ * Automatically ensures the directory exists.
+ * @param {'phones'|'brands'|'news'|'branding'} type
  * @returns {string} absolute path
  */
 function getWebfilePath(type) {
@@ -66,9 +89,41 @@ function getWebfilePath(type) {
   return dir;
 }
 
+/**
+ * Ensure all standard subdirectories exist in uploads and webfiles.
+ * Safe to call at any time (idempotent).
+ */
+function ensureMediaDirectories() {
+  const uploadSubdirs = ['phones', 'brands', 'branding', 'news', 'reviews'];
+  const webfileSubdirs = ['phones', 'brands', 'news', 'branding'];
+
+  for (const sub of uploadSubdirs) {
+    getUploadPath(sub);
+  }
+  for (const sub of webfileSubdirs) {
+    getWebfilePath(sub);
+  }
+  if (IMAGES_BASE && !fs.existsSync(IMAGES_BASE)) {
+    try { fs.mkdirSync(IMAGES_BASE, { recursive: true }); } catch (_) {}
+  }
+}
+
+// Automatically ensure directories exist on module load
+try {
+  ensureMediaDirectories();
+} catch (e) {
+  console.warn('⚠️ Could not initialize media directories on startup:', e.message);
+}
+
 module.exports = {
+  PROJECT_ROOT,
+  MEDIA_BASE,
   UPLOADS_BASE,
   WEBFILES_BASE,
+  IMAGES_BASE,
+  isMediaOutsideProject,
   getUploadPath,
   getWebfilePath,
+  ensureMediaDirectories
 };
+

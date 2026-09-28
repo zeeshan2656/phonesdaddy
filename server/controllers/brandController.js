@@ -1,6 +1,7 @@
 const BrandModel = require('../models/brandModel');
 const { cache } = require('../utils/cache');
 const { optimizeBrandLogo, deleteMediaFiles } = require('../utils/imageOptimizer');
+const { getWebfilePath } = require('../utils/paths');
 
 const BRAND_PALETTE = [
   '#1428a0', // Royal Blue (Samsung)
@@ -100,8 +101,7 @@ class BrandController {
         const fs = require('fs');
         const path = require('path');
         const logoFilename = `${slug.trim().toLowerCase()}-logo.svg`;
-        const logoDir = path.join(__dirname, '../../public/webfiles/brands');
-        if (!fs.existsSync(logoDir)) fs.mkdirSync(logoDir, { recursive: true });
+        const logoDir = getWebfilePath('brands');
 
         const chosenColor = brand_color || color || getBrandColor(name);
         const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" width="160" height="60">
@@ -179,8 +179,7 @@ class BrandController {
         const fs = require('fs');
         const path = require('path');
         const logoFilename = `${slug.trim().toLowerCase()}-logo.svg`;
-        const logoDir = path.join(__dirname, '../../public/webfiles/brands');
-        if (!fs.existsSync(logoDir)) fs.mkdirSync(logoDir, { recursive: true });
+        const logoDir = getWebfilePath('brands');
 
         const chosenColor = brand_color || color || getBrandColor(name);
         const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" width="160" height="60">

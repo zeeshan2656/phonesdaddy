@@ -1,10 +1,11 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const session = require('express-session');
 const helmet = require('helmet');
 const cors = require('cors');
 require('dotenv').config();
-const { UPLOADS_BASE, WEBFILES_BASE } = require('./utils/paths');
+const { UPLOADS_BASE, WEBFILES_BASE, IMAGES_BASE } = require('./utils/paths');
 
 const compression = require('compression');
 
@@ -101,21 +102,13 @@ const staticOptions = {
   }
 };
 
+// Static Folders with optimized HTTP Cache-Control headers (1 Year Immutable for 100% GTmetrix Score)
+if (IMAGES_BASE && fs.existsSync(IMAGES_BASE) && path.resolve(IMAGES_BASE) !== path.resolve(__dirname, '../public/images')) {
+  app.use('/images', express.static(IMAGES_BASE, staticOptions));
+}
 app.use(express.static(path.join(__dirname, '../public'), staticOptions));
-app.use('/uploads', express.static(UPLOADS_BASE, {
-  maxAge: '1y',
-  immutable: true,
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  }
-}));
-app.use('/webfiles', express.static(WEBFILES_BASE, {
-  maxAge: '1y',
-  immutable: true,
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  }
-}));
+app.use('/uploads', express.static(UPLOADS_BASE, staticOptions));
+app.use('/webfiles', express.static(WEBFILES_BASE, staticOptions));
 
 // REST API Endpoints
 app.use('/api/phones', searchRoutes); // Handles /api/phones/search

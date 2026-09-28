@@ -14,13 +14,12 @@ yarn-error.log*
 .env.*
 !.env.example
 
-# Dynamic User Uploads & Photos (Protects server images from local overwrites)
-/server/uploads/*
-!/server/uploads/*/.gitkeep
-/public/webfiles/phones/*
-!/public/webfiles/phones/.gitkeep
-/public/webfiles/news/*
-!/public/webfiles/news/.gitkeep
+# Dynamic Media & Uploads (Stored OUTSIDE the deployment repository)
+/server/uploads/
+/public/webfiles/
+phonesdaddy_uploads/
+phonesdaddy_webfiles/
+phonesdaddy_media/
 
 # Database Backups & SQL Dumps (Never commit local database dumps)
 *.sql

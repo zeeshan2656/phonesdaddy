@@ -5,6 +5,8 @@ require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 
+const { UPLOADS_BASE, WEBFILES_BASE, isMediaOutsideProject } = require('./utils/paths');
+
 async function startServer() {
   const dbOk = await testConnection();
   if (!dbOk) {
@@ -19,6 +21,9 @@ async function startServer() {
     console.log(`🚀 PhonesDaddy Server is running on:`);
     console.log(`👉 http://localhost:${PORT}`);
     console.log(`👉 Admin Panel: http://localhost:${PORT}/admin`);
+    console.log(`📁 Uploads Dir: ${UPLOADS_BASE}`);
+    console.log(`📁 Webfiles Dir: ${WEBFILES_BASE}`);
+    console.log(`🛡️  Media Safety: ${isMediaOutsideProject ? 'OUTSIDE deployment folder (SAFE from Git & ZIP)' : 'INSIDE project'}`);
     console.log(`=================================================`);
   });
 }

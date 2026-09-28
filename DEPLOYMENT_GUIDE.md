@@ -1,91 +1,133 @@
-# 🛡️ PhonesDaddy — Safe Production Deployment Guide
+# 🛡️ PhonesDaddy — Zero-Risk Production Deployment Guide
 
-> **CRITICAL**: Never use Hostinger's "Extract" button directly on `deploy-bundle.zip`.  
-> Always use `bash safe-deploy.sh` on the server instead. This is the only method that protects your images.
-
----
-
-## ⚡ Why Images Were Getting Deleted
-
-When you upload `deploy-bundle.zip` and click **Extract** in Hostinger's File Manager, it:
-1. Extracts the ZIP contents, **overwriting** every matching file and folder
-2. The ZIP contains an **empty** `server/uploads/` folder (with only `.gitkeep`)
-3. That empty folder **replaces** the live `server/uploads/` — wiping all your phone images, news images, brand logos, etc.
-
-The solution is to run `safe-deploy.sh` on the server, which **backs up your images first**, then extracts, then **restores them back**.
+This guide explains how to deploy new versions of PhonesDaddy to your live server (Hostinger, cPanel, VPS, or Docker) with **100% guarantee** that your uploaded phone images, news photos, brand logos, and database remain completely safe.
 
 ---
 
-## 🚀 How to Deploy (Step-by-Step — Image-Safe)
+## ⚡ The Solution: External Persistent Media Storage
 
-### Step 1: Package the new code (on your local computer)
+### Why images were previously disappearing:
+1. In standard web setups, images were saved inside the application folder (`public_html/server/uploads` or `public_html/public/webfiles`).
+2. When deploying via **GitHub (Git Pull / Git Checkout / Webhook)**, Git manages the folder contents. Any `git clean`, branch switch, or deployment action replaced or wiped untracked files.
+3. When deploying via **ZIP File**, extracting a zip with empty upload folders overwrote the live folders with empty ones.
+
+### The Architectural Fix:
+All media files are stored **OUTSIDE** the application deployment directory:
+- **Application Code:** `/home/username/public_html` (or `/var/www/phonesdaddy`)
+- **Media Files:** `/home/username/phonesdaddy_media` (or `../phonesdaddy_media`)
+
+Because the media folder is located **outside** the application directory:
+- **Git** can NEVER touch, wipe, reset, or delete your media files.
+- **ZIP File Extraction** (even using Hostinger or cPanel File Manager "Extract" button) can NEVER touch or overwrite your media files.
+- You can even delete the entire `public_html` code folder and extract a new ZIP from scratch — **your media remains 100% intact**.
+
+---
+
+## 🚀 One-Time Server Setup (Run Once on Live Server)
+
+Run this once on your live server via SSH / Hostinger Terminal:
+```bash
+bash setup-persistent-media.sh
+```
+*(Or run `npm run setup:media`)*
+
+**What this does automatically:**
+1. Creates the external persistent directory at `~/phonesdaddy_media/` (with all required subfolders: `phones`, `brands`, `branding`, `news`, `reviews`, `webfiles`).
+2. Safely moves any existing images currently on the server into `~/phonesdaddy_media/` so nothing is lost.
+3. Adds `MEDIA_DIR=/home/username/phonesdaddy_media` to your server's `.env`.
+
+---
+
+## 📦 METHOD 1: Deploying via ZIP File (Hostinger / cPanel)
+
+### Step 1: Create the clean deployment ZIP (on your local machine)
+In your local project terminal, run:
 ```bash
 npm run package:deploy
 ```
-This creates `deploy-bundle.zip` (≈2–3 MB). It includes `safe-deploy.sh` and excludes uploads, .env, and node_modules.
+This builds `deploy-bundle.zip` (~2–3 MB).  
+**Protections applied in this ZIP:**
+- Excludes `.env` (your live database credentials are never touched)
+- Excludes all media folders (extracting can NEVER overwrite images)
+- Excludes `node_modules/` (lightweight, rapid upload)
 
----
+### Step 2: Upload & Deploy on Server
+Choose either option:
 
-### Step 2: Upload the ZIP to your server
+#### Option A: Via Hostinger / cPanel File Manager (Simple UI)
+1. Go to **File Manager** in your hosting control panel.
+2. Navigate to your project root (e.g. `public_html`).
+3. Upload `deploy-bundle.zip`.
+4. Click **Extract**. *(Safe! It contains zero media folders).*
+5. Delete `deploy-bundle.zip`.
+6. Go to **Node.js App Manager** → click **Restart**.
 
-**Option A — Hostinger File Manager:**
-1. Login to Hostinger hPanel
-2. Go to **Files → File Manager**
-3. Navigate to your project root (e.g. `domains/yourdomain.com/public_html` or the Node.js app folder)
-4. Click **Upload** and select `deploy-bundle.zip`
-5. ⚠️ **DO NOT click Extract yet!**
-
-**Option B — SFTP / FTP:**
-Upload `deploy-bundle.zip` to your project root using FileZilla or WinSCP.
-
----
-
-### Step 3: Run the safe deploy script on the server
-
-**Option A — Hostinger SSH Terminal:**
-1. In hPanel go to **Advanced → SSH Access** or open the Terminal
-2. Navigate to your project root:
-   ```bash
-   cd ~/domains/yourdomain.com/public_html
-   ```
-3. Run:
+#### Option B: Via SSH Terminal
+1. Upload `deploy-bundle.zip` to your server root.
+2. Run:
    ```bash
    bash safe-deploy.sh
    ```
-
-**Option B — VPS via SSH:**
-```bash
-ssh user@your-server-ip
-cd /var/www/phonesdaddy
-bash safe-deploy.sh
-```
-
-### What `safe-deploy.sh` does automatically:
-| Step | Action | Your Images |
-|---|---|---|
-| 1 | Backs up `server/uploads/` and `public/webfiles/` to temp folder | ✅ Safe |
-| 2 | Extracts `deploy-bundle.zip` (new code) | ✅ Backup in temp |
-| 3 | Restores all your images from the temp backup | ✅ Fully Restored |
-| 4 | Runs `npm install --omit=dev` | — |
-| 5 | Restarts the app via PM2 or prints manual instructions | — |
-| 6 | Deletes temp backup + ZIP file | ✅ Clean |
+   *(This extracts the zip, runs `npm install --omit=dev`, runs safe migrations, and restarts the app automatically).*
 
 ---
 
-## 🔒 What Is Always Protected
+## 🐙 METHOD 2: Deploying via GitHub (Git Auto-Deploy / Git Pull)
 
-| Protected Item | Why | How |
+Because your media folder is stored outside the Git repository:
+1. Commit and push your code changes to GitHub:
+   ```bash
+   git add .
+   git commit -m "Updates"
+   git push origin main
+   ```
+2. On your live server, simply pull the latest code:
+   ```bash
+   bash git-deploy.sh
+   ```
+   *(Or if you use Hostinger Git Auto-Deploy webhook, it deploys automatically).*
+3. **Result:** Git updates only application code. Your images in `~/phonesdaddy_media` are completely untouched.
+
+---
+
+## 🔒 Directory Layout Reference
+
+```text
+/home/yourusername/
+│
+├── phonesdaddy_media/                <-- 100% PERSISTENT MEDIA (OUTSIDE DEPLOYMENT)
+│   ├── uploads/
+│   │   ├── phones/                   <-- Admin phone photo uploads
+│   │   ├── brands/                   <-- Brand logo uploads
+│   │   ├── branding/                 <-- Site logo & favicon
+│   │   ├── news/                     <-- Article banner images
+│   │   └── reviews/                  <-- User review photo attachments
+│   └── webfiles/
+│       ├── phones/                   <-- Scraped & optimized WebP phone images
+│       ├── brands/                   <-- Scraped & generated brand logos
+│       ├── news/                     <-- Scraped news thumbnails
+│       └── branding/
+│
+└── public_html/                      <-- DEPLOYMENT FOLDER (Git & ZIP updates code here)
+    ├── server/                       <-- Express backend & API
+    ├── public/                       <-- CSS, JS, and default SVGs
+    ├── views/                        <-- Frontend HTML templates
+    ├── database/                     <-- Schema & safe non-destructive migrations
+    ├── .env                          <-- Contains MEDIA_DIR=../phonesdaddy_media
+    └── package.json
+```
+
+---
+
+## ⚙️ Environment Variables (.env) Reference
+
+| Variable | Recommended Production Value | Description |
 |---|---|---|
-| `server/uploads/phones/` | Phone images (WebP + thumbnails) | Backed up & restored by `safe-deploy.sh` |
-| `server/uploads/news/` | News article images | Backed up & restored by `safe-deploy.sh` |
-| `server/uploads/brands/` | Brand logos | Backed up & restored by `safe-deploy.sh` |
-| `server/uploads/branding/` | Site logo & favicon | Backed up & restored by `safe-deploy.sh` |
-| `server/uploads/reviews/` | User review images | Backed up & restored by `safe-deploy.sh` |
-| `public/webfiles/phones/` | Scraped gallery images | Backed up & restored by `safe-deploy.sh` |
-| `public/webfiles/news/` | Scraped news thumbnails | Backed up & restored by `safe-deploy.sh` |
-| `.env` | DB credentials & secrets | Never included in ZIP |
-| `node_modules/` | Dependencies | Never included in ZIP |
-| MySQL Database | All phones, articles, reviews | Auto-migrate only adds columns, never drops |
+| `MEDIA_DIR` | `../phonesdaddy_media` or `/home/user/phonesdaddy_media` | Unified external media folder |
+| `NODE_ENV` | `production` | Enables production caching & auto-fallback |
+| `PORT` | `3000` | Port for Express app |
+| `DB_HOST` | `localhost` | MySQL Host |
+| `DB_NAME` | `phonesdaddy` | MySQL Database Name |
 
 ---
 
@@ -95,37 +137,6 @@ bash safe-deploy.sh
 |---|---|---|
 | `npm run db:backup` | Creates a timestamped `.sql` backup in `backups/` | ✅ 100% Safe |
 | `npm run migrate` | Adds missing columns non-destructively | ✅ 100% Safe |
-| `npm run package:deploy` | Creates `deploy-bundle.zip` for upload | ✅ Local only |
-| `npm start` | Starts server with auto-migrations on boot | ✅ 100% Safe |
-
----
-
-## ⚠️ Things to NEVER Do
-
-1. ❌ **NEVER click "Extract" on the ZIP directly in Hostinger File Manager** — it will wipe `server/uploads/`
-2. ❌ **NEVER upload your local `.env`** to the server
-3. ❌ **NEVER run `DROP TABLE` or `TRUNCATE`** in phpMyAdmin
-4. ❌ **NEVER manually replace `server/uploads/`** with your local folder (your local uploads are empty)
-
----
-
-## 🔁 Quick Reference: Full Deploy Flow
-
-```
-[Your PC]                          [Server]
-   │                                  │
-   ├─ npm run package:deploy           │
-   │  → Creates deploy-bundle.zip      │
-   │                                  │
-   ├─ Upload deploy-bundle.zip ──────► │
-   │                                  │
-   │                                  ├─ bash safe-deploy.sh
-   │                                  │   ├─ Backup images
-   │                                  │   ├─ Extract ZIP
-   │                                  │   ├─ Restore images
-   │                                  │   ├─ npm install
-   │                                  │   └─ Restart app
-   │                                  │
-   │                            ✅ Site Updated
-   │                            ✅ All Images Safe
-```
+| `npm run setup:media` | Migrates media to persistent external folder | ✅ 100% Safe |
+| `npm run package:deploy` | Creates clean `deploy-bundle.zip` for upload | ✅ Local only |
+| `npm start` | Starts server with non-destructive migrations | ✅ 100% Safe |
