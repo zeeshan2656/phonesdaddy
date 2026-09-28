@@ -1,133 +1,122 @@
 # 🛡️ PhonesDaddy — Zero-Risk Production Deployment Guide
 
-This guide explains how to deploy new versions of PhonesDaddy to your live server (Hostinger, cPanel, VPS, or Docker) with **100% guarantee** that your uploaded phone images, news photos, brand logos, and database remain completely safe.
+This guide explains how to deploy new versions of PhonesDaddy to your live Hostinger server with **100% guarantee** that your uploaded phone images, news photos, and brand logos remain completely safe.
 
 ---
 
-## ⚡ The Solution: External Persistent Media Storage
+## 🚨 IMAGES DISAPPEARED AFTER DEPLOYMENT? — Fix in 3 Steps
 
-### Why images were previously disappearing:
-1. In standard web setups, images were saved inside the application folder (`public_html/server/uploads` or `public_html/public/webfiles`).
-2. When deploying via **GitHub (Git Pull / Git Checkout / Webhook)**, Git manages the folder contents. Any `git clean`, branch switch, or deployment action replaced or wiped untracked files.
-3. When deploying via **ZIP File**, extracting a zip with empty upload folders overwrote the live folders with empty ones.
+This happens because images were stored **inside** the deployment folder. Here is how to fix it permanently:
 
-### The Architectural Fix:
-All media files are stored **OUTSIDE** the application deployment directory:
-- **Application Code:** `/home/username/public_html` (or `/var/www/phonesdaddy`)
-- **Media Files:** `/home/username/phonesdaddy_media` (or `../phonesdaddy_media`)
+### Step 1: Open Hostinger Terminal
+Go to **Hostinger Control Panel → Advanced → Terminal** (or use SSH).
 
-Because the media folder is located **outside** the application directory:
-- **Git** can NEVER touch, wipe, reset, or delete your media files.
-- **ZIP File Extraction** (even using Hostinger or cPanel File Manager "Extract" button) can NEVER touch or overwrite your media files.
-- You can even delete the entire `public_html` code folder and extract a new ZIP from scratch — **your media remains 100% intact**.
-
----
-
-## 🚀 One-Time Server Setup (Run Once on Live Server)
-
-Run this once on your live server via SSH / Hostinger Terminal:
+### Step 2: Navigate to your project and run the recovery script
 ```bash
+cd ~/domains/yourdomain.com/public_html
 bash setup-persistent-media.sh
 ```
-*(Or run `npm run setup:media`)*
+This will:
+1. Create `~/phonesdaddy_media/` outside your deployment folder (safe zone)
+2. Copy any existing images from `server/uploads` and `public/webfiles` into the safe zone
+3. Update your `.env` with `MEDIA_DIR=~/phonesdaddy_media` so all future image uploads go there
 
-**What this does automatically:**
-1. Creates the external persistent directory at `~/phonesdaddy_media/` (with all required subfolders: `phones`, `brands`, `branding`, `news`, `reviews`, `webfiles`).
-2. Safely moves any existing images currently on the server into `~/phonesdaddy_media/` so nothing is lost.
-3. Adds `MEDIA_DIR=/home/username/phonesdaddy_media` to your server's `.env`.
+### Step 3: Restart your Node.js app
+Go to **Hostinger → Node.js App Manager → click Restart**.
 
----
-
-## 📦 METHOD 1: Deploying via ZIP File (Hostinger / cPanel)
-
-### Step 1: Create the clean deployment ZIP (on your local machine)
-In your local project terminal, run:
-```bash
-npm run package:deploy
-```
-This builds `deploy-bundle.zip` (~2–3 MB).  
-**Protections applied in this ZIP:**
-- Excludes `.env` (your live database credentials are never touched)
-- Excludes all media folders (extracting can NEVER overwrite images)
-- Excludes `node_modules/` (lightweight, rapid upload)
-
-### Step 2: Upload & Deploy on Server
-Choose either option:
-
-#### Option A: Via Hostinger / cPanel File Manager (Simple UI)
-1. Go to **File Manager** in your hosting control panel.
-2. Navigate to your project root (e.g. `public_html`).
-3. Upload `deploy-bundle.zip`.
-4. Click **Extract**. *(Safe! It contains zero media folders).*
-5. Delete `deploy-bundle.zip`.
-6. Go to **Node.js App Manager** → click **Restart**.
-
-#### Option B: Via SSH Terminal
-1. Upload `deploy-bundle.zip` to your server root.
-2. Run:
-   ```bash
-   bash safe-deploy.sh
-   ```
-   *(This extracts the zip, runs `npm install --omit=dev`, runs safe migrations, and restarts the app automatically).*
+✅ **Done!** Your images are now permanently protected. They can never be overwritten by Git pulls or ZIP extractions again.
 
 ---
 
-## 🐙 METHOD 2: Deploying via GitHub (Git Auto-Deploy / Git Pull)
+## ⚡ Why Images Disappear (The Root Cause)
 
-Because your media folder is stored outside the Git repository:
-1. Commit and push your code changes to GitHub:
-   ```bash
-   git add .
-   git commit -m "Updates"
-   git push origin main
-   ```
-2. On your live server, simply pull the latest code:
-   ```bash
-   bash git-deploy.sh
-   ```
-   *(Or if you use Hostinger Git Auto-Deploy webhook, it deploys automatically).*
-3. **Result:** Git updates only application code. Your images in `~/phonesdaddy_media` are completely untouched.
+| Storage Location | What happens on Git Pull / ZIP Extract |
+|---|---|
+| `public_html/server/uploads/` ❌ | Git **replaces** or ZIP **overwrites** this folder with empty version |
+| `public_html/public/webfiles/` ❌ | Same — folder gets emptied by deployment |
+| `~/phonesdaddy_media/` ✅ | Git and ZIP can **NEVER touch** this folder — 100% safe |
+
+The fix moves all media storage to `~/phonesdaddy_media/` which is one level **above** `public_html`. Neither Git nor ZIP can reach files there.
 
 ---
 
-## 🔒 Directory Layout Reference
+## 🗂️ Safe Directory Layout (After Setup)
 
 ```text
 /home/yourusername/
 │
-├── phonesdaddy_media/                <-- 100% PERSISTENT MEDIA (OUTSIDE DEPLOYMENT)
+├── phonesdaddy_media/          ← 100% PERSISTENT — never touched by deployments
 │   ├── uploads/
-│   │   ├── phones/                   <-- Admin phone photo uploads
-│   │   ├── brands/                   <-- Brand logo uploads
-│   │   ├── branding/                 <-- Site logo & favicon
-│   │   ├── news/                     <-- Article banner images
-│   │   └── reviews/                  <-- User review photo attachments
+│   │   ├── phones/             ← Admin phone photo uploads
+│   │   ├── brands/             ← Brand logo uploads
+│   │   ├── branding/           ← Site logo & favicon
+│   │   ├── news/               ← Article banner images
+│   │   └── reviews/            ← User review attachments
 │   └── webfiles/
-│       ├── phones/                   <-- Scraped & optimized WebP phone images
-│       ├── brands/                   <-- Scraped & generated brand logos
-│       ├── news/                     <-- Scraped news thumbnails
-│       └── branding/
+│       ├── phones/             ← Scraped & optimized WebP phone images
+│       ├── brands/             ← Brand logo WebP files
+│       └── news/               ← Article thumbnail WebP files
 │
-└── public_html/                      <-- DEPLOYMENT FOLDER (Git & ZIP updates code here)
-    ├── server/                       <-- Express backend & API
-    ├── public/                       <-- CSS, JS, and default SVGs
-    ├── views/                        <-- Frontend HTML templates
-    ├── database/                     <-- Schema & safe non-destructive migrations
-    ├── .env                          <-- Contains MEDIA_DIR=../phonesdaddy_media
-    └── package.json
+└── domains/yourdomain.com/
+    └── public_html/            ← Deployment folder (Git & ZIP update code here)
+        ├── server/
+        ├── public/
+        ├── views/
+        ├── .env                ← Contains MEDIA_DIR=~/phonesdaddy_media
+        └── package.json
 ```
 
 ---
 
-## ⚙️ Environment Variables (.env) Reference
+## 🚀 Safe Deployment Process (After One-Time Setup)
 
-| Variable | Recommended Production Value | Description |
-|---|---|---|
-| `MEDIA_DIR` | `../phonesdaddy_media` or `/home/user/phonesdaddy_media` | Unified external media folder |
-| `NODE_ENV` | `production` | Enables production caching & auto-fallback |
-| `PORT` | `3000` | Port for Express app |
-| `DB_HOST` | `localhost` | MySQL Host |
-| `DB_NAME` | `phonesdaddy` | MySQL Database Name |
+### METHOD 1: Via GitHub Git Auto-Deploy (Recommended)
+
+Your media is already outside the Git repo, so:
+1. Push code changes to GitHub
+2. Hostinger Git Auto-Deploy pulls new code automatically
+3. ✅ Media is untouched — nothing to do
+
+Or manually via Hostinger Terminal:
+```bash
+cd ~/domains/yourdomain.com/public_html
+bash git-deploy.sh
+```
+
+### METHOD 2: Via ZIP File (Hostinger File Manager)
+
+1. On your local machine, run:
+   ```bash
+   npm run package:deploy
+   ```
+   This creates `deploy-bundle.zip` (~2–3 MB) — **it contains zero media folders**, so extracting it can never wipe your images.
+
+2. Upload `deploy-bundle.zip` to your Hostinger File Manager
+3. Click **Extract** (safe — zero media folders in zip)
+4. Delete the zip file
+5. Go to **Node.js App Manager → Restart**
+
+---
+
+## ⚙️ Required .env Settings on Live Server
+
+After running `setup-persistent-media.sh`, your `.env` should contain:
+
+```env
+NODE_ENV=production
+PORT=3000
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=phonesdaddy
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+SESSION_SECRET=your_secret_key
+
+# IMPORTANT: This must point to the external media folder
+MEDIA_DIR=/home/yourusername/phonesdaddy_media
+```
+
+> 💡 **Tip:** You can find your exact home path by running `echo $HOME` in the Hostinger Terminal.
 
 ---
 
@@ -140,3 +129,19 @@ Because your media folder is stored outside the Git repository:
 | `npm run setup:media` | Migrates media to persistent external folder | ✅ 100% Safe |
 | `npm run package:deploy` | Creates clean `deploy-bundle.zip` for upload | ✅ Local only |
 | `npm start` | Starts server with non-destructive migrations | ✅ 100% Safe |
+
+---
+
+## ❓ Frequently Asked Questions
+
+**Q: I ran setup-persistent-media.sh but images are still gone. Why?**
+A: The images that disappeared were already gone from the server before the script ran. The script protects future images. To get the missing images back, you need to re-upload or re-scrape them from the admin panel.
+
+**Q: Will running the setup script again cause problems?**
+A: No — the script is fully idempotent. Running it multiple times is safe. It uses `cp -n` (no-overwrite) so it never overwrites existing images.
+
+**Q: What if my .env doesn't have MEDIA_DIR?**
+A: With our latest update in `server/utils/paths.js`, the server automatically creates and uses `../phonesdaddy_media` outside your deployment directory even if `MEDIA_DIR` is not explicitly set in `.env`! Running `bash setup-persistent-media.sh` is still recommended to set the explicit path and establish directory permissions.
+
+**Q: After deployment, do I need to run setup-persistent-media.sh again?**
+A: No — only run it once. After that, just deploy as normal (Git or ZIP). All future images remain untouched in the persistent folder outside the deployment root.

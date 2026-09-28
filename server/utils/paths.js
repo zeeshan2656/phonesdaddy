@@ -23,18 +23,51 @@ const fs   = require('fs');
 // Root of the deployed project (one level above /server)
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
-// Check if an external persistent media directory exists or is configured
+// Check if an external persistent media directory exists or can be created
 function resolveMediaBase() {
+  // 1. Explicit env var (highest priority)
   if (process.env.MEDIA_DIR && process.env.MEDIA_DIR.trim()) {
-    return path.resolve(PROJECT_ROOT, process.env.MEDIA_DIR.trim());
+    const customPath = path.resolve(PROJECT_ROOT, process.env.MEDIA_DIR.trim());
+    try {
+      if (!fs.existsSync(customPath)) fs.mkdirSync(customPath, { recursive: true });
+      return customPath;
+    } catch (_) {
+      return customPath;
+    }
   }
 
-  // Default outside-repo candidate: one level above deployment root (e.g., ../phonesdaddy_media)
-  const defaultOutsideDir = path.resolve(PROJECT_ROOT, '..', 'phonesdaddy_media');
+  // 2. Candidate A: One level above project root (e.g., ../phonesdaddy_media)
+  // This is completely outside public_html / deployment root.
+  const parentCandidate = path.resolve(PROJECT_ROOT, '..', 'phonesdaddy_media');
+  if (fs.existsSync(parentCandidate)) {
+    return parentCandidate;
+  }
 
-  // On production or if the external folder already exists, use it automatically
-  if (process.env.NODE_ENV === 'production' || fs.existsSync(defaultOutsideDir)) {
-    return defaultOutsideDir;
+  // Try creating parent candidate automatically
+  try {
+    fs.mkdirSync(parentCandidate, { recursive: true });
+    fs.accessSync(parentCandidate, fs.constants.W_OK);
+    return parentCandidate;
+  } catch (err) {
+    // If not writable, fall through to next candidate
+  }
+
+  // 3. Candidate B: User home directory on Linux / cPanel / Hostinger (~/phonesdaddy_media)
+  if (process.env.HOME && fs.existsSync(process.env.HOME)) {
+    const homeCandidate = path.resolve(process.env.HOME, 'phonesdaddy_media');
+    if (fs.existsSync(homeCandidate)) {
+      return homeCandidate;
+    }
+    try {
+      fs.mkdirSync(homeCandidate, { recursive: true });
+      fs.accessSync(homeCandidate, fs.constants.W_OK);
+      return homeCandidate;
+    } catch (_) {}
+  }
+
+  // 4. If running in production mode, force parentCandidate path even if not created yet
+  if (process.env.NODE_ENV === 'production') {
+    return parentCandidate;
   }
 
   return null;

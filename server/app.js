@@ -106,12 +106,26 @@ const staticOptions = {
 };
 
 // Static Folders with optimized HTTP Cache-Control headers (1 Year Immutable for 100% GTmetrix Score)
+// 1. Persistent External Media & Scraped Webfiles (Priority 1)
+app.use('/uploads', express.static(UPLOADS_BASE, staticOptions));
+const localUploads = path.join(__dirname, 'uploads');
+if (fs.existsSync(localUploads) && path.resolve(UPLOADS_BASE) !== path.resolve(localUploads)) {
+  app.use('/uploads', express.static(localUploads, staticOptions));
+}
+
+app.use('/webfiles', express.static(WEBFILES_BASE, staticOptions));
+const localWebfiles = path.join(__dirname, '../public/webfiles');
+if (fs.existsSync(localWebfiles) && path.resolve(WEBFILES_BASE) !== path.resolve(localWebfiles)) {
+  app.use('/webfiles', express.static(localWebfiles, staticOptions));
+}
+
+// 2. Persistent Images Directory (if configured)
 if (IMAGES_BASE && fs.existsSync(IMAGES_BASE) && path.resolve(IMAGES_BASE) !== path.resolve(__dirname, '../public/images')) {
   app.use('/images', express.static(IMAGES_BASE, staticOptions));
 }
+
+// 3. Mount general public static directory (CSS, JS, bundled icons)
 app.use(express.static(path.join(__dirname, '../public'), staticOptions));
-app.use('/uploads', express.static(UPLOADS_BASE, staticOptions));
-app.use('/webfiles', express.static(WEBFILES_BASE, staticOptions));
 
 // REST API Endpoints
 app.use('/api/phones', searchRoutes); // Handles /api/phones/search

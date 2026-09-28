@@ -1,24 +1,21 @@
 #!/bin/bash
 # =============================================================================
-# PhonesDaddy — ONE-TIME PERSISTENT MEDIA SETUP (Linux / Hostinger / cPanel)
+# PhonesDaddy — ONE-TIME MEDIA SETUP (Run on live server via Hostinger Terminal)
 # =============================================================================
-# Run this ONCE on your live server to permanently move all images/media
-# to a dedicated persistent folder OUTSIDE the deployment directory.
+# This script sets up a persistent media directory OUTSIDE the deployment
+# folder so that future Git pulls and ZIP deployments NEVER wipe your images.
 #
-# After this runs:
-#   → All media lives in  ~/phonesdaddy_media/
-#   → Neither Git pull, Git webhook, nor ZIP extraction can EVER touch them
-#   → All future deployments (Git or ZIP) are 100% safe
-#
-# HOW TO RUN ON SERVER:
-#   bash setup-persistent-media.sh
+# HOW TO RUN:
+#   1. Open Hostinger Terminal
+#   2. cd ~/domains/yourdomain.com/public_html
+#   3. bash setup-persistent-media.sh
 # =============================================================================
 
 set -e
 
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 BOLD='\033[1m'
 NC='\033[0m'
 
@@ -26,107 +23,88 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$PROJECT_DIR/.env"
 
 echo ""
-echo -e "${BOLD}============================================================${NC}"
-echo -e "${BOLD}  PhonesDaddy — Persistent Media Setup${NC}"
-echo -e "${BOLD}============================================================${NC}"
+echo -e "${BOLD}${BLUE}============================================================${NC}"
+echo -e "${BOLD}${BLUE}  PhonesDaddy — Persistent Media Setup${NC}"
+echo -e "${BOLD}${BLUE}============================================================${NC}"
 echo ""
+echo -e "  Project : ${BOLD}$PROJECT_DIR${NC}"
 
-# Persistent media directory (outside deployment root)
-# Default: ~/phonesdaddy_media or ../phonesdaddy_media
-if [ -n "$HOME" ] && [ -d "$HOME" ]; then
-  PERSISTENT_MEDIA="${HOME}/phonesdaddy_media"
+# ── Determine media directory ─────────────────────────────────────────────────
+# Candidate 1: One level above deployment (e.g. ~/domains/yourdomain.com/phonesdaddy_media)
+PARENT_MEDIA="$(cd "$PROJECT_DIR/.." 2>/dev/null && pwd)/phonesdaddy_media"
+
+if mkdir -p "$PARENT_MEDIA" 2>/dev/null && [ -w "$PARENT_MEDIA" ]; then
+  PERSISTENT_MEDIA="$PARENT_MEDIA"
+elif [ -n "$HOME" ] && [ -d "$HOME" ]; then
+  PERSISTENT_MEDIA="$HOME/phonesdaddy_media"
+  mkdir -p "$PERSISTENT_MEDIA"
 else
-  PERSISTENT_MEDIA="$(cd "$PROJECT_DIR/.." && pwd)/phonesdaddy_media"
+  PERSISTENT_MEDIA="$PARENT_MEDIA"
 fi
 
-echo -e "This will configure your media storage at:"
-echo -e "  Persistent Media → ${BOLD}${GREEN}$PERSISTENT_MEDIA${NC}"
-echo ""
-echo -e "This folder is completely OUTSIDE your deployment directory."
-echo -e "Git and ZIP extractions can NEVER overwrite or wipe your images."
+echo -e "  Media   : ${BOLD}${GREEN}$PERSISTENT_MEDIA${NC}"
 echo ""
 
-# ── Step 1: Create persistent directories ────────────────────────────────────
+# ── Step 1: Create directory structure ───────────────────────────────────────
 echo -e "${BOLD}Step 1/4 — Creating persistent directories...${NC}"
-UPLOAD_SUBDIRS=(phones brands branding news reviews)
-WEBFILE_SUBDIRS=(phones brands news branding)
 
-for d in "${UPLOAD_SUBDIRS[@]}"; do
-  mkdir -p "$PERSISTENT_MEDIA/uploads/$d"
-  echo -e "  ${GREEN}✓${NC} $PERSISTENT_MEDIA/uploads/$d"
-done
-for d in "${WEBFILE_SUBDIRS[@]}"; do
-  mkdir -p "$PERSISTENT_MEDIA/webfiles/$d"
-  echo -e "  ${GREEN}✓${NC} $PERSISTENT_MEDIA/webfiles/$d"
-done
+mkdir -p "$PERSISTENT_MEDIA/uploads/phones"
+mkdir -p "$PERSISTENT_MEDIA/uploads/brands"
+mkdir -p "$PERSISTENT_MEDIA/uploads/branding"
+mkdir -p "$PERSISTENT_MEDIA/uploads/news"
+mkdir -p "$PERSISTENT_MEDIA/uploads/reviews"
+mkdir -p "$PERSISTENT_MEDIA/webfiles/phones"
+mkdir -p "$PERSISTENT_MEDIA/webfiles/brands"
+mkdir -p "$PERSISTENT_MEDIA/webfiles/news"
+mkdir -p "$PERSISTENT_MEDIA/webfiles/branding"
 mkdir -p "$PERSISTENT_MEDIA/images"
-echo -e "  ${GREEN}✓${NC} $PERSISTENT_MEDIA/images"
+
+echo -e "  ${GREEN}✓${NC} All media directories created"
 echo ""
 
-# ── Step 2: Migrate existing media to persistent location ────────────────────
-echo -e "${BOLD}Step 2/4 — Migrating existing media from project...${NC}"
+# ── Step 2: Migrate any existing media from project ──────────────────────────
+echo -e "${BOLD}Step 2/4 — Preserving any existing media...${NC}"
 
-# Check project server/uploads
-if [ -d "$PROJECT_DIR/server/uploads" ]; then
-  for subdir in "${UPLOAD_SUBDIRS[@]}"; do
-    SRC="$PROJECT_DIR/server/uploads/$subdir"
-    DEST="$PERSISTENT_MEDIA/uploads/$subdir"
-    if [ -d "$SRC" ]; then
-      find "$SRC" -type f ! -name '.gitkeep' -exec cp -n {} "$DEST/" \; 2>/dev/null || true
-    fi
-  done
-fi
-
-# Check project public/webfiles
 if [ -d "$PROJECT_DIR/public/webfiles" ]; then
-  for subdir in "${WEBFILE_SUBDIRS[@]}"; do
-    SRC="$PROJECT_DIR/public/webfiles/$subdir"
-    DEST="$PERSISTENT_MEDIA/webfiles/$subdir"
-    if [ -d "$SRC" ]; then
-      find "$SRC" -type f ! -name '.gitkeep' -exec cp -n {} "$DEST/" \; 2>/dev/null || true
-    fi
-  done
+  cp -rn "$PROJECT_DIR/public/webfiles/"* "$PERSISTENT_MEDIA/webfiles/" 2>/dev/null || true
+  echo -e "  ${GREEN}✓${NC} Preserved webfiles"
 fi
 
-# Check legacy split folders if they exist (~/phonesdaddy_uploads, ~/phonesdaddy_webfiles)
-if [ -d "${HOME}/phonesdaddy_uploads" ] && [ "${HOME}/phonesdaddy_uploads" != "$PERSISTENT_MEDIA/uploads" ]; then
-  cp -rn "${HOME}/phonesdaddy_uploads/"* "$PERSISTENT_MEDIA/uploads/" 2>/dev/null || true
+if [ -d "$PROJECT_DIR/server/uploads" ]; then
+  cp -rn "$PROJECT_DIR/server/uploads/"* "$PERSISTENT_MEDIA/uploads/" 2>/dev/null || true
+  echo -e "  ${GREEN}✓${NC} Preserved uploads"
 fi
-if [ -d "${HOME}/phonesdaddy_webfiles" ] && [ "${HOME}/phonesdaddy_webfiles" != "$PERSISTENT_MEDIA/webfiles" ]; then
-  cp -rn "${HOME}/phonesdaddy_webfiles/"* "$PERSISTENT_MEDIA/webfiles/" 2>/dev/null || true
-fi
-
-TOTAL_FILES=$(find "$PERSISTENT_MEDIA" -type f | wc -l)
-echo -e "  ${GREEN}✓${NC} Media migration complete. Total files in persistent storage: ${BOLD}$TOTAL_FILES${NC}"
 echo ""
 
-# ── Step 3: Update .env with MEDIA_DIR ────────────────────────────────────────
-echo -e "${BOLD}Step 3/4 — Configuring .env...${NC}"
+# ── Step 3: Update .env ───────────────────────────────────────────────────────
+echo -e "${BOLD}Step 3/4 — Updating .env...${NC}"
 
 if [ ! -f "$ENV_FILE" ]; then
   if [ -f "$PROJECT_DIR/.env.example" ]; then
     cp "$PROJECT_DIR/.env.example" "$ENV_FILE"
+    echo -e "  ${GREEN}✓${NC} Created .env from .env.example (fill in your DB credentials!)"
   else
-    touch "$ENV_FILE"
+    echo "NODE_ENV=production" > "$ENV_FILE"
+    echo -e "  ${YELLOW}⚠${NC}  Created minimal .env — add DB credentials manually"
   fi
 fi
 
-# Clean old paths
-sed -i '/^MEDIA_DIR=/d' "$ENV_FILE"
-sed -i '/^UPLOADS_DIR=/d' "$ENV_FILE"
+# Remove old media path entries, add the new unified MEDIA_DIR
+sed -i '/^MEDIA_DIR=/d'    "$ENV_FILE"
+sed -i '/^UPLOADS_DIR=/d'  "$ENV_FILE"
 sed -i '/^WEBFILES_DIR=/d' "$ENV_FILE"
 
-# Append unified MEDIA_DIR
 echo "" >> "$ENV_FILE"
-echo "# Persistent media storage outside deployment folder (safe across all Git & ZIP deployments)" >> "$ENV_FILE"
+echo "# Persistent media — SAFE from Git pull and ZIP extraction" >> "$ENV_FILE"
 echo "MEDIA_DIR=$PERSISTENT_MEDIA" >> "$ENV_FILE"
 
-echo -e "  ${GREEN}✓${NC} Added MEDIA_DIR=$PERSISTENT_MEDIA to .env"
+echo -e "  ${GREEN}✓${NC} MEDIA_DIR set to: $PERSISTENT_MEDIA"
 echo ""
 
-# ── Step 4: Restart application ───────────────────────────────────────────────
+# ── Step 4: Restart app ───────────────────────────────────────────────────────
 echo -e "${BOLD}Step 4/4 — Restarting application...${NC}"
-if command -v pm2 &> /dev/null; then
+
+if command -v pm2 &>/dev/null; then
   PM2_APP=$(pm2 list --no-color 2>/dev/null | grep -E 'online|stopped' | awk '{print $4}' | head -1)
   if [ -n "$PM2_APP" ]; then
     pm2 restart "$PM2_APP" --update-env
@@ -136,13 +114,17 @@ if command -v pm2 &> /dev/null; then
     echo -e "  ${GREEN}✓${NC} Started PM2 process: phonesdaddy"
   fi
 else
-  echo -e "  ${YELLOW}ℹ️  PM2 not found. Please restart your Node.js application in your hosting panel.${NC}"
+  echo -e "  ${YELLOW}ℹ${NC}  PM2 not found."
+  echo -e "     → Go to Hostinger → Node.js App Manager → click 'Restart'"
 fi
-echo ""
 
+echo ""
 echo -e "${BOLD}${GREEN}============================================================${NC}"
-echo -e "${BOLD}${GREEN}  ✅  Persistent Media Setup Complete!${NC}"
+echo -e "${BOLD}${GREEN}  ✅  Setup Complete!${NC}"
 echo -e "${BOLD}${GREEN}============================================================${NC}"
-echo -e "  All media is now stored in: ${BOLD}$PERSISTENT_MEDIA${NC}"
-echo -e "  You can now deploy using Git or ZIP File anytime with 100% confidence."
+echo ""
+echo -e "  All future uploads and phone images will be saved to:"
+echo -e "  ${BOLD}$PERSISTENT_MEDIA${NC}"
+echo ""
+echo -e "  Git pull and ZIP deployments will NEVER overwrite this folder."
 echo ""
