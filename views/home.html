@@ -26,6 +26,7 @@
           <li><a href="/phones" class="nav-link">Mobiles</a></li>
           <li><a href="/brands" class="nav-link">Brands</a></li>
           <li><a href="/compare" class="nav-link">Compare</a></li>
+          <li><a href="/pta-tax-calculator" class="nav-link">PTA Tax 🇵🇰</a></li>
           <li><a href="/news" class="nav-link">News</a></li>
           <li><a href="/admin/login" class="nav-link nav-login-btn"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Login</a></li>
         </ul>
@@ -50,8 +51,8 @@
     </div>
   </header>
 
-  <!-- Popular Brands Strip -->
-  <div class="brands-strip">
+  <!-- Popular Brands Strip (Only on mobile/tablet screens < 992px) -->
+  <div class="brands-strip mobile-only-strip">
     <div class="container">
       <div class="brands-scroll" id="homeBrandsStrip">
         <!-- Populated dynamically via JS -->
@@ -72,14 +73,154 @@
     </div>
   </div>
 
-  <!-- Main Content Container -->
-  <main class="container" style="padding-top: 24px; padding-bottom: 48px;">
+  <!-- Main Content Container with GSMArena-Style 2-Column Desktop Layout -->
+  <main class="container home-layout-container" style="padding-top: 20px; padding-bottom: 48px;">
     
-    <!-- Latest Mobiles -->
-    <section class="section" style="padding-top: 0;">
+    <div class="gsm-page-wrapper home-desktop-wrapper">
+
+      <!-- ====================================================================
+           Desktop Left Sidebar: Modern Professional Advanced Filters
+           ==================================================================== -->
+      <aside class="home-sidebar-col" id="homeSidebarCol">
+        
+        <div class="adv-filter-card" id="advFilterCard">
+          
+          <!-- Header -->
+          <div class="adv-filter-header">
+            <div class="adv-filter-title">
+              <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              <span>Advanced Filters</span>
+            </div>
+            <button type="button" class="adv-filter-reset" id="btnResetAdvFilters" title="Clear all filters">Reset</button>
+          </div>
+
+          <!-- Section 1: 5G Network Quick Toggle -->
+          <div class="adv-filter-section" style="padding-bottom: 12px;">
+            <label class="adv-toggle-row">
+              <div class="adv-toggle-title">
+                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                  <line x1="12" y1="20" x2="12.01" y2="20"/>
+                </svg>
+                <span>5G Network Only</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="adv-toggle-badge">5G FAST</span>
+                <label class="adv-switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="adv5GToggle">
+                  <span class="adv-slider"></span>
+                </label>
+              </div>
+            </label>
+          </div>
+
+          <!-- Section 2: Brands with Live Search & Multi-Select Checkboxes -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Brand</span>
+              <span class="adv-badge-count">22 Brands</span>
+            </div>
+            
+            <div class="adv-search-box">
+              <svg class="adv-search-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+              <input type="text" id="advBrandSearchInput" placeholder="Search brand..." class="adv-search-input" autocomplete="off" aria-label="Search brand">
+            </div>
+
+            <div class="adv-brands-list" id="advBrandsList">
+              {{HOME_SIDEBAR_BRANDS_HTML}}
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
+              <span style="font-size: 11px; color: #94a3b8;">Select 1 or more</span>
+              <a href="/brands" style="font-size: 11.5px; font-weight: 700; color: var(--primary); text-decoration: none;">All Brands Directory &rarr;</a>
+            </div>
+          </div>
+
+          <!-- Section 3: Price Range (PKR) with Dual Inputs & Quick Pills -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Price Range (PKR)</span>
+            </div>
+
+            <div class="adv-price-inputs">
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="advMinPrice" placeholder="Min" min="0" step="5000" class="adv-price-input">
+              </div>
+              <span class="adv-price-sep">–</span>
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="advMaxPrice" placeholder="Max" min="0" step="5000" class="adv-price-input">
+              </div>
+            </div>
+
+            <!-- Quick Price Range Preset Chips -->
+            <div class="adv-chips-grid" id="advPriceChips">
+              <button type="button" class="adv-chip" data-min="" data-max="30000">&lt; 30K</button>
+              <button type="button" class="adv-chip" data-min="30000" data-max="60000">30K–60K</button>
+              <button type="button" class="adv-chip" data-min="60000" data-max="100000">60K–100K</button>
+              <button type="button" class="adv-chip" data-min="100000" data-max="">100K+</button>
+            </div>
+          </div>
+
+          <!-- Section 4: RAM Selection -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">RAM</span>
+            </div>
+            <div class="adv-chips-grid" id="advRamChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="4GB">4 GB</button>
+              <button type="button" class="adv-chip" data-val="6GB">6 GB</button>
+              <button type="button" class="adv-chip" data-val="8GB">8 GB</button>
+              <button type="button" class="adv-chip" data-val="12GB">12 GB+</button>
+            </div>
+          </div>
+
+          <!-- Section 5: Internal Storage -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Storage</span>
+            </div>
+            <div class="adv-chips-grid" id="advStorageChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="64GB">64 GB</button>
+              <button type="button" class="adv-chip" data-val="128GB">128 GB</button>
+              <button type="button" class="adv-chip" data-val="256GB">256 GB</button>
+              <button type="button" class="adv-chip" data-val="512GB">512 GB+</button>
+            </div>
+          </div>
+
+          <!-- Primary Apply Button -->
+          <button type="button" id="btnApplyAdvFilters" class="adv-apply-btn">
+            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <span>Show Matching Phones</span>
+          </button>
+
+        </div>
+
+      </aside>
+
+      <!-- ====================================================================
+           Main Content Column (Right Column on Desktop, Full Width on Mobile)
+           ==================================================================== -->
+      <div class="gsm-main-col home-main-col">
+    
+        <!-- Latest Mobiles -->
+        <section class="section" style="padding-top: 0;">
       <div class="section-header">
         <h1 class="section-title">Latest Mobiles</h1>
-        <a href="/phones?sort=newest" class="view-all-link">View all latest phones &rarr;</a>
+        <a href="/phones?sort=newest" class="view-all-link">View All &rarr;</a>
       </div>
       <div class="phones-grid" id="latestPhonesGrid">
         {{LATEST_PHONES_HTML}}
@@ -90,7 +231,7 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">Popular Mobiles</h2>
-        <a href="/phones?sort=popular" class="view-all-link">View all popular &rarr;</a>
+        <a href="/phones?sort=popular" class="view-all-link">View All &rarr;</a>
       </div>
       <div class="phones-grid" id="popularPhonesGrid">
         {{POPULAR_PHONES_HTML}}
@@ -101,7 +242,7 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">Compare Phones</h2>
-        <a href="/compare" class="view-all-link">Open comparison tool &rarr;</a>
+        <a href="/compare" class="view-all-link">View All &rarr;</a>
       </div>
 
       <div class="compare-widget-box">
@@ -138,7 +279,7 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">Upcoming Mobiles</h2>
-        <a href="/phones?status=Upcoming" class="view-all-link">View upcoming &rarr;</a>
+        <a href="/phones?status=Upcoming" class="view-all-link">View All &rarr;</a>
       </div>
       <div class="phones-grid" id="upcomingPhonesGrid">
         {{UPCOMING_PHONES_HTML}}
@@ -149,7 +290,7 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">Popular Brands</h2>
-        <a href="/brands" class="view-all-link">View all brands &rarr;</a>
+        <a href="/brands" class="view-all-link">View All &rarr;</a>
       </div>
       <div class="brands-grid" id="homeBrandsGrid">
         {{HOME_BRANDS_HTML}}
@@ -159,13 +300,19 @@
     <!-- Hot News & Tech Updates Section -->
     <section class="section" id="newsSection">
       <div class="section-header">
-        <h2 class="section-title"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Hot News &amp; Mobile Tech Blog</h2>
-        <a href="/news" class="view-all-link">View all news &amp; leaks &rarr;</a>
+        <h2 class="section-title"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> <span class="heading-text-main">Latest News</span><span class="heading-text-extra"> &amp; Tech Blog</span></h2>
+        <a href="/news" class="view-all-link">View All &rarr;</a>
       </div>
       <div id="homeHotNewsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
         {{HOT_NEWS_HTML}}
       </div>
     </section>
+
+      </div>
+      <!-- END: gsm-main-col -->
+
+    </div>
+    <!-- END: gsm-page-wrapper -->
 
   </main>
 
@@ -185,6 +332,7 @@
           <h4>Explore</h4>
           <ul class="footer-links">
             <li><a href="/phones">Latest Mobiles</a></li>
+            <li><a href="/pta-tax-calculator">PTA Tax Calculator 🇵🇰</a></li>
             <li><a href="/phones?status=Upcoming">Upcoming Mobiles</a></li>
             <li><a href="/compare">Phone Comparison</a></li>
             <li><a href="/brands">All Brands</a></li>
@@ -254,6 +402,110 @@
             return;
           }
           window.location.href = `/compare?phones=${encodeURIComponent(p1)},${encodeURIComponent(p2)}`;
+        });
+      }
+
+      // ==========================================
+      // Advanced Filters Sidebar Controller
+      // ==========================================
+      const brandSearchInput = document.getElementById('advBrandSearchInput');
+      if (brandSearchInput) {
+        brandSearchInput.addEventListener('input', (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          const items = document.querySelectorAll('#advBrandsList .adv-brand-item');
+          items.forEach(el => {
+            const name = (el.getAttribute('data-brand') || el.textContent).toLowerCase();
+            el.style.display = (!q || name.includes(q)) ? 'flex' : 'none';
+          });
+        });
+      }
+
+      // Quick Price Presets
+      const minPriceInput = document.getElementById('advMinPrice');
+      const maxPriceInput = document.getElementById('advMaxPrice');
+      const priceChips = document.querySelectorAll('#advPriceChips .adv-chip');
+      priceChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const wasActive = chip.classList.contains('active');
+          priceChips.forEach(c => c.classList.remove('active'));
+          if (!wasActive) {
+            chip.classList.add('active');
+            if (minPriceInput) minPriceInput.value = chip.dataset.min || '';
+            if (maxPriceInput) maxPriceInput.value = chip.dataset.max || '';
+          } else {
+            if (minPriceInput) minPriceInput.value = '';
+            if (maxPriceInput) maxPriceInput.value = '';
+          }
+        });
+      });
+
+      // Clear price chips when user types manually
+      [minPriceInput, maxPriceInput].forEach(inp => {
+        if (inp) {
+          inp.addEventListener('input', () => {
+            priceChips.forEach(c => c.classList.remove('active'));
+          });
+        }
+      });
+
+      // RAM Chips (Radio selection)
+      const ramChips = document.querySelectorAll('#advRamChips .adv-chip');
+      let selectedRam = '';
+      ramChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          ramChips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          selectedRam = chip.dataset.val || '';
+        });
+      });
+
+      // Storage Chips (Radio selection)
+      const storageChips = document.querySelectorAll('#advStorageChips .adv-chip');
+      let selectedStorage = '';
+      storageChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          storageChips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          selectedStorage = chip.dataset.val || '';
+        });
+      });
+
+      // Reset Button
+      const btnResetAdv = document.getElementById('btnResetAdvFilters');
+      if (btnResetAdv) {
+        btnResetAdv.addEventListener('click', () => {
+          document.querySelectorAll('#advBrandsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+          if (brandSearchInput) { brandSearchInput.value = ''; brandSearchInput.dispatchEvent(new Event('input')); }
+          if (minPriceInput) minPriceInput.value = '';
+          if (maxPriceInput) maxPriceInput.value = '';
+          priceChips.forEach(c => c.classList.remove('active'));
+          ramChips.forEach(c => c.classList.toggle('active', c.dataset.val === ''));
+          storageChips.forEach(c => c.classList.toggle('active', c.dataset.val === ''));
+          selectedRam = '';
+          selectedStorage = '';
+          const toggle5G = document.getElementById('adv5GToggle');
+          if (toggle5G) toggle5G.checked = false;
+        });
+      }
+
+      // Apply Filters Button
+      const btnApplyAdv = document.getElementById('btnApplyAdvFilters');
+      if (btnApplyAdv) {
+        btnApplyAdv.addEventListener('click', () => {
+          const checkedBrands = Array.from(document.querySelectorAll('#advBrandsList input[name="homeAdvBrand"]:checked')).map(cb => cb.value);
+          const minP = minPriceInput ? minPriceInput.value.trim() : '';
+          const maxP = maxPriceInput ? maxPriceInput.value.trim() : '';
+          const is5G = document.getElementById('adv5GToggle')?.checked;
+
+          const params = new URLSearchParams();
+          checkedBrands.forEach(b => params.append('brand', b));
+          if (minP) params.set('minPrice', minP);
+          if (maxP) params.set('maxPrice', maxP);
+          if (selectedRam) params.set('ram', selectedRam);
+          if (selectedStorage) params.set('storage', selectedStorage);
+          if (is5G) params.set('is5G', '1');
+
+          window.location.href = `/phones?${params.toString()}`;
         });
       }
     });

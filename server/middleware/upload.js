@@ -54,13 +54,78 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+const sharp = require('sharp');
+
+/**
+ * Automatic Sharp image optimization middleware for uploaded images.
+ * Resizes, compresses, and generates WebP thumbnails according to upload category.
+ */
+async function optimizeUploadedImages(req, res, next) {
+  if (!req.file && (!req.files || req.files.length === 0)) {
+    return next();
+  }
+
+  const filesToProcess = req.file ? [req.file] : (Array.isArray(req.files) ? req.files : Object.values(req.files).flat());
+
+  for (const file of filesToProcess) {
+    if (!file || !file.path || !fs.existsSync(file.path)) continue;
+    const ext = path.extname(file.path).toLowerCase();
+    if (ext === '.svg' || ext === '.ico' || ext === '.gif') continue;
+
+    try {
+      const isFavicon = file.fieldname === 'site_favicon' || file.path.includes('favicon');
+      const isLogo = file.fieldname === 'site_logo' || file.path.includes('logo');
+      const isPhone = file.path.includes('phones');
+
+      if (isFavicon) {
+        // Generate crisp 32x32, 180x180 and 192x192 icons in public/ and upload dest
+        const inBuf = fs.readFileSync(file.path);
+        const optBuf = await sharp(inBuf).resize(64, 64, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png({ compressionLevel: 9, palette: true }).toBuffer();
+        fs.writeFileSync(file.path, optBuf);
+        // Also update public root favicons
+        await sharp(inBuf).resize(32, 32).png().toFile(path.join(__dirname, '../../public/favicon.ico')).catch(() => {});
+        await sharp(inBuf).resize(32, 32).png().toFile(path.join(__dirname, '../../public/favicon-32x32.png')).catch(() => {});
+        await sharp(inBuf).resize(180, 180).png({ quality: 80, palette: true }).toFile(path.join(__dirname, '../../public/apple-touch-icon.png')).catch(() => {});
+        await sharp(inBuf).resize(192, 192).png({ quality: 80, palette: true }).toFile(path.join(__dirname, '../../public/favicon-192x192.png')).catch(() => {});
+      } else if (isLogo) {
+        // Resize logo to max 360px wide for 2x retina display (under 15KB)
+        const inBuf = fs.readFileSync(file.path);
+        const optBuf = await sharp(inBuf).resize({ width: 360, withoutEnlargement: true }).png({ compressionLevel: 9, palette: true }).toBuffer();
+        fs.writeFileSync(file.path, optBuf);
+      } else if (isPhone) {
+        // Automatically generate WebP thumbnail (320x424 max, quality 70) alongside image
+        const inBuf = fs.readFileSync(file.path);
+        const thumbPath = file.path.replace(/\.[^.]+$/, '') + '-thumb.webp';
+        await sharp(inBuf)
+          .resize(320, 424, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 70, effort: 4 })
+          .toFile(thumbPath);
+      } else {
+        // General images: resize if > 1200px, compress to efficient WebP/JPEG
+        const inBuf = fs.readFileSync(file.path);
+        const meta = await sharp(inBuf).metadata();
+        if (meta.width && meta.width > 1200) {
+          const optBuf = await sharp(inBuf).resize({ width: 1200, withoutEnlargement: true }).toBuffer();
+          fs.writeFileSync(file.path, optBuf);
+        }
+      }
+    } catch (err) {
+      console.warn('Sharp optimization warning on upload:', err.message);
+    }
+  }
+
+  next();
+}
+
 const upload = multer({
   storage: storage,
   limits: {
     fileSize: 20 * 1024 * 1024, // 20 MB max for file uploads
-    fieldSize: 50 * 1024 * 1024  // 50 MB max for text fields (rich HTML content from Quill editor)
+    fieldSize: 50 * 1024 * 1024  // 50 MB max for text fields
   },
   fileFilter: fileFilter
 });
+
+upload.optimizeUploadedImages = optimizeUploadedImages;
 
 module.exports = upload;

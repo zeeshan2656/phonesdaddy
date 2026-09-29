@@ -2564,11 +2564,27 @@ async function loadSettingsData() {
       updateBrandMockups();
       updateAdminSidebarBrand(currentBrandingState);
 
-      // Load WhatsApp Floating Contact Button Settings
+      // Floating Social Channels (YouTube, Instagram, TikTok, Facebook, WhatsApp)
       const waNumberInput = document.getElementById('whatsapp_number');
       const waMsgInput = document.getElementById('whatsapp_message');
       const waToggle = document.getElementById('whatsapp_enabled');
       const waStatusLabel = document.getElementById('whatsappStatusLabel');
+
+      const fbUrlInput = document.getElementById('facebook_url');
+      const fbToggle = document.getElementById('facebook_enabled');
+      const fbStatusLabel = document.getElementById('facebookStatusLabel');
+
+      const ttUrlInput = document.getElementById('tiktok_url');
+      const ttToggle = document.getElementById('tiktok_enabled');
+      const ttStatusLabel = document.getElementById('tiktokStatusLabel');
+
+      const ytUrlInput = document.getElementById('youtube_url');
+      const ytToggle = document.getElementById('youtube_enabled');
+      const ytStatusLabel = document.getElementById('youtubeStatusLabel');
+
+      const igUrlInput = document.getElementById('instagram_url');
+      const igToggle = document.getElementById('instagram_enabled');
+      const igStatusLabel = document.getElementById('instagramStatusLabel');
 
       if (waNumberInput) waNumberInput.value = s.whatsapp_number || '';
       if (waMsgInput) waMsgInput.value = s.whatsapp_message || 'Hello! I have an inquiry from PhonesDaddy.';
@@ -2583,10 +2599,75 @@ async function loadSettingsData() {
             waStatusLabel.innerText = waToggle.checked ? 'Active' : 'Disabled';
             waStatusLabel.style.color = waToggle.checked ? '#0d9488' : '#ef4444';
           }
-          if (typeof updateWhatsAppPreview === 'function') updateWhatsAppPreview();
+          if (typeof updateSocialChannelsPreview === 'function') updateSocialChannelsPreview();
         };
       }
-      if (typeof updateWhatsAppPreview === 'function') updateWhatsAppPreview();
+
+      if (fbUrlInput) fbUrlInput.value = s.facebook_url || '';
+      if (fbToggle) {
+        fbToggle.checked = s.facebook_enabled !== '0' && s.facebook_enabled !== false;
+        if (fbStatusLabel) {
+          fbStatusLabel.innerText = fbToggle.checked ? 'Active' : 'Disabled';
+          fbStatusLabel.style.color = fbToggle.checked ? '#0d9488' : '#ef4444';
+        }
+        fbToggle.onchange = () => {
+          if (fbStatusLabel) {
+            fbStatusLabel.innerText = fbToggle.checked ? 'Active' : 'Disabled';
+            fbStatusLabel.style.color = fbToggle.checked ? '#0d9488' : '#ef4444';
+          }
+          if (typeof updateSocialChannelsPreview === 'function') updateSocialChannelsPreview();
+        };
+      }
+
+      if (ttUrlInput) ttUrlInput.value = s.tiktok_url || '';
+      if (ttToggle) {
+        ttToggle.checked = s.tiktok_enabled !== '0' && s.tiktok_enabled !== false;
+        if (ttStatusLabel) {
+          ttStatusLabel.innerText = ttToggle.checked ? 'Active' : 'Disabled';
+          ttStatusLabel.style.color = ttToggle.checked ? '#0d9488' : '#ef4444';
+        }
+        ttToggle.onchange = () => {
+          if (ttStatusLabel) {
+            ttStatusLabel.innerText = ttToggle.checked ? 'Active' : 'Disabled';
+            ttStatusLabel.style.color = ttToggle.checked ? '#0d9488' : '#ef4444';
+          }
+          if (typeof updateSocialChannelsPreview === 'function') updateSocialChannelsPreview();
+        };
+      }
+
+      if (ytUrlInput) ytUrlInput.value = s.youtube_url || '';
+      if (ytToggle) {
+        ytToggle.checked = s.youtube_enabled !== '0' && s.youtube_enabled !== false;
+        if (ytStatusLabel) {
+          ytStatusLabel.innerText = ytToggle.checked ? 'Active' : 'Disabled';
+          ytStatusLabel.style.color = ytToggle.checked ? '#0d9488' : '#ef4444';
+        }
+        ytToggle.onchange = () => {
+          if (ytStatusLabel) {
+            ytStatusLabel.innerText = ytToggle.checked ? 'Active' : 'Disabled';
+            ytStatusLabel.style.color = ytToggle.checked ? '#0d9488' : '#ef4444';
+          }
+          if (typeof updateSocialChannelsPreview === 'function') updateSocialChannelsPreview();
+        };
+      }
+
+      if (igUrlInput) igUrlInput.value = s.instagram_url || '';
+      if (igToggle) {
+        igToggle.checked = s.instagram_enabled !== '0' && s.instagram_enabled !== false;
+        if (igStatusLabel) {
+          igStatusLabel.innerText = igToggle.checked ? 'Active' : 'Disabled';
+          igStatusLabel.style.color = igToggle.checked ? '#0d9488' : '#ef4444';
+        }
+        igToggle.onchange = () => {
+          if (igStatusLabel) {
+            igStatusLabel.innerText = igToggle.checked ? 'Active' : 'Disabled';
+            igStatusLabel.style.color = igToggle.checked ? '#0d9488' : '#ef4444';
+          }
+          if (typeof updateSocialChannelsPreview === 'function') updateSocialChannelsPreview();
+        };
+      }
+
+      if (typeof updateSocialChannelsPreview === 'function') updateSocialChannelsPreview();
 
       const headToggle = document.getElementById('is_head_code_enabled');
       const bodyToggle = document.getElementById('is_body_code_enabled');
@@ -2690,10 +2771,18 @@ async function submitSettingsForm() {
     footer_copyright: (document.getElementById('footer_copyright') ? document.getElementById('footer_copyright').value : '').trim(),
     footer_about: (document.getElementById('footer_about') ? document.getElementById('footer_about').value : '').trim(),
 
-    // Floating WhatsApp Contact Button
+    // Floating Social Channels (YouTube, Instagram, TikTok, Facebook, WhatsApp)
     whatsapp_number: (document.getElementById('whatsapp_number') ? document.getElementById('whatsapp_number').value : '').trim(),
     whatsapp_message: (document.getElementById('whatsapp_message') ? document.getElementById('whatsapp_message').value : '').trim(),
     whatsapp_enabled: document.getElementById('whatsapp_enabled') ? document.getElementById('whatsapp_enabled').checked : true,
+    facebook_url: (document.getElementById('facebook_url') ? document.getElementById('facebook_url').value : '').trim(),
+    facebook_enabled: document.getElementById('facebook_enabled') ? document.getElementById('facebook_enabled').checked : true,
+    tiktok_url: (document.getElementById('tiktok_url') ? document.getElementById('tiktok_url').value : '').trim(),
+    tiktok_enabled: document.getElementById('tiktok_enabled') ? document.getElementById('tiktok_enabled').checked : true,
+    youtube_url: (document.getElementById('youtube_url') ? document.getElementById('youtube_url').value : '').trim(),
+    youtube_enabled: document.getElementById('youtube_enabled') ? document.getElementById('youtube_enabled').checked : true,
+    instagram_url: (document.getElementById('instagram_url') ? document.getElementById('instagram_url').value : '').trim(),
+    instagram_enabled: document.getElementById('instagram_enabled') ? document.getElementById('instagram_enabled').checked : true,
 
     // Head & Body Code Snippets (Base64 safe encoded to prevent Hostinger ModSecurity WAF blocks)
     is_head_code_enabled: document.getElementById('is_head_code_enabled') ? document.getElementById('is_head_code_enabled').checked : true,
@@ -2778,45 +2867,150 @@ async function submitSettingsForm() {
 }
 
 /**
- * Real-time preview and test link generator for WhatsApp contact button
+ * Real-time preview and test link generator for WhatsApp, Facebook, TikTok channels
  */
-function updateWhatsAppPreview() {
+function updateSocialChannelsPreview() {
+  // 1. WhatsApp
   const numberInput = document.getElementById('whatsapp_number');
   const msgInput = document.getElementById('whatsapp_message');
-  const toggle = document.getElementById('whatsapp_enabled');
-  const linkText = document.getElementById('whatsappPreviewLinkText');
-  const testBtn = document.getElementById('btnTestWhatsApp');
+  const waToggle = document.getElementById('whatsapp_enabled');
+  const testWaBtn = document.getElementById('btnTestWhatsApp');
+  const previewWaIcon = document.getElementById('previewWhatsappIcon');
 
-  if (!numberInput || !linkText || !testBtn) return;
-
-  const rawNumber = numberInput.value.trim();
+  const rawNumber = numberInput ? numberInput.value.trim() : '';
   const cleanNumber = rawNumber.replace(/[^\d]/g, '');
   const msg = (msgInput ? msgInput.value.trim() : '') || 'Hello! I have an inquiry from PhonesDaddy.';
-  const isEnabled = toggle ? toggle.checked : true;
+  const isWaActive = (waToggle ? waToggle.checked : true) && !!cleanNumber;
 
-  if (!cleanNumber) {
-    linkText.innerHTML = '<span style="color: #f59e0b; font-weight: 700;">⚠️ Inactive:</span> Enter your admin WhatsApp number above to activate the button.';
-    testBtn.removeAttribute('href');
-    testBtn.style.opacity = '0.4';
-    testBtn.style.pointerEvents = 'none';
-    return;
+  if (testWaBtn) {
+    if (isWaActive) {
+      testWaBtn.href = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
+      testWaBtn.style.opacity = '1';
+      testWaBtn.style.pointerEvents = 'auto';
+    } else {
+      testWaBtn.removeAttribute('href');
+      testWaBtn.style.opacity = '0.35';
+      testWaBtn.style.pointerEvents = 'none';
+    }
+  }
+  if (previewWaIcon) {
+    previewWaIcon.style.opacity = isWaActive ? '1' : '0.25';
   }
 
-  if (!isEnabled) {
-    linkText.innerHTML = '<span style="color: #ef4444; font-weight: 700;">🔴 Disabled:</span> The switch is currently turned off. Switch to Active to display on live site.';
-    testBtn.removeAttribute('href');
-    testBtn.style.opacity = '0.4';
-    testBtn.style.pointerEvents = 'none';
-    return;
+  // 2. Facebook
+  const fbInput = document.getElementById('facebook_url');
+  const fbToggle = document.getElementById('facebook_enabled');
+  const testFbBtn = document.getElementById('btnTestFacebook');
+  const previewFbIcon = document.getElementById('previewFacebookIcon');
+
+  const fbUrl = fbInput ? fbInput.value.trim() : '';
+  const isFbActive = (fbToggle ? fbToggle.checked : true) && !!fbUrl;
+
+  if (testFbBtn) {
+    if (isFbActive) {
+      testFbBtn.href = fbUrl;
+      testFbBtn.style.opacity = '1';
+      testFbBtn.style.pointerEvents = 'auto';
+    } else {
+      testFbBtn.removeAttribute('href');
+      testFbBtn.style.opacity = '0.35';
+      testFbBtn.style.pointerEvents = 'none';
+    }
+  }
+  if (previewFbIcon) {
+    previewFbIcon.style.opacity = isFbActive ? '1' : '0.25';
   }
 
-  const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(msg)}`;
-  linkText.innerHTML = `<span style="color: #10b981; font-weight: 700;">🟢 Active:</span> Directs visitors to <strong style="color: #38bdf8;">+${cleanNumber}</strong> with pre-filled message.`;
-  testBtn.href = waUrl;
-  testBtn.style.opacity = '1';
-  testBtn.style.pointerEvents = 'auto';
+  // 3. TikTok
+  const ttInput = document.getElementById('tiktok_url');
+  const ttToggle = document.getElementById('tiktok_enabled');
+  const testTtBtn = document.getElementById('btnTestTikTok');
+  const previewTtIcon = document.getElementById('previewTiktokIcon');
+
+  const ttUrl = ttInput ? ttInput.value.trim() : '';
+  const isTtActive = (ttToggle ? ttToggle.checked : true) && !!ttUrl;
+
+  if (testTtBtn) {
+    if (isTtActive) {
+      testTtBtn.href = ttUrl;
+      testTtBtn.style.opacity = '1';
+      testTtBtn.style.pointerEvents = 'auto';
+    } else {
+      testTtBtn.removeAttribute('href');
+      testTtBtn.style.opacity = '0.35';
+      testTtBtn.style.pointerEvents = 'none';
+    }
+  }
+  if (previewTtIcon) {
+    previewTtIcon.style.opacity = isTtActive ? '1' : '0.25';
+  }
+
+  // 4. YouTube
+  const ytInput = document.getElementById('youtube_url');
+  const ytToggle = document.getElementById('youtube_enabled');
+  const testYtBtn = document.getElementById('btnTestYouTube');
+  const previewYtIcon = document.getElementById('previewYoutubeIcon');
+
+  const ytUrl = ytInput ? ytInput.value.trim() : '';
+  const isYtActive = (ytToggle ? ytToggle.checked : true) && !!ytUrl;
+
+  if (testYtBtn) {
+    if (isYtActive) {
+      testYtBtn.href = ytUrl;
+      testYtBtn.style.opacity = '1';
+      testYtBtn.style.pointerEvents = 'auto';
+    } else {
+      testYtBtn.removeAttribute('href');
+      testYtBtn.style.opacity = '0.35';
+      testYtBtn.style.pointerEvents = 'none';
+    }
+  }
+  if (previewYtIcon) {
+    previewYtIcon.style.opacity = isYtActive ? '1' : '0.25';
+  }
+
+  // 5. Instagram
+  const igInput = document.getElementById('instagram_url');
+  const igToggle = document.getElementById('instagram_enabled');
+  const testIgBtn = document.getElementById('btnTestInstagram');
+  const previewIgIcon = document.getElementById('previewInstagramIcon');
+
+  const igUrl = igInput ? igInput.value.trim() : '';
+  const isIgActive = (igToggle ? igToggle.checked : true) && !!igUrl;
+
+  if (testIgBtn) {
+    if (isIgActive) {
+      testIgBtn.href = igUrl;
+      testIgBtn.style.opacity = '1';
+      testIgBtn.style.pointerEvents = 'auto';
+    } else {
+      testIgBtn.removeAttribute('href');
+      testIgBtn.style.opacity = '0.35';
+      testIgBtn.style.pointerEvents = 'none';
+    }
+  }
+  if (previewIgIcon) {
+    previewIgIcon.style.opacity = isIgActive ? '1' : '0.25';
+  }
+
+  // Summary
+  const summary = document.getElementById('socialDockStatusSummary');
+  if (summary) {
+    const activeList = [];
+    if (isYtActive) activeList.push('YouTube (Top)');
+    if (isIgActive) activeList.push('Instagram');
+    if (isTtActive) activeList.push('TikTok');
+    if (isFbActive) activeList.push('Facebook');
+    if (isWaActive) activeList.push('WhatsApp (Bottom)');
+    if (activeList.length > 0) {
+      summary.innerHTML = `<span style="color: #10b981; font-weight: 700;">Active Badges:</span> ${activeList.join(' &rarr; ')} (stacked vertically above Scroll-To-Top)`;
+    } else {
+      summary.innerHTML = `<span style="color: #f59e0b; font-weight: 700;">All Badges Inactive:</span> Enable switches and provide valid links or phone number above.`;
+    }
+  }
 }
-window.updateWhatsAppPreview = updateWhatsAppPreview;
+window.updateSocialChannelsPreview = updateSocialChannelsPreview;
+window.updateWhatsAppPreview = updateSocialChannelsPreview;
 
 function applyAdPreset(slotKey, sizeType) {
   const txt = document.getElementById(slotKey);
@@ -4811,12 +5005,11 @@ function initSettingsDropdown() {
   const dropdown = document.getElementById('navSettingsDropdown');
   if (!dropdown) return;
 
-  const isSettingsPage = window.location.pathname.startsWith('/admin/settings');
+  // By default settings is collapsed; it only gets opened on user action
   const stored = localStorage.getItem('admin_nav_settings_collapsed');
-
-  if (isSettingsPage) {
+  if (stored === '0') {
     dropdown.classList.remove('collapsed');
-  } else if (stored === '1') {
+  } else {
     dropdown.classList.add('collapsed');
   }
 }

@@ -6,10 +6,15 @@
   RewriteEngine On
   RewriteBase /
 
-  # Enforce HTTPS if behind reverse proxy
-  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  # 1. Canonical Redirect: www to non-www in a SINGLE 301 hop (preserves HTTPS)
+  RewriteCond %{HTTP_HOST} ^www\.phonesdaddy\.com$ [NC]
+  RewriteRule ^(.*)$ https://phonesdaddy.com/$1 [L,R=301]
+
+  # 2. Enforce HTTPS for non-www domain in a SINGLE 301 hop
   RewriteCond %{HTTPS} off
-  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteCond %{HTTP_HOST} ^phonesdaddy\.com$ [NC]
+  RewriteRule ^(.*)$ https://phonesdaddy.com/$1 [L,R=301]
 </IfModule>
 
 # ==============================================================================
@@ -39,6 +44,7 @@
 # ==============================================================================
 <IfModule mod_expires.c>
   ExpiresActive On
+  ExpiresDefault "access plus 1 year"
 
   # Images: 1 Year Immutable
   ExpiresByType image/jpeg "access plus 1 year"
@@ -55,26 +61,31 @@
   ExpiresByType font/woff "access plus 1 year"
   ExpiresByType font/woff2 "access plus 1 year"
 
-  # CSS and JavaScript: 1 Year (100% Score on GTmetrix Cache Policy)
+  # CSS and JavaScript: 1 Year Immutable
   ExpiresByType text/css "access plus 1 year"
   ExpiresByType text/javascript "access plus 1 year"
   ExpiresByType application/javascript "access plus 1 year"
   ExpiresByType application/x-javascript "access plus 1 year"
 
-  # HTML: 5 minutes with revalidation
-  ExpiresByType text/html "access plus 300 seconds"
+  # HTML: Fresh revalidation with ETags
+  ExpiresByType text/html "access plus 0 seconds"
 </IfModule>
 
 <IfModule mod_headers.c>
-  # 1 Year Immutable Cache for Static Web Files & Assets
-  <FilesMatch "\.(ico|jpe?g|png|gif|webp|svg|woff2?|ttf|otf)$">
+  # 1 Year Immutable Cache for Static Web Files, Images, Fonts, CSS, JS
+  <FilesMatch "\.(ico|jpe?g|png|gif|webp|svg|woff2?|ttf|otf|css|js)$">
+    Header always set Cache-Control "public, max-age=31536000, immutable"
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
 
-  # 1-Year Immutable Cache for CSS & JS
-  <FilesMatch "\.(css|js)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
+  # HTML documents: must-revalidate with ETag
+  <FilesMatch "\.(html|htm)$">
+    Header always set Cache-Control "public, max-age=180, stale-while-revalidate=600"
+    Header set Cache-Control "public, max-age=180, stale-while-revalidate=600"
   </FilesMatch>
+
+  # HSTS (Strict-Transport-Security): 1 Year + subdomains + preload
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
   # Keep-Alive Connection Optimization
   Header set Connection "keep-alive"
@@ -82,4 +93,5 @@
   # Security & Performance Headers
   Header set X-Content-Type-Options "nosniff"
   Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>

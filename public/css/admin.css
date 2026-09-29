@@ -1014,6 +1014,7 @@ body.admin-sidebar-open {
 }
 
 .admin-nav-item-dropdown.collapsed .admin-nav-submenu {
+  display: none !important;
   max-height: 0 !important;
   opacity: 0 !important;
   padding-top: 0 !important;

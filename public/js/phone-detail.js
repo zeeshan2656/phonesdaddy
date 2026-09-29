@@ -1,5 +1,20 @@
 // PhonesDaddy - Phone Detail Page Script
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatPKR(num) {
+  if (!num || isNaN(parseFloat(num)) || parseFloat(num) <= 0) return 'Price on Request';
+  return 'Rs. ' + Math.round(parseFloat(num)).toLocaleString('en-PK');
+}
+
 async function initPhoneDetail() {
   if (window.__INITIAL_PHONE__) {
     renderPhoneDetail(window.__INITIAL_PHONE__);
@@ -96,6 +111,11 @@ function renderPhoneDetail(phone) {
   const overviewEl = document.getElementById('phoneDetailSummaryParagraph');
   const overviewTitle = document.getElementById('overviewHeadingTitle');
   const overviewCard = document.getElementById('phoneOverviewCard');
+  const overviewWrap = document.getElementById('overviewContentWrap');
+  const overviewToggleWrap = document.getElementById('overviewToggleWrap');
+  const btnToggleOverview = document.getElementById('btnToggleOverview');
+  const overviewToggleText = document.getElementById('overviewToggleText');
+  const overviewToggleIcon = document.getElementById('overviewToggleIcon');
 
   const fullSummary = phone.short_description || `${phone.name} full mobile phone specifications and features.`;
 
@@ -105,10 +125,29 @@ function renderPhoneDetail(phone) {
   }
 
   if (overviewEl) {
-    if (phone.short_description && phone.short_description.trim().length > 0) {
-      overviewEl.innerText = phone.short_description.trim();
+    const summaryText = (phone.short_description || '').trim();
+    if (summaryText.length > 0) {
+      overviewEl.innerText = summaryText;
       if (overviewTitle) overviewTitle.innerText = `${phone.name} — Device Overview & Key Highlights`;
       if (overviewCard) overviewCard.style.display = 'block';
+
+      // Check if overview has substantial data to collapse
+      requestAnimationFrame(() => {
+        const textLen = summaryText.length;
+        const lineCount = summaryText.split('\n').filter(Boolean).length;
+        const scrollH = overviewWrap ? overviewWrap.scrollHeight : overviewEl.scrollHeight;
+
+        if (textLen > 220 || lineCount > 3 || scrollH > 165) {
+          if (overviewWrap) overviewWrap.classList.add('collapsed');
+          if (overviewToggleWrap) overviewToggleWrap.style.display = 'flex';
+          if (btnToggleOverview) btnToggleOverview.setAttribute('aria-expanded', 'false');
+          if (overviewToggleText) overviewToggleText.textContent = 'Read More';
+          if (overviewToggleIcon) overviewToggleIcon.innerHTML = '&darr;';
+        } else {
+          if (overviewWrap) overviewWrap.classList.remove('collapsed');
+          if (overviewToggleWrap) overviewToggleWrap.style.display = 'none';
+        }
+      });
     } else {
       if (overviewCard) overviewCard.style.display = 'none';
     }
@@ -159,6 +198,7 @@ function renderPhoneDetail(phone) {
   // Render GSMArena Sidebar Widgets
   renderSidebarBrands();
   renderSidebarPrices(phone);
+  renderSidebarPta(phone);
   renderSidebarNews(phone.related_news, phone.name, phone.brand_name);
   renderSidebarReviews(phone);
   renderSidebarRelatedDevices(phone.related_phones, phone.brand_slug);
@@ -171,8 +211,9 @@ function renderPhoneDetail(phone) {
 
 let _cachedBrands = null;
 async function renderSidebarBrands() {
-  const container = document.getElementById('sidebarBrandsGrid');
-  if (!container) return;
+  const advContainer = document.getElementById('detailBrandsList');
+  const oldContainer = document.getElementById('sidebarBrandsGrid');
+  const countBadge = document.getElementById('detailBrandBadgeCount');
 
   try {
     if (!_cachedBrands) {
@@ -184,14 +225,140 @@ async function renderSidebarBrands() {
     }
 
     if (_cachedBrands && _cachedBrands.length > 0) {
-      container.innerHTML = _cachedBrands.slice(0, 18).map(b => `
-        <a href="/brand/${b.slug}" class="gsm-brand-item" title="${b.name}">
-          ${b.name.toUpperCase()}
-        </a>
-      `).join('');
+      if (countBadge) {
+        countBadge.textContent = `${_cachedBrands.length} Brands`;
+      }
+
+      if (advContainer) {
+        advContainer.innerHTML = _cachedBrands.map(b => {
+          const count = parseInt(b.phone_count, 10) || 0;
+          return `
+            <label class="adv-brand-item" data-brand="${b.name.toLowerCase()}" title="${b.name} (${count} phones)">
+              <div class="adv-brand-left">
+                <input type="checkbox" name="detailAdvBrand" value="${b.slug}" class="adv-brand-checkbox">
+                <span class="adv-brand-name">${b.name}</span>
+              </div>
+              <span class="adv-brand-count">${count}</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      if (oldContainer) {
+        oldContainer.innerHTML = _cachedBrands.slice(0, 18).map(b => `
+          <a href="/brand/${b.slug}" class="gsm-brand-item" title="${b.name}">
+            ${b.name.toUpperCase()}
+          </a>
+        `).join('');
+      }
+
+      initDetailAdvFilterListeners();
     }
   } catch (err) {
     console.warn('Could not load dynamic brands for sidebar:', err);
+  }
+}
+
+let _detailFiltersInitialized = false;
+function initDetailAdvFilterListeners() {
+  if (_detailFiltersInitialized) return;
+  _detailFiltersInitialized = true;
+
+  // Brand Search
+  const brandSearchInput = document.getElementById('detailBrandSearchInput');
+  if (brandSearchInput) {
+    brandSearchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const items = document.querySelectorAll('#detailBrandsList .adv-brand-item');
+      items.forEach(item => {
+        const name = item.dataset.brand || '';
+        item.style.display = name.includes(q) ? 'flex' : 'none';
+      });
+    });
+  }
+
+  // Price inputs & chips
+  const minPriceInput = document.getElementById('detailMinPrice');
+  const maxPriceInput = document.getElementById('detailMaxPrice');
+  const priceChips = document.querySelectorAll('#detailPriceChips .adv-chip');
+
+  priceChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const isActive = chip.classList.contains('active');
+      priceChips.forEach(c => c.classList.remove('active'));
+      if (!isActive) {
+        chip.classList.add('active');
+        if (minPriceInput) minPriceInput.value = chip.dataset.min || '';
+        if (maxPriceInput) maxPriceInput.value = chip.dataset.max || '';
+      } else {
+        if (minPriceInput) minPriceInput.value = '';
+        if (maxPriceInput) maxPriceInput.value = '';
+      }
+    });
+  });
+
+  // RAM Chips
+  const ramChips = document.querySelectorAll('#detailRamChips .adv-chip');
+  let selectedRam = '';
+  ramChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      ramChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedRam = chip.dataset.val || '';
+    });
+  });
+
+  // Storage Chips
+  const storageChips = document.querySelectorAll('#detailStorageChips .adv-chip');
+  let selectedStorage = '';
+  storageChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      storageChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedStorage = chip.dataset.val || '';
+    });
+  });
+
+  // Reset Button
+  const btnReset = document.getElementById('btnResetDetailFilters');
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      document.querySelectorAll('#detailBrandsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      if (brandSearchInput) {
+        brandSearchInput.value = '';
+        brandSearchInput.dispatchEvent(new Event('input'));
+      }
+      if (minPriceInput) minPriceInput.value = '';
+      if (maxPriceInput) maxPriceInput.value = '';
+      priceChips.forEach(c => c.classList.remove('active'));
+      ramChips.forEach(c => c.classList.toggle('active', c.dataset.val === ''));
+      storageChips.forEach(c => c.classList.toggle('active', c.dataset.val === ''));
+      selectedRam = '';
+      selectedStorage = '';
+      const toggle5G = document.getElementById('detail5GToggle');
+      if (toggle5G) toggle5G.checked = false;
+    });
+  }
+
+  // Apply Button
+  const btnApply = document.getElementById('btnApplyDetailFilters');
+  if (btnApply) {
+    btnApply.addEventListener('click', () => {
+      const checkedBrands = Array.from(document.querySelectorAll('#detailBrandsList input[name="detailAdvBrand"]:checked')).map(cb => cb.value);
+      const minP = minPriceInput ? minPriceInput.value.trim() : '';
+      const maxP = maxPriceInput ? maxPriceInput.value.trim() : '';
+      const is5G = document.getElementById('detail5GToggle')?.checked;
+
+      const params = new URLSearchParams();
+      checkedBrands.forEach(b => params.append('brand', b));
+      if (minP) params.set('minPrice', minP);
+      if (maxP) params.set('maxPrice', maxP);
+      if (selectedRam) params.set('ram', selectedRam);
+      if (selectedStorage) params.set('storage', selectedStorage);
+      if (is5G) params.set('is5G', '1');
+
+      window.location.href = `/phones?${params.toString()}`;
+    });
   }
 }
 
@@ -237,6 +404,84 @@ function renderSidebarPrices(phone) {
   }
 }
 
+async function renderSidebarPta(phone) {
+  const cnicEl = document.getElementById('sidebarPtaCNIC');
+  const passportEl = document.getElementById('sidebarPtaPassport');
+  const nonPtaEl = document.getElementById('sidebarPtaNonPta');
+  const calcBtn = document.getElementById('sidebarPtaCalcBtn');
+  const pillValEl = document.getElementById('phoneDetailPtaVal');
+  const pillLinkEl = document.getElementById('phoneDetailPtaLink');
+
+  const phoneName = phone.name || '';
+  const pricePkr = phone.price || 0;
+  const priceUsd = pricePkr > 0 ? Math.round(pricePkr / 280) : 0;
+
+  const calcUrl = `/pta-tax-calculator?name=${encodeURIComponent(phoneName)}&price=${priceUsd}`;
+  if (calcBtn) calcBtn.href = calcUrl;
+  if (pillLinkEl) pillLinkEl.href = calcUrl;
+
+  try {
+    const res = await fetch(`/api/pta-tax/calculate?name=${encodeURIComponent(phoneName)}&price=${priceUsd}`);
+    const data = await res.json();
+    if (data.success && data.tax) {
+      const tax = data.tax;
+      if (cnicEl) cnicEl.textContent = `Rs. ${tax.cnicTax.toLocaleString()}`;
+      if (passportEl) passportEl.textContent = `Rs. ${tax.passportTax.toLocaleString()}`;
+      if (pillValEl) pillValEl.textContent = `Rs. ${tax.cnicTax.toLocaleString()} (CNIC)`;
+
+      if (nonPtaEl) {
+        if (pricePkr > 0 && pricePkr > tax.cnicTax) {
+          const nonPtaEst = Math.max(Math.round(pricePkr * 0.65), pricePkr - tax.cnicTax);
+          nonPtaEl.textContent = `~Rs. ${nonPtaEst.toLocaleString()}`;
+        } else if (priceUsd > 0) {
+          const nonPtaEst = priceUsd * 280;
+          nonPtaEl.textContent = `~Rs. ${nonPtaEst.toLocaleString()}`;
+        } else {
+          nonPtaEl.textContent = 'Contact Seller';
+        }
+      }
+    } else {
+      if (cnicEl) cnicEl.textContent = 'View Slabs';
+      if (passportEl) passportEl.textContent = 'View Slabs';
+      if (pillValEl) pillValEl.textContent = 'Check Slabs';
+    }
+  } catch (err) {
+    console.warn('Could not calculate PTA tax for phone:', err);
+    if (cnicEl) cnicEl.textContent = 'Check Details';
+    if (passportEl) passportEl.textContent = 'Check Details';
+    if (pillValEl) pillValEl.textContent = 'Check Details';
+  }
+}
+
+window.toggleOverviewContent = function() {
+  const wrapEl = document.getElementById('overviewContentWrap');
+  const toggleBtn = document.getElementById('btnToggleOverview');
+  const toggleText = document.getElementById('overviewToggleText');
+  const toggleIcon = document.getElementById('overviewToggleIcon');
+  if (!wrapEl) return;
+
+  const isCollapsed = wrapEl.classList.contains('collapsed');
+  if (isCollapsed) {
+    wrapEl.classList.remove('collapsed');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+    if (toggleText) toggleText.textContent = 'Read Less';
+    if (toggleIcon) toggleIcon.innerHTML = '&uarr;';
+  } else {
+    wrapEl.classList.add('collapsed');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+    if (toggleText) toggleText.textContent = 'Read More';
+    if (toggleIcon) toggleIcon.innerHTML = '&darr;';
+
+    const cardEl = document.getElementById('phoneOverviewCard');
+    if (cardEl) {
+      const rect = cardEl.getBoundingClientRect();
+      if (rect.top < 70) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+};
+
 function handleSidebarVariantChange(val) {
   const pkrEl = document.getElementById('sidebarPricePKR');
   const usdEl = document.getElementById('sidebarPriceUSD');
@@ -267,7 +512,7 @@ function renderSidebarNews(newsList, phoneName, brandName) {
   }
 
   listEl.innerHTML = newsList.slice(0, 4).map(art => {
-    const imgUrl = art.image || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=200&q=80';
+    const imgUrl = art.image || '/images/news/news-1.webp';
     const dateStr = art.created_at ? new Date(art.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
     return `
       <a href="/news/${art.slug}" class="gsm-news-item">

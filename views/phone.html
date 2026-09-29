@@ -37,6 +37,7 @@
           <li><a href="/phones" class="nav-link active">Mobiles</a></li>
           <li><a href="/brands" class="nav-link">Brands</a></li>
           <li><a href="/compare" class="nav-link">Compare</a></li>
+          <li><a href="/pta-tax-calculator" class="nav-link">PTA Tax 🇵🇰</a></li>
           <li><a href="/news" class="nav-link">News</a></li>
           <li><a href="/admin/login" class="nav-link nav-login-btn"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Login</a></li>
         </ul>
@@ -83,35 +84,131 @@
            ==================================================================== -->
       <aside class="gsm-sidebar-col" id="gsmSidebarCol">
 
-        <!-- 1. PHONE FINDER / Brands Grid Widget -->
-        <div class="gsm-widget-card" id="widgetPhoneFinder">
-          <div class="gsm-widget-title">
-            <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg> Phone Finder</span>
-            <span class="widget-icon"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <!-- 1. Advanced Filters Widget (Same as Landing Page) -->
+        <div class="adv-filter-card" id="advFilterCard" style="margin-bottom: 18px;">
+          
+          <!-- Header -->
+          <div class="adv-filter-header">
+            <div class="adv-filter-title">
+              <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              <span>Advanced Filters</span>
+            </div>
+            <button type="button" class="adv-filter-reset" id="btnResetDetailFilters" title="Clear all filters">Reset</button>
           </div>
-          <div class="gsm-brands-grid" id="sidebarBrandsGrid">
-            <!-- Dynamically populated, with top default brands for instant display -->
-            <a href="/brand/samsung" class="gsm-brand-item">Samsung</a>
-            <a href="/brand/apple" class="gsm-brand-item">Apple</a>
-            <a href="/brand/xiaomi" class="gsm-brand-item">Xiaomi</a>
-            <a href="/brand/vivo" class="gsm-brand-item">Vivo</a>
-            <a href="/brand/oppo" class="gsm-brand-item">Oppo</a>
-            <a href="/brand/realme" class="gsm-brand-item">Realme</a>
-            <a href="/brand/oneplus" class="gsm-brand-item">OnePlus</a>
-            <a href="/brand/google" class="gsm-brand-item">Google</a>
-            <a href="/brand/motorola" class="gsm-brand-item">Motorola</a>
-            <a href="/brand/infinix" class="gsm-brand-item">Infinix</a>
-            <a href="/brand/tecno" class="gsm-brand-item">Tecno</a>
-            <a href="/brand/honor" class="gsm-brand-item">Honor</a>
-            <a href="/brand/sony" class="gsm-brand-item">Sony</a>
-            <a href="/brand/zte" class="gsm-brand-item">ZTE</a>
-            <a href="/brand/huawei" class="gsm-brand-item">Huawei</a>
-            <a href="/brand/nothing" class="gsm-brand-item">Nothing</a>
+
+          <!-- Section 1: 5G Network Quick Toggle -->
+          <div class="adv-filter-section" style="padding-bottom: 12px;">
+            <label class="adv-toggle-row">
+              <div class="adv-toggle-title">
+                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                  <line x1="12" y1="20" x2="12.01" y2="20"/>
+                </svg>
+                <span>5G Network Only</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="adv-toggle-badge">5G FAST</span>
+                <label class="adv-switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="detail5GToggle">
+                  <span class="adv-slider"></span>
+                </label>
+              </div>
+            </label>
           </div>
-          <div class="gsm-brand-actions">
-            <a href="/brands" class="gsm-brand-action-btn">All Brands</a>
-            <a href="/phones" class="gsm-brand-action-btn">Rumor Mill</a>
+
+          <!-- Section 2: Brands with Live Search & Multi-Select Checkboxes -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Brand</span>
+              <span class="adv-badge-count" id="detailBrandBadgeCount">All Brands</span>
+            </div>
+            
+            <div class="adv-search-box">
+              <svg class="adv-search-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+              <input type="text" id="detailBrandSearchInput" placeholder="Search brand..." class="adv-search-input" autocomplete="off" aria-label="Search brand">
+            </div>
+
+            <div class="adv-brands-list" id="detailBrandsList">
+              <div style="color: #94a3b8; font-size: 13px; padding: 8px;">Loading brands...</div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
+              <span style="font-size: 11px; color: #94a3b8;">Select 1 or more</span>
+              <a href="/brands" style="font-size: 11.5px; font-weight: 700; color: var(--primary); text-decoration: none;">All Brands Directory &rarr;</a>
+            </div>
           </div>
+
+          <!-- Section 3: Price Range (PKR) with Dual Inputs & Quick Chips -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Price Range (PKR)</span>
+            </div>
+
+            <div class="adv-price-inputs">
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="detailMinPrice" placeholder="Min" min="0" step="5000" class="adv-price-input">
+              </div>
+              <span class="adv-price-sep">–</span>
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="detailMaxPrice" placeholder="Max" min="0" step="5000" class="adv-price-input">
+              </div>
+            </div>
+
+            <!-- Quick Price Range Preset Chips -->
+            <div class="adv-chips-grid" id="detailPriceChips">
+              <button type="button" class="adv-chip" data-min="" data-max="30000">&lt; 30K</button>
+              <button type="button" class="adv-chip" data-min="30000" data-max="60000">30K–60K</button>
+              <button type="button" class="adv-chip" data-min="60000" data-max="100000">60K–100K</button>
+              <button type="button" class="adv-chip" data-min="100000" data-max="">100K+</button>
+            </div>
+          </div>
+
+          <!-- Section 4: RAM Selection -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">RAM</span>
+            </div>
+            <div class="adv-chips-grid" id="detailRamChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="4GB">4 GB</button>
+              <button type="button" class="adv-chip" data-val="6GB">6 GB</button>
+              <button type="button" class="adv-chip" data-val="8GB">8 GB</button>
+              <button type="button" class="adv-chip" data-val="12GB">12 GB+</button>
+            </div>
+          </div>
+
+          <!-- Section 5: Internal Storage -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Storage</span>
+            </div>
+            <div class="adv-chips-grid" id="detailStorageChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="64GB">64 GB</button>
+              <button type="button" class="adv-chip" data-val="128GB">128 GB</button>
+              <button type="button" class="adv-chip" data-val="256GB">256 GB</button>
+              <button type="button" class="adv-chip" data-val="512GB">512 GB+</button>
+            </div>
+          </div>
+
+          <!-- Primary Apply Button -->
+          <button type="button" id="btnApplyDetailFilters" class="adv-apply-btn">
+            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <span>Show Matching Phones</span>
+          </button>
+
         </div>
 
         <!-- 2. PRICES Widget -->
@@ -141,6 +238,41 @@
             <button type="button" class="gsm-btn-show-prices" onclick="document.getElementById('globalPricesSection')?.scrollIntoView({behavior: 'smooth'})">
               Show All Prices ▼
             </button>
+          </div>
+        </div>
+
+        <!-- 2b. PTA TAX WIDGET -->
+        <div class="gsm-widget-card" id="widgetSidebarPTA">
+          <div class="gsm-widget-title" style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); color: #fff;">
+            <span style="display:flex; align-items:center; gap:6px;">
+              <span>🇵🇰</span> PTA Mobile Tax
+            </span>
+            <span class="widget-icon" style="color: #6ee7b7; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">DIRBS 2026</span>
+          </div>
+          <div class="gsm-widget-body" style="padding: 12px 14px;">
+            <div class="gsm-prices-list">
+              <div class="gsm-price-row" style="padding: 6px 0;">
+                <span class="gsm-price-store" style="font-weight: 600; color: #334155;">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; margin-right:4px;"></span>
+                  On CNIC (Local)
+                </span>
+                <span class="gsm-price-value" id="sidebarPtaCNIC" style="color: #047857; font-weight: 700; font-size: 14px;">Calculating...</span>
+              </div>
+              <div class="gsm-price-row" style="padding: 6px 0;">
+                <span class="gsm-price-store" style="font-weight: 600; color: #334155;">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#3b82f6; margin-right:4px;"></span>
+                  On Passport (Traveler)
+                </span>
+                <span class="gsm-price-value" id="sidebarPtaPassport" style="color: #1d4ed8; font-weight: 700; font-size: 14px;">Calculating...</span>
+              </div>
+              <div class="gsm-price-row" id="sidebarPtaNonPtaRow" style="border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px;">
+                <span class="gsm-price-store" style="font-size: 12px; color: #64748b;">Est. Non-PTA Price</span>
+                <span class="gsm-price-value" id="sidebarPtaNonPta" style="font-size: 12px; color: #475569; font-weight: 600;">Calculating...</span>
+              </div>
+            </div>
+            <a href="/pta-tax-calculator" class="gsm-btn-show-prices" id="sidebarPtaCalcBtn" style="display:block; text-align:center; text-decoration:none; margin-top:10px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-weight: 700; font-size: 12px;">
+              Check Full PTA Details &rarr;
+            </a>
           </div>
         </div>
 
@@ -268,6 +400,12 @@
                 <div class="price-val-wrap">
                   <span class="price-val" id="phoneDetailPrice">Loading Price...</span>
                 </div>
+                <div class="pta-price-pill-row" id="phoneDetailPtaPill" style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 7px 12px; font-size: 13px;">
+                  <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #065f46;">
+                    <span>🇵🇰</span> <span>PTA Tax: <strong id="phoneDetailPtaVal" style="color: #047857;">Calculating...</strong></span>
+                  </span>
+                  <a href="/pta-tax-calculator" id="phoneDetailPtaLink" style="font-size: 12px; font-weight: 700; color: #047857; text-decoration: none;">PTA Calculator &rarr;</a>
+                </div>
               </div>
 
               <p class="phone-short-desc" id="phoneDetailShortDesc">
@@ -315,11 +453,20 @@
         <!-- Phone Overview & Highlights Paragraph Card -->
         <div class="spec-section-card phone-overview-card" id="phoneOverviewCard" style="margin-bottom: 24px;">
           <div class="spec-section-title">
-            <span id="overviewHeadingTitle">Device Overview & Summary</span>
+            <span id="overviewHeadingTitle">Device Overview &amp; Summary</span>
           </div>
-          <div style="padding: 24px; background: #fff; border-radius: 0 0 8px 8px;">
-            <div id="phoneDetailSummaryParagraph" style="font-size: 15px; line-height: 1.85; color: #334155; white-space: pre-line;">
-              Loading overview and specifications highlights...
+          <div class="overview-card-body">
+            <div id="overviewContentWrap" class="overview-content-wrap">
+              <div id="phoneDetailSummaryParagraph" style="font-size: 15px; line-height: 1.85; color: #334155; white-space: pre-line;">
+                Loading overview and specifications highlights...
+              </div>
+              <div id="overviewFadeOverlay" class="overview-fade-overlay"></div>
+            </div>
+            <div id="overviewToggleWrap" class="overview-toggle-wrap" style="display: none;">
+              <button type="button" id="btnToggleOverview" class="btn-overview-toggle" onclick="toggleOverviewContent()" aria-expanded="false">
+                <span id="overviewToggleText">Read More</span>
+                <span id="overviewToggleIcon" class="overview-toggle-icon">&darr;</span>
+              </button>
             </div>
           </div>
         </div>
@@ -551,6 +698,7 @@
           <h4>Explore</h4>
           <ul class="footer-links">
             <li><a href="/phones">Latest Mobiles</a></li>
+            <li><a href="/pta-tax-calculator">PTA Tax Calculator 🇵🇰</a></li>
             <li><a href="/compare">Comparison</a></li>
             <li><a href="/brands">All Brands</a></li>
           </ul>

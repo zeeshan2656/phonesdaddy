@@ -1,8 +1,24 @@
 // PhonesDaddy - Phones Catalog & Filtering Logic
 
+// Standalone utility helpers (self-contained fallback)
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatPKR(num) {
+  if (!num || isNaN(parseFloat(num)) || parseFloat(num) <= 0) return 'Price on Request';
+  return 'Rs. ' + Math.round(parseFloat(num)).toLocaleString('en-PK');
+}
+
 let currentFilters = {
   page: 1,
-  limit: 12,
+  limit: 24,
   brand: [],
   minPrice: '',
   maxPrice: '',
@@ -29,16 +45,25 @@ function parseUrlParams() {
   if (urlParams.has('storage')) currentFilters.storage = urlParams.get('storage');
   if (urlParams.has('is5G')) currentFilters.is5G = urlParams.get('is5G');
   if (urlParams.has('sort')) currentFilters.sort = urlParams.get('sort');
+  if (urlParams.has('limit')) currentFilters.limit = parseInt(urlParams.get('limit'), 10) || 24;
 
   // Set sort dropdown value
   const sortSelect = document.getElementById('catalogSortSelect');
   if (sortSelect && currentFilters.sort) {
     sortSelect.value = currentFilters.sort;
   }
+
+  const minPriceInput = document.getElementById('filterMinPrice');
+  const maxPriceInput = document.getElementById('filterMaxPrice');
+  if (minPriceInput && currentFilters.minPrice) minPriceInput.value = currentFilters.minPrice;
+  if (maxPriceInput && currentFilters.maxPrice) maxPriceInput.value = currentFilters.maxPrice;
+  const check5G = document.getElementById('filter5G');
+  if (check5G && currentFilters.is5G) check5G.checked = true;
 }
 
 async function loadBrandFilters() {
   const container = document.getElementById('brandFiltersList');
+  const countBadge = document.getElementById('advBadgeCount');
   if (!container) return;
 
   try {
@@ -46,12 +71,20 @@ async function loadBrandFilters() {
     const json = await res.json();
 
     if (json.success && json.data) {
-      container.innerHTML = json.data.map(b => `
-        <label class="filter-label">
-          <input type="checkbox" name="brand" value="${b.slug}" ${currentFilters.brand.includes(b.slug) ? 'checked' : ''}>
-          <span>${b.name} (${b.phone_count})</span>
-        </label>
-      `).join('');
+      if (countBadge) countBadge.textContent = `${json.data.length} Brands`;
+      container.innerHTML = json.data.map(b => {
+        const count = parseInt(b.phone_count, 10) || 0;
+        const isChecked = currentFilters.brand.includes(b.slug);
+        return `
+          <label class="adv-brand-item" data-brand="${b.name.toLowerCase()}" title="${b.name} (${count} phones)">
+            <div class="adv-brand-left">
+              <input type="checkbox" name="brand" value="${b.slug}" class="adv-brand-checkbox" ${isChecked ? 'checked' : ''}>
+              <span class="adv-brand-name">${b.name}</span>
+            </div>
+            <span class="adv-brand-count">${count}</span>
+          </label>
+        `;
+      }).join('');
     }
   } catch (err) {
     console.error('Error loading brand filters:', err);
@@ -59,6 +92,19 @@ async function loadBrandFilters() {
 }
 
 function setupFilterListeners() {
+  // Brand live search
+  const brandSearchInput = document.getElementById('brandSearchInput');
+  if (brandSearchInput) {
+    brandSearchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const items = document.querySelectorAll('#brandFiltersList .adv-brand-item');
+      items.forEach(item => {
+        const name = item.dataset.brand || '';
+        item.style.display = name.includes(q) ? 'flex' : 'none';
+      });
+    });
+  }
+
   // Brand checkboxes
   const brandList = document.getElementById('brandFiltersList');
   if (brandList) {
@@ -70,45 +116,95 @@ function setupFilterListeners() {
     });
   }
 
-  // Price inputs
+  // Price inputs & chips
   const minPriceInput = document.getElementById('filterMinPrice');
   const maxPriceInput = document.getElementById('filterMaxPrice');
-  const applyPriceBtn = document.getElementById('btnApplyPrice');
+  const priceChips = document.querySelectorAll('#advPriceChips .adv-chip');
 
-  if (applyPriceBtn) {
-    applyPriceBtn.addEventListener('click', () => {
-      currentFilters.minPrice = minPriceInput ? minPriceInput.value : '';
-      currentFilters.maxPrice = maxPriceInput ? maxPriceInput.value : '';
+  if (minPriceInput) {
+    minPriceInput.addEventListener('change', () => {
+      currentFilters.minPrice = minPriceInput.value.trim();
+      currentFilters.page = 1;
+      updateUrlAndFetch();
+    });
+  }
+  if (maxPriceInput) {
+    maxPriceInput.addEventListener('change', () => {
+      currentFilters.maxPrice = maxPriceInput.value.trim();
       currentFilters.page = 1;
       updateUrlAndFetch();
     });
   }
 
-  // RAM radios
-  document.querySelectorAll('input[name="filterRam"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      currentFilters.ram = e.target.value;
+  priceChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const isActive = chip.classList.contains('active');
+      priceChips.forEach(c => c.classList.remove('active'));
+      if (!isActive) {
+        chip.classList.add('active');
+        if (minPriceInput) minPriceInput.value = chip.dataset.min || '';
+        if (maxPriceInput) maxPriceInput.value = chip.dataset.max || '';
+      } else {
+        if (minPriceInput) minPriceInput.value = '';
+        if (maxPriceInput) maxPriceInput.value = '';
+      }
+      currentFilters.minPrice = minPriceInput ? minPriceInput.value : '';
+      currentFilters.maxPrice = maxPriceInput ? maxPriceInput.value : '';
       currentFilters.page = 1;
       updateUrlAndFetch();
     });
   });
 
-  // Storage radios
-  document.querySelectorAll('input[name="filterStorage"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      currentFilters.storage = e.target.value;
+  // RAM chips
+  const ramChips = document.querySelectorAll('#advRamChips .adv-chip');
+  if (currentFilters.ram) {
+    ramChips.forEach(c => c.classList.toggle('active', c.dataset.val === currentFilters.ram));
+  }
+  ramChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      ramChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilters.ram = chip.dataset.val || '';
       currentFilters.page = 1;
       updateUrlAndFetch();
     });
   });
 
-  // 5G checkbox
+  // Storage chips
+  const storageChips = document.querySelectorAll('#advStorageChips .adv-chip');
+  if (currentFilters.storage) {
+    storageChips.forEach(c => c.classList.toggle('active', c.dataset.val === currentFilters.storage));
+  }
+  storageChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      storageChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilters.storage = chip.dataset.val || '';
+      currentFilters.page = 1;
+      updateUrlAndFetch();
+    });
+  });
+
+  // 5G toggle switch
   const check5G = document.getElementById('filter5G');
   if (check5G) {
     check5G.addEventListener('change', (e) => {
       currentFilters.is5G = e.target.checked ? 'true' : '';
       currentFilters.page = 1;
       updateUrlAndFetch();
+    });
+  }
+
+  // Primary Apply Button
+  const applyBtn = document.getElementById('btnApplyFilters');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      currentFilters.page = 1;
+      updateUrlAndFetch();
+      const sidebar = document.getElementById('filterSidebar');
+      if (sidebar && sidebar.classList.contains('mobile-open')) {
+        toggleMobileFilterSidebar();
+      }
     });
   }
 
@@ -128,7 +224,7 @@ function setupFilterListeners() {
     resetBtn.addEventListener('click', () => {
       currentFilters = {
         page: 1,
-        limit: 12,
+        limit: 24,
         brand: [],
         minPrice: '',
         maxPrice: '',
@@ -137,12 +233,16 @@ function setupFilterListeners() {
         is5G: '',
         sort: 'newest'
       };
-      // Reset inputs in DOM
       document.querySelectorAll('#brandFiltersList input').forEach(cb => cb.checked = false);
+      if (brandSearchInput) {
+        brandSearchInput.value = '';
+        brandSearchInput.dispatchEvent(new Event('input'));
+      }
       if (minPriceInput) minPriceInput.value = '';
       if (maxPriceInput) maxPriceInput.value = '';
-      document.querySelectorAll('input[name="filterRam"]').forEach(r => r.checked = r.value === '');
-      document.querySelectorAll('input[name="filterStorage"]').forEach(r => r.checked = r.value === '');
+      priceChips.forEach(c => c.classList.remove('active'));
+      ramChips.forEach(c => c.classList.toggle('active', c.dataset.val === ''));
+      storageChips.forEach(c => c.classList.toggle('active', c.dataset.val === ''));
       if (check5G) check5G.checked = false;
       if (sortSelect) sortSelect.value = 'newest';
       updateUrlAndFetch();
@@ -206,12 +306,19 @@ async function loadPhones() {
       countEl.innerText = `${json.pagination.total} phones found`;
     }
 
-    container.innerHTML = json.data.map(phone => createPhoneCardHtml(phone)).join('');
+    container.innerHTML = json.data.map(phone => {
+      try {
+        return createPhoneCardHtml(phone);
+      } catch (err) {
+        console.error('Error rendering phone card:', err, phone);
+        return '';
+      }
+    }).join('');
 
     renderPagination(json.pagination);
   } catch (err) {
     console.error('Error fetching phones:', err);
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #dc2626; padding: 30px;">Error loading phones. Please try again.</div>`;
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #dc2626; padding: 30px;">Error loading phones: ${escapeHtml(err && (err.message || String(err)) ? (err.message || String(err)) : 'Please try again.')}</div>`;
   }
 }
 
@@ -225,25 +332,35 @@ const eyeIcon = (typeof ICONS !== 'undefined' && ICONS.eye) || '<svg class="svg-
 const commentIcon = (typeof ICONS !== 'undefined' && ICONS.comment) || '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
 
 function createPhoneCardHtml(phone) {
+  if (!phone) return '';
+  const priceVal = parseFloat(phone.price) || 0;
+  const priceDisplay = priceVal > 0 ? formatPKR(priceVal) : 'Rumored Price';
+  const brandName = phone.brand_name || '';
+  const phoneName = phone.name || 'Smartphone';
+  const phoneSlug = phone.slug || '';
+  const thumbImg = getCardThumb(phone.image);
+  const viewsCount = parseInt(phone.views, 10) || 0;
+  const reviewCount = parseInt(phone.review_count, 10) || 0;
+
   return `
-    <div class="phone-card" onclick="window.location.href='/phone/${phone.slug}'">
+    <div class="phone-card" onclick="window.location.href='/phone/${escapeHtml(phoneSlug)}'">
       <div class="phone-card-image-wrap">
-        <span class="phone-card-brand-badge">${escapeHtml(phone.brand_name || '')}</span>
-        <a href="/phone/${phone.slug}" onclick="event.stopPropagation()">
-          <img src="${escapeHtml(getCardThumb(phone.image))}" alt="${escapeHtml(phone.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
+        <span class="phone-card-brand-badge">${escapeHtml(brandName)}</span>
+        <a href="/phone/${escapeHtml(phoneSlug)}" onclick="event.stopPropagation()">
+          <img src="${escapeHtml(thumbImg)}" alt="${escapeHtml(phoneName)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
         </a>
       </div>
       <div class="phone-card-body">
-        <a href="/phone/${phone.slug}" onclick="event.stopPropagation()">
-          <h3 class="phone-card-title">${escapeHtml(phone.name)}</h3>
+        <a href="/phone/${escapeHtml(phoneSlug)}" onclick="event.stopPropagation()">
+          <h3 class="phone-card-title">${escapeHtml(phoneName)}</h3>
         </a>
-        <div class="phone-card-price">${phone.price > 0 ? formatPKR(phone.price) : 'Rumored Price'}</div>
+        <div class="phone-card-price">${priceDisplay}</div>
         <div class="phone-card-stats-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px; font-size: 11.5px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
-          <span style="display: inline-flex; align-items: center; gap: 4px;" title="${(phone.views || 0).toLocaleString()} views">
-            ${eyeIcon} <span class="stat-label">${(phone.views || 0).toLocaleString()}</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;" title="${viewsCount.toLocaleString()} views">
+            ${eyeIcon} <span class="stat-label">${viewsCount.toLocaleString()}</span>
           </span>
-          <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: ${phone.review_count > 0 ? '#0d9488' : '#94a3b8'};" title="${(phone.review_count || 0).toLocaleString()} reviews">
-            ${commentIcon} <span class="stat-label">${(phone.review_count || 0).toLocaleString()}</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: ${reviewCount > 0 ? '#0d9488' : '#94a3b8'};" title="${reviewCount.toLocaleString()} reviews">
+            ${commentIcon} <span class="stat-label">${reviewCount.toLocaleString()}</span>
           </span>
         </div>
       </div>

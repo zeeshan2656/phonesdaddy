@@ -345,8 +345,8 @@
       <li><a href="/admin/categories" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Article Categories</a></li>
       <li><a href="/admin/pages" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Pages</a></li>
       <li><a href="/admin/reviews" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Reviews &amp; Comments</a></li>
-      <li class="admin-nav-item-dropdown" id="navSettingsDropdown">
-        <div class="admin-nav-link admin-nav-dropdown-toggle active" onclick="toggleSettingsDropdown(event)">
+      <li class="admin-nav-item-dropdown collapsed" id="navSettingsDropdown">
+        <div class="admin-nav-link admin-nav-dropdown-toggle active" onclick="toggleSettingsDropdown(event)" style="cursor: pointer; user-select: none;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</span>
           </div>
@@ -647,68 +647,241 @@
             </div>
           </div>
 
-          <!-- Card 4: Floating WhatsApp Contact Button -->
+          <!-- Card 4: Floating Social & Contact Channels (WhatsApp, Facebook, TikTok, YouTube, Instagram) -->
           <div class="admin-card" style="margin-top: 20px; margin-bottom: 20px;">
             <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--admin-border); padding-bottom: 12px; margin-bottom: 16px;">
               <div>
                 <h3 class="admin-card-title" style="display: flex; align-items: center; gap: 8px;">
-                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #25D366; border-radius: 50%; color: #fff; font-size: 14px;">💬</span>
-                  Floating WhatsApp Contact Button
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: linear-gradient(135deg, #FF0000 0%, #d6249f 50%, #25D366 100%); border-radius: 50%; color: #fff; font-size: 13px;">📱</span>
+                  Floating Social &amp; Contact Channels (YouTube, Instagram, TikTok, Facebook &amp; WhatsApp)
                 </h3>
                 <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
-                  Displays a direct WhatsApp chat button on all public pages, positioned directly above the scroll-to-top button.
+                  Configure floating social badges displayed vertically on the bottom right of all public pages, stacked directly above the "Scroll to Top" button.
                 </p>
               </div>
-              <div class="toggle-switch-wrapper">
-                <label class="switch">
-                  <input type="checkbox" id="whatsapp_enabled" checked>
-                  <span class="slider"></span>
-                </label>
-                <span id="whatsappStatusLabel" style="font-size: 13px; font-weight: 700; color: #0d9488;">Active</span>
-              </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
-              <!-- WhatsApp Number -->
+            <!-- 1. Floating YouTube Settings -->
+            <div style="background: rgba(255, 0, 0, 0.05); border: 1px solid rgba(255, 0, 0, 0.25); border-radius: 8px; padding: 16px 18px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #FF0000; border-radius: 50%; color: #fff; font-size: 14px;">▶</span>
+                  <div>
+                    <strong style="font-size: 14px; color: var(--admin-text-heading);">YouTube Floating Channel Badge</strong>
+                    <span style="display: block; font-size: 12px; color: var(--admin-text-muted);">Stacked at the top of the floating social dock</span>
+                  </div>
+                </div>
+                <div class="toggle-switch-wrapper">
+                  <label class="switch">
+                    <input type="checkbox" id="youtube_enabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                  <span id="youtubeStatusLabel" style="font-size: 13px; font-weight: 700; color: #0d9488;">Active</span>
+                </div>
+              </div>
+
               <div>
-                <label class="form-label" for="whatsapp_number" style="font-size: 12.5px; font-weight: 700;">
-                  Admin WhatsApp Number (With Country Code)
+                <label class="form-label" for="youtube_url" style="font-size: 12px; font-weight: 700;">
+                  YouTube Channel or Video URL
                 </label>
                 <div style="position: relative;">
-                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #25D366; font-size: 15px;">💬</span>
-                  <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control" placeholder="e.g. +923001234567 or 923001234567" style="padding-left: 38px; font-weight: 600;" oninput="updateWhatsAppPreview()">
+                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #FF0000; font-size: 14px;">▶</span>
+                  <input type="url" id="youtube_url" name="youtube_url" class="form-control" placeholder="e.g. https://youtube.com/@phonesdaddy" style="padding-left: 36px; font-weight: 600;" oninput="updateSocialChannelsPreview()">
                 </div>
-                <small style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">
-                  Enter full number with international country code (e.g. <code>+923001234567</code> or <code>14155552671</code>).
-                </small>
-              </div>
-
-              <!-- Default Pre-filled Message -->
-              <div>
-                <label class="form-label" for="whatsapp_message" style="font-size: 12.5px; font-weight: 700;">
-                  Default Pre-filled Message (Optional)
-                </label>
-                <input type="text" id="whatsapp_message" name="whatsapp_message" class="form-control" placeholder="e.g. Hello! I have an inquiry from PhonesDaddy." oninput="updateWhatsAppPreview()">
-                <small style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">
-                  This message is automatically typed in the visitor's WhatsApp when they tap the button.
+                <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">
+                  Direct link to your official YouTube channel (e.g. <code>https://youtube.com/@yourchannel</code>). Leave blank to hide.
                 </small>
               </div>
             </div>
 
-            <!-- WhatsApp Preview & Direct Test Box -->
-            <div style="margin-top: 18px; background: #0b1120; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(37,211,102,0.4); flex-shrink: 0;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="#fff"><path d="M16 2a13.9 13.9 0 0 0-12 21L2 30l7.2-1.9A13.9 13.9 0 1 0 16 2zm0 25.5a11.6 11.6 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.6 11.6 0 1 1 16 27.5zm6.4-8.7c-.3-.2-2-.9-2.3-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.4 0-.6.2-.8s.3-.4.5-.6.2-.4.3-.6 0-.4 0-.6-.7-1.8-1-2.4c-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 1 5.3 5.3 0 0 0 1.6 3.9 12.3 12.3 0 0 0 4.8 4.3 15.6 15.6 0 0 0 1.6.6c.7.2 1.4.2 1.9.1.6-.1 2-.8 2.3-1.6s.3-1.4.2-1.6-.3-.3-.6-.5z"/></svg>
+            <!-- 2. Floating Instagram Settings -->
+            <div style="background: rgba(214, 36, 159, 0.05); border: 1px solid rgba(214, 36, 159, 0.25); border-radius: 8px; padding: 16px 18px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); border-radius: 50%; color: #fff; font-size: 14px;">📷</span>
+                  <div>
+                    <strong style="font-size: 14px; color: var(--admin-text-heading);">Instagram Floating Profile Badge</strong>
+                    <span style="display: block; font-size: 12px; color: var(--admin-text-muted);">Stacked below YouTube (above TikTok)</span>
+                  </div>
                 </div>
-                <div>
-                  <div style="font-weight: 700; font-size: 13px; color: #f8fafc;">Position: Fixed on bottom-right, directly above "Scroll to Top" button</div>
-                  <div id="whatsappPreviewLinkText" style="font-size: 12px; color: #94a3b8; margin-top: 3px;">Status: Enter your number above to activate</div>
+                <div class="toggle-switch-wrapper">
+                  <label class="switch">
+                    <input type="checkbox" id="instagram_enabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                  <span id="instagramStatusLabel" style="font-size: 13px; font-weight: 700; color: #0d9488;">Active</span>
                 </div>
               </div>
-              <a id="btnTestWhatsApp" href="#" target="_blank" class="btn btn-sm" style="background: #25D366; color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer;">
-                💬 Test WhatsApp Chat
-              </a>
+
+              <div>
+                <label class="form-label" for="instagram_url" style="font-size: 12px; font-weight: 700;">
+                  Instagram Profile or Page URL
+                </label>
+                <div style="position: relative;">
+                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #d6249f; font-size: 14px;">📷</span>
+                  <input type="url" id="instagram_url" name="instagram_url" class="form-control" placeholder="e.g. https://instagram.com/phonesdaddy" style="padding-left: 36px; font-weight: 600;" oninput="updateSocialChannelsPreview()">
+                </div>
+                <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">
+                  Direct link to your official Instagram page (e.g. <code>https://instagram.com/youraccount</code>). Leave blank to hide.
+                </small>
+              </div>
+            </div>
+
+            <!-- 3. Floating TikTok Settings -->
+            <div style="background: rgba(15, 23, 42, 0.04); border: 1px solid rgba(15, 23, 42, 0.2); border-radius: 8px; padding: 16px 18px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #010101; border-radius: 50%; color: #fff; font-size: 14px;">🎵</span>
+                  <div>
+                    <strong style="font-size: 14px; color: var(--admin-text-heading);">TikTok Floating Badge</strong>
+                    <span style="display: block; font-size: 12px; color: var(--admin-text-muted);">Stacked in the middle (above Facebook)</span>
+                  </div>
+                </div>
+                <div class="toggle-switch-wrapper">
+                  <label class="switch">
+                    <input type="checkbox" id="tiktok_enabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                  <span id="tiktokStatusLabel" style="font-size: 13px; font-weight: 700; color: #0d9488;">Active</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label" for="tiktok_url" style="font-size: 12px; font-weight: 700;">
+                  TikTok Channel or Profile URL
+                </label>
+                <div style="position: relative;">
+                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #010101; font-size: 14px;">🎵</span>
+                  <input type="url" id="tiktok_url" name="tiktok_url" class="form-control" placeholder="e.g. https://tiktok.com/@phonesdaddy" style="padding-left: 36px; font-weight: 600;" oninput="updateSocialChannelsPreview()">
+                </div>
+                <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">
+                  Direct link to your TikTok profile or channel (e.g. <code>https://tiktok.com/@youraccount</code>). Leave blank to hide.
+                </small>
+              </div>
+            </div>
+
+            <!-- 4. Floating Facebook Settings -->
+            <div style="background: rgba(24, 119, 242, 0.05); border: 1px solid rgba(24, 119, 242, 0.25); border-radius: 8px; padding: 16px 18px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #1877F2; border-radius: 50%; color: #fff; font-size: 16px; font-weight: 800;">f</span>
+                  <div>
+                    <strong style="font-size: 14px; color: var(--admin-text-heading);">Facebook Floating Badge</strong>
+                    <span style="display: block; font-size: 12px; color: var(--admin-text-muted);">Stacked below TikTok (directly above WhatsApp)</span>
+                  </div>
+                </div>
+                <div class="toggle-switch-wrapper">
+                  <label class="switch">
+                    <input type="checkbox" id="facebook_enabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                  <span id="facebookStatusLabel" style="font-size: 13px; font-weight: 700; color: #0d9488;">Active</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label" for="facebook_url" style="font-size: 12px; font-weight: 700;">
+                  Facebook Page or Profile URL
+                </label>
+                <div style="position: relative;">
+                  <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #1877F2; font-size: 14px;">f</span>
+                  <input type="url" id="facebook_url" name="facebook_url" class="form-control" placeholder="e.g. https://facebook.com/phonesdaddy" style="padding-left: 36px; font-weight: 600;" oninput="updateSocialChannelsPreview()">
+                </div>
+                <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">
+                  Direct link to your official Facebook page or group. Leave blank to hide.
+                </small>
+              </div>
+            </div>
+
+            <!-- 5. Floating WhatsApp Settings -->
+            <div style="background: rgba(37, 211, 102, 0.05); border: 1px solid rgba(37, 211, 102, 0.25); border-radius: 8px; padding: 16px 18px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #25D366; border-radius: 50%; color: #fff; font-size: 16px;">💬</span>
+                  <div>
+                    <strong style="font-size: 14px; color: var(--admin-text-heading);">WhatsApp Floating Contact Button</strong>
+                    <span style="display: block; font-size: 12px; color: var(--admin-text-muted);">Positioned at the bottom of the floating social dock (directly above Scroll-To-Top)</span>
+                  </div>
+                </div>
+                <div class="toggle-switch-wrapper">
+                  <label class="switch">
+                    <input type="checkbox" id="whatsapp_enabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                  <span id="whatsappStatusLabel" style="font-size: 13px; font-weight: 700; color: #0d9488;">Active</span>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                <div>
+                  <label class="form-label" for="whatsapp_number" style="font-size: 12px; font-weight: 700;">
+                    Admin WhatsApp Number (With Country Code)
+                  </label>
+                  <div style="position: relative;">
+                    <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #25D366; font-size: 14px;">💬</span>
+                    <input type="text" id="whatsapp_number" name="whatsapp_number" class="form-control" placeholder="e.g. +923001234567 or 923001234567" style="padding-left: 36px; font-weight: 600;" oninput="updateSocialChannelsPreview()">
+                  </div>
+                  <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">
+                    Enter international format (e.g. <code>+923001234567</code>).
+                  </small>
+                </div>
+                <div>
+                  <label class="form-label" for="whatsapp_message" style="font-size: 12px; font-weight: 700;">
+                    Default Pre-filled Message (Optional)
+                  </label>
+                  <input type="text" id="whatsapp_message" name="whatsapp_message" class="form-control" placeholder="e.g. Hello! I have an inquiry from PhonesDaddy." oninput="updateSocialChannelsPreview()">
+                  <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">
+                    Auto-typed into visitor's WhatsApp when tapped.
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Stack Preview & Interactive Test Actions -->
+            <div style="background: #0b1120; border: 1px solid #1e293b; border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <!-- Mini Stack Preview -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px; background: rgba(255,255,255,0.04); border-radius: 24px; border: 1px dashed rgba(255,255,255,0.15);">
+                  <div id="previewYoutubeIcon" style="width: 30px; height: 30px; border-radius: 50%; background: #FF0000; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(255,0,0,0.45); color: #fff; font-size: 12px; transition: opacity 0.2s;">
+                    ▶
+                  </div>
+                  <div id="previewInstagramIcon" style="width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(214,36,159,0.45); color: #fff; font-size: 12px; transition: opacity 0.2s;">
+                    📷
+                  </div>
+                  <div id="previewTiktokIcon" style="width: 30px; height: 30px; border-radius: 50%; background: #010101; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.5); color: #fff; font-size: 12px; transition: opacity 0.2s;">
+                    🎵
+                  </div>
+                  <div id="previewFacebookIcon" style="width: 30px; height: 30px; border-radius: 50%; background: #1877F2; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(24,119,242,0.4); color: #fff; font-weight: 800; font-size: 13px; transition: opacity 0.2s;">
+                    f
+                  </div>
+                  <div id="previewWhatsappIcon" style="width: 30px; height: 30px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(37,211,102,0.4); color: #fff; font-size: 13px; transition: opacity 0.2s;">
+                    💬
+                  </div>
+                </div>
+                <div>
+                  <div style="font-weight: 700; font-size: 13.5px; color: #f8fafc;">Live Floating Social Dock Stack</div>
+                  <div id="socialDockStatusSummary" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
+                    Order: YouTube (Top) &rarr; Instagram &rarr; TikTok &rarr; Facebook &rarr; WhatsApp (Bottom, directly above Scroll-To-Top).
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a id="btnTestYouTube" href="#" target="_blank" class="btn btn-sm" style="background: #FF0000; color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 6px; border: none;">
+                  ▶ Test YouTube
+                </a>
+                <a id="btnTestInstagram" href="#" target="_blank" class="btn btn-sm" style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 6px; border: none;">
+                  📷 Test Instagram
+                </a>
+                <a id="btnTestTikTok" href="#" target="_blank" class="btn btn-sm" style="background: #010101; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 6px;">
+                  🎵 Test TikTok
+                </a>
+                <a id="btnTestFacebook" href="#" target="_blank" class="btn btn-sm" style="background: #1877F2; color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 6px; border: none;">
+                  f Test Facebook
+                </a>
+                <a id="btnTestWhatsApp" href="#" target="_blank" class="btn btn-sm" style="background: #25D366; color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 6px; border: none;">
+                  💬 Test WhatsApp
+                </a>
+              </div>
             </div>
           </div>
 

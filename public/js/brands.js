@@ -1,5 +1,20 @@
 // PhonesDaddy - Brands Listing & Single Brand Page Script
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatPKR(num) {
+  if (!num || isNaN(parseFloat(num)) || parseFloat(num) <= 0) return 'Price on Request';
+  return 'Rs. ' + Math.round(parseFloat(num)).toLocaleString('en-PK');
+}
+
 async function initBrandsPage() {
   const container = document.getElementById('brandsGridContainer');
   if (!container) return;

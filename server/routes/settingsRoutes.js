@@ -15,10 +15,10 @@ router.put('/', requireMasterAdmin, SettingsController.updateSettings);
 router.post('/', requireMasterAdmin, SettingsController.updateSettings);
 
 // Brand Logo & Favicon Upload Endpoints
-router.post('/logo', requireMasterAdmin, upload.single('logo'), SettingsController.uploadLogo);
+router.post('/logo', requireMasterAdmin, upload.single('logo'), upload.optimizeUploadedImages, SettingsController.uploadLogo);
 router.delete('/logo', requireMasterAdmin, SettingsController.removeLogo);
 
-router.post('/favicon', requireMasterAdmin, upload.single('favicon'), SettingsController.uploadFavicon);
+router.post('/favicon', requireMasterAdmin, upload.single('favicon'), upload.optimizeUploadedImages, SettingsController.uploadFavicon);
 router.delete('/favicon', requireMasterAdmin, SettingsController.removeFavicon);
 
 module.exports = router;

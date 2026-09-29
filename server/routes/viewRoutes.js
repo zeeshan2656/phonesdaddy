@@ -46,11 +46,33 @@ function getCardThumbUrl(imgUrl) {
   return imgUrl;
 }
 
+const brandSvgCache = new Map();
+function getBrandLogoMarkup(slug, name) {
+  if (brandSvgCache.has(slug)) return brandSvgCache.get(slug);
+  const svgPath = path.join(__dirname, `../../public/images/brands/${slug}-logo.svg`);
+  if (fs.existsSync(svgPath)) {
+    const raw = fs.readFileSync(svgPath, 'utf8')
+      .replace(/width="160"\s+height="60"/i, 'width="80" height="30"')
+      .replace(/<svg\b/i, `<svg class="brand-card-logo" aria-label="${escapeAttr(name)}" role="img"`);
+    brandSvgCache.set(slug, raw);
+    return raw;
+  }
+  const fallback = `<img src="/images/placeholder.svg" alt="${escapeAttr(name)}" class="brand-card-logo" loading="lazy" decoding="async" width="80" height="40">`;
+  brandSvgCache.set(slug, fallback);
+  return fallback;
+}
+
 /**
  * Helper to generate rendered HTML string with custom snippets and branding
  */
 async function getRenderedViewHtml(templateFile, replacements = {}) {
   let html = getTemplateHtml(templateFile);
+
+  // Versioned static asset URLs for 1-year immutable caching & instant cache-busting on build
+  html = html
+    .replace(/\/css\/style\.css(?!\?v=)/g, '/css/style.css?v=2026.2')
+    .replace(/\/js\/app\.js(?!\?v=)/g, '/js/app.js?v=2026.2')
+    .replace(/\/js\/icons\.js(?!\?v=)/g, '/js/icons.js?v=2026.2');
 
   const bundle = await SettingsModel.getViewSnippetsBundle();
   const branding = bundle.branding;
@@ -74,8 +96,13 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
     '{{FOOTER_COPYRIGHT}}': escapeHtml(footerCopyright),
     '{{FOOTER_ABOUT}}': escapeHtml(branding.site_description),
     '{{WHATSAPP_BUTTON_HTML}}': bundle.whatsappButtonHtml || '',
+    '{{FLOATING_SOCIAL_DOCK_HTML}}': bundle.whatsappButtonHtml || '',
     '{{WHATSAPP_NUMBER}}': escapeHtml(branding.whatsapp_number || ''),
-    '{{WHATSAPP_MESSAGE}}': escapeHtml(branding.whatsapp_message || '')
+    '{{WHATSAPP_MESSAGE}}': escapeHtml(branding.whatsapp_message || ''),
+    '{{FACEBOOK_URL}}': escapeHtml(branding.facebook_url || ''),
+    '{{TIKTOK_URL}}': escapeHtml(branding.tiktok_url || ''),
+    '{{YOUTUBE_URL}}': escapeHtml(branding.youtube_url || ''),
+    '{{INSTAGRAM_URL}}': escapeHtml(branding.instagram_url || '')
   };
 
   const allReplacements = { ...commonReplacements, ...replacements };
@@ -89,7 +116,7 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
     html = html.replace(/PhonesDaddy/g, escapeHtml(branding.site_name));
   }
 
-  // Ensure favicon and WhatsApp meta are present in <head>
+  // Ensure favicon and WhatsApp / Social meta are present in <head>
   if (html.includes('</head>')) {
     let headInject = '';
     if (!html.includes('rel="icon"') && !html.includes("rel='icon'")) {
@@ -102,13 +129,25 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
       headInject += `\n  <meta name="whatsapp-number" content="${escapeAttr(branding.whatsapp_number)}">`;
       headInject += `\n  <meta name="whatsapp-message" content="${escapeAttr(branding.whatsapp_message || '')}">`;
     }
+    if (branding.facebook_url && branding.facebook_enabled !== '0') {
+      headInject += `\n  <meta name="facebook-url" content="${escapeAttr(branding.facebook_url)}">`;
+    }
+    if (branding.tiktok_url && branding.tiktok_enabled !== '0') {
+      headInject += `\n  <meta name="tiktok-url" content="${escapeAttr(branding.tiktok_url)}">`;
+    }
+    if (branding.youtube_url && branding.youtube_enabled !== '0') {
+      headInject += `\n  <meta name="youtube-url" content="${escapeAttr(branding.youtube_url)}">`;
+    }
+    if (branding.instagram_url && branding.instagram_enabled !== '0') {
+      headInject += `\n  <meta name="instagram-url" content="${escapeAttr(branding.instagram_url)}">`;
+    }
     if (headInject) {
       html = html.replace('</head>', `${headInject}\n</head>`);
     }
   }
 
-  // Inject Floating WhatsApp Button before </body>
-  if (bundle.whatsappButtonHtml && !html.includes('id="whatsappFloatBtn"')) {
+  // Inject Floating Social Channels Dock before </body>
+  if (bundle.whatsappButtonHtml && !html.includes('id="floatingSocialDock"') && !html.includes('id="whatsappFloatBtn"')) {
     if (html.includes('</body>')) {
       html = html.replace('</body>', `\n${bundle.whatsappButtonHtml}\n</body>`);
     } else if (html.includes('</BODY>')) {
@@ -204,10 +243,12 @@ async function getQuickCompareOptions() {
   }
 }
 
-async function getHomeSsrReplacements() {
-  const cached = cache.get(HOME_SSR_CACHE_KEY);
-  if (cached) {
-    return cached;
+async function getHomeSsrReplacements(noCache = false) {
+  if (!noCache) {
+    const cached = cache.get(HOME_SSR_CACHE_KEY);
+    if (cached) {
+      return cached;
+    }
   }
 
   try {
@@ -218,7 +259,7 @@ async function getHomeSsrReplacements() {
         FROM phones p
         JOIN brands b ON p.brand_id = b.id
         ORDER BY p.id DESC
-        LIMIT 8
+        LIMIT 12
       `).then(([rows]) => rows).catch(() => []),
 
       pool.query(`
@@ -226,7 +267,7 @@ async function getHomeSsrReplacements() {
         FROM phones p
         JOIN brands b ON p.brand_id = b.id
         ORDER BY p.popular DESC, p.views DESC, p.id DESC
-        LIMIT 8
+        LIMIT 12
       `).then(([rows]) => rows).catch(() => []),
 
       pool.query(`
@@ -235,7 +276,7 @@ async function getHomeSsrReplacements() {
         JOIN brands b ON p.brand_id = b.id
         WHERE p.status = 'Upcoming'
         ORDER BY p.id DESC
-        LIMIT 8
+        LIMIT 12
       `).then(([rows]) => rows).catch(() => []),
 
       pool.query(`
@@ -245,7 +286,6 @@ async function getHomeSsrReplacements() {
         WHERE b.status = 'active'
         GROUP BY b.id
         ORDER BY phone_count DESC, b.name ASC
-        LIMIT 12
       `).then(([rows]) => rows).catch(() => []),
 
       pool.query(`
@@ -266,26 +306,27 @@ async function getHomeSsrReplacements() {
       }
 
       const cardImg = getCardThumbUrl(p.image);
+      const cleanName = (p.name || '').replace(/\s*Price\s*(&amp;|&)\s*Specs\s*/gi, '').trim();
 
       return `
       <div class="phone-card home-phone-card" onclick="window.location.href='/phone/${escapeAttr(p.slug)}'">
         <div class="phone-card-image-wrap">
           <span class="phone-card-brand-badge">${escapeHtml(p.brand_name || '')}</span>
           <a href="/phone/${escapeAttr(p.slug)}" onclick="event.stopPropagation()">
-            <img src="${escapeAttr(cardImg)}" alt="${escapeAttr(p.name)}" class="phone-card-image" ${loadingAttrs} width="160" height="212">
+            <img src="${escapeAttr(cardImg)}" alt="${escapeAttr(cleanName)}" class="phone-card-image" ${loadingAttrs} width="160" height="212">
           </a>
         </div>
         <div class="phone-card-body">
           <a href="/phone/${escapeAttr(p.slug)}" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; width: 100%; text-decoration: none;">
-            <h3 class="phone-card-title" title="${escapeAttr(p.name)}">${escapeHtml(p.name)}</h3>
+            <h3 class="phone-card-title" title="${escapeAttr(cleanName)}">${escapeHtml(cleanName)}</h3>
           </a>
         </div>
       </div>
     `;
     };
 
-    // First row (4 cards) is above the fold: Card 0 is LCP with fetchpriority="high", next 3 are eager
-    const latestHtml = (latestPhones || []).map((p, idx) => renderCard(p, idx < 4, idx === 0)).join('');
+    // First 6 cards are above the fold: Card 0 is LCP with fetchpriority="high", next 5 are eager
+    const latestHtml = (latestPhones || []).map((p, idx) => renderCard(p, idx < 6, idx === 0)).join('');
     const popularHtml = (popularPhones || []).map(p => renderCard(p, false, false)).join('');
     const upcomingHtml = (upcomingPhones || []).map(p => renderCard(p, false, false)).join('');
 
@@ -296,13 +337,31 @@ async function getHomeSsrReplacements() {
       lcpPreload = `<link rel="preload" href="${escapeAttr(lcpImg)}" as="image" type="image/webp" fetchpriority="high">`;
     }
 
-    const brandsHtml = (topBrands || []).map(b => `
+    const allBrands = topBrands || [];
+    const featuredBrands = allBrands.slice(0, 12);
+
+    // Inlined SVG Brand Logos (0 extra network roundtrips)
+    const brandsHtml = (featuredBrands || []).map(b => `
       <a href="/brand/${escapeAttr(b.slug)}" class="brand-card">
-        <img src="${escapeAttr(b.logo || '/images/placeholder.svg')}" alt="${escapeAttr(b.name)}" class="brand-card-logo" loading="lazy" decoding="async" width="80" height="40">
+        ${getBrandLogoMarkup(b.slug, b.name)}
         <div class="brand-card-name">${escapeHtml(b.name)}</div>
         <div class="brand-card-count">${parseInt(b.phone_count, 10) || 0} phones</div>
       </a>
     `).join('');
+
+    // Advanced Filter Brand Items (All active brands with checkboxes & counts)
+    const sidebarBrandsHtml = (allBrands || []).map(b => {
+      const count = parseInt(b.phone_count, 10) || 0;
+      return `
+        <label class="adv-brand-item" data-brand="${escapeAttr(b.name.toLowerCase())}" title="${escapeAttr(b.name)} (${count} phones)">
+          <div class="adv-brand-left">
+            <input type="checkbox" name="homeAdvBrand" value="${escapeAttr(b.slug)}" class="adv-brand-checkbox">
+            <span class="adv-brand-name">${escapeHtml(b.name)}</span>
+          </div>
+          <span class="adv-brand-count">${count}</span>
+        </label>
+      `;
+    }).join('');
 
     let newsHtml = '';
     if (articles && articles.length > 0) {
@@ -346,6 +405,7 @@ async function getHomeSsrReplacements() {
       '{{POPULAR_PHONES_HTML}}': popularHtml || '<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">No popular phones found.</div>',
       '{{UPCOMING_PHONES_HTML}}': upcomingHtml || '<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 24px;">No upcoming phones found.</div>',
       '{{HOME_BRANDS_HTML}}': brandsHtml,
+      '{{HOME_SIDEBAR_BRANDS_HTML}}': sidebarBrandsHtml,
       '{{HOT_NEWS_HTML}}': newsHtml,
       '{{QUICK_COMPARE_OPTIONS}}': quickCompareOptions,
       '{{HOME_LCP_PRELOAD}}': lcpPreload
@@ -360,6 +420,7 @@ async function getHomeSsrReplacements() {
       '{{POPULAR_PHONES_HTML}}': '',
       '{{UPCOMING_PHONES_HTML}}': '',
       '{{HOME_BRANDS_HTML}}': '',
+      '{{HOME_SIDEBAR_BRANDS_HTML}}': '',
       '{{HOT_NEWS_HTML}}': '',
       '{{QUICK_COMPARE_OPTIONS}}': '',
       '{{HOME_LCP_PRELOAD}}': ''
@@ -384,7 +445,7 @@ router.get('/', async (req, res, next) => {
       }
     }
 
-    const ssrReplacements = await getHomeSsrReplacements();
+    const ssrReplacements = await getHomeSsrReplacements(noCache);
     const html = await getRenderedViewHtml('home.html', ssrReplacements);
 
     if (!isAdmin && !noCache) {
@@ -599,6 +660,15 @@ router.get('/compare', async (req, res, next) => {
   }
 });
 
+// PTA Mobile Tax Calculator Page (2026 DIRBS Slabs & High-Traffic SEO)
+router.get('/pta-tax-calculator', async (req, res, next) => {
+  try {
+    await renderViewWithSnippets(res, 'pta-calculator.html');
+  } catch (err) {
+    next(err);
+  }
+});
+
 // News & Blog Listing Page
 router.get('/news', async (req, res, next) => {
   try {
@@ -771,6 +841,7 @@ router.get('/sitemap.xml', async (req, res, next) => {
     const staticPages = [
       { loc: `${host}/`, changefreq: 'daily', priority: '1.0' },
       { loc: `${host}/phones`, changefreq: 'daily', priority: '0.9' },
+      { loc: `${host}/pta-tax-calculator`, changefreq: 'weekly', priority: '0.9' },
       { loc: `${host}/news`, changefreq: 'daily', priority: '0.9' },
       { loc: `${host}/brands`, changefreq: 'weekly', priority: '0.8' },
       { loc: `${host}/compare`, changefreq: 'weekly', priority: '0.8' }
@@ -913,11 +984,13 @@ function escapeAttr(str) {
 
 function escapeHtml(str) {
   if (!str) return '';
-  return str.replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+  return String(str)
+    .replace(/&amp;/g, '&')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 router.clearTemplateCache = clearTemplateCache;

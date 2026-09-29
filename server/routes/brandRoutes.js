@@ -12,8 +12,8 @@ router.get('/slug/:slug', cacheMiddleware(300, ['brands']), BrandController.getB
 router.get('/:id', cacheMiddleware(300, ['brands']), BrandController.getById);
 
 // Protected admin & mobile manager routes
-router.post('/', requirePhonePermission, upload.single('logo'), BrandController.create);
-router.put('/:id', requirePhonePermission, upload.single('logo'), BrandController.update);
+router.post('/', requirePhonePermission, upload.single('logo'), upload.optimizeUploadedImages, BrandController.create);
+router.put('/:id', requirePhonePermission, upload.single('logo'), upload.optimizeUploadedImages, BrandController.update);
 router.delete('/:id', requirePhonePermission, BrandController.deleteBrand);
 
 module.exports = router;

@@ -24,6 +24,7 @@
           <li><a href="/phones" class="nav-link active">Mobiles</a></li>
           <li><a href="/brands" class="nav-link">Brands</a></li>
           <li><a href="/compare" class="nav-link">Compare</a></li>
+          <li><a href="/pta-tax-calculator" class="nav-link">PTA Tax 🇵🇰</a></li>
           <li><a href="/news" class="nav-link">News</a></li>
           <li><a href="/admin/login" class="nav-link nav-login-btn"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Login</a></li>
         </ul>
@@ -67,118 +68,133 @@
         </button>
       </div>
 
-      <!-- Filter Sidebar -->
-      <aside class="filter-sidebar" id="filterSidebar">
-        <div class="filter-sidebar-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
-          <h3 style="font-size: 16px; font-weight: 700; color: var(--dark);">Filters</h3>
-          <button id="btnResetFilters" style="background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer;">Reset All</button>
-        </div>
-
-        <!-- 5G Toggle -->
-        <div class="filter-group filter-group-static">
-          <label class="filter-label" style="font-weight: 700;">
-            <input type="checkbox" id="filter5G">
-            <span>5G Connectivity Only</span>
-          </label>
-        </div>
-
-        <!-- Brand Filter Accordion -->
-        <div class="filter-group filter-accordion-group" id="filterGroupBrand">
-          <div class="filter-title" onclick="toggleFilterAccordion('filterGroupBrand')">
-            <span>Brands</span>
-            <span class="filter-chevron">▾</span>
+      <!-- Filter Sidebar (Identical to Landing Page Modern Design) -->
+      <aside class="filter-sidebar" id="filterSidebar" style="padding: 0; border: none; background: transparent;">
+        <div class="adv-filter-card" id="advFilterCard">
+          
+          <!-- Header -->
+          <div class="adv-filter-header">
+            <div class="adv-filter-title">
+              <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              <span>Advanced Filters</span>
+            </div>
+            <button type="button" class="adv-filter-reset" id="btnResetFilters" title="Clear all filters">Reset</button>
           </div>
-          <div class="filter-group-content">
-            <div class="filter-options-list" id="brandFiltersList">
-              <div style="color: #94a3b8; font-size: 13px;">Loading brands...</div>
+
+          <!-- Section 1: 5G Network Quick Toggle -->
+          <div class="adv-filter-section" style="padding-bottom: 12px;">
+            <label class="adv-toggle-row">
+              <div class="adv-toggle-title">
+                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                  <line x1="12" y1="20" x2="12.01" y2="20"/>
+                </svg>
+                <span>5G Network Only</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="adv-toggle-badge">5G FAST</span>
+                <label class="adv-switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="filter5G">
+                  <span class="adv-slider"></span>
+                </label>
+              </div>
+            </label>
+          </div>
+
+          <!-- Section 2: Brands with Live Search & Multi-Select Checkboxes -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Brand</span>
+              <span class="adv-badge-count" id="advBadgeCount">All Brands</span>
+            </div>
+            
+            <div class="adv-search-box">
+              <svg class="adv-search-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+              <input type="text" id="brandSearchInput" placeholder="Search brand..." class="adv-search-input" autocomplete="off" aria-label="Search brand">
+            </div>
+
+            <div class="adv-brands-list" id="brandFiltersList">
+              <div style="color: #94a3b8; font-size: 13px; padding: 8px;">Loading brands...</div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
+              <span style="font-size: 11px; color: #94a3b8;">Select 1 or more</span>
+              <a href="/brands" style="font-size: 11.5px; font-weight: 700; color: var(--primary); text-decoration: none;">All Brands Directory &rarr;</a>
             </div>
           </div>
-        </div>
 
-        <!-- Price Range Accordion -->
-        <div class="filter-group filter-accordion-group" id="filterGroupPrice">
-          <div class="filter-title" onclick="toggleFilterAccordion('filterGroupPrice')">
-            <span>Price Range (PKR)</span>
-            <span class="filter-chevron">▾</span>
-          </div>
-          <div class="filter-group-content">
-            <div class="filter-price-inputs">
-              <input type="number" id="filterMinPrice" placeholder="Min" min="0" step="5000">
-              <span style="color: #94a3b8;">-</span>
-              <input type="number" id="filterMaxPrice" placeholder="Max" min="0" step="5000">
+          <!-- Section 3: Price Range (PKR) with Dual Inputs & Quick Chips -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Price Range (PKR)</span>
             </div>
-            <button id="btnApplyPrice" class="btn btn-outline btn-sm btn-block" style="margin-top: 10px;">Apply Price</button>
-          </div>
-        </div>
 
-        <!-- RAM Filter Accordion -->
-        <div class="filter-group filter-accordion-group" id="filterGroupRam">
-          <div class="filter-title" onclick="toggleFilterAccordion('filterGroupRam')">
-            <span>RAM</span>
-            <span class="filter-chevron">▾</span>
-          </div>
-          <div class="filter-group-content">
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <label class="filter-label">
-                <input type="radio" name="filterRam" value="" checked>
-                <span>Any RAM</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterRam" value="16GB">
-                <span>16 GB &amp; above</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterRam" value="12GB">
-                <span>12 GB</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterRam" value="8GB">
-                <span>8 GB</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterRam" value="6GB">
-                <span>6 GB</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterRam" value="4GB">
-                <span>4 GB</span>
-              </label>
+            <div class="adv-price-inputs">
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="filterMinPrice" placeholder="Min" min="0" step="5000" class="adv-price-input">
+              </div>
+              <span class="adv-price-sep">–</span>
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="filterMaxPrice" placeholder="Max" min="0" step="5000" class="adv-price-input">
+              </div>
+            </div>
+
+            <!-- Quick Price Range Preset Chips -->
+            <div class="adv-chips-grid" id="advPriceChips">
+              <button type="button" class="adv-chip" data-min="" data-max="30000">&lt; 30K</button>
+              <button type="button" class="adv-chip" data-min="30000" data-max="60000">30K–60K</button>
+              <button type="button" class="adv-chip" data-min="60000" data-max="100000">60K–100K</button>
+              <button type="button" class="adv-chip" data-min="100000" data-max="">100K+</button>
             </div>
           </div>
-        </div>
 
-        <!-- Storage Filter Accordion -->
-        <div class="filter-group filter-accordion-group" id="filterGroupStorage">
-          <div class="filter-title" onclick="toggleFilterAccordion('filterGroupStorage')">
-            <span>Internal Storage</span>
-            <span class="filter-chevron">▾</span>
-          </div>
-          <div class="filter-group-content">
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <label class="filter-label">
-                <input type="radio" name="filterStorage" value="" checked>
-                <span>Any Storage</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterStorage" value="1TB">
-                <span>1 TB</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterStorage" value="512GB">
-                <span>512 GB</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterStorage" value="256GB">
-                <span>256 GB</span>
-              </label>
-              <label class="filter-label">
-                <input type="radio" name="filterStorage" value="128GB">
-                <span>128 GB</span>
-              </label>
+          <!-- Section 4: RAM Selection -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">RAM</span>
+            </div>
+            <div class="adv-chips-grid" id="advRamChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="4GB">4 GB</button>
+              <button type="button" class="adv-chip" data-val="6GB">6 GB</button>
+              <button type="button" class="adv-chip" data-val="8GB">8 GB</button>
+              <button type="button" class="adv-chip" data-val="12GB">12 GB+</button>
             </div>
           </div>
-        </div>
 
+          <!-- Section 5: Internal Storage -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Storage</span>
+            </div>
+            <div class="adv-chips-grid" id="advStorageChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="64GB">64 GB</button>
+              <button type="button" class="adv-chip" data-val="128GB">128 GB</button>
+              <button type="button" class="adv-chip" data-val="256GB">256 GB</button>
+              <button type="button" class="adv-chip" data-val="512GB">512 GB+</button>
+            </div>
+          </div>
+
+          <!-- Primary Apply Button -->
+          <button type="button" id="btnApplyFilters" class="adv-apply-btn">
+            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <span>Show Matching Phones</span>
+          </button>
+
+        </div>
       </aside>
 
       <!-- Phones Grid & Sort Bar -->
@@ -226,6 +242,7 @@
           <h4>Explore</h4>
           <ul class="footer-links">
             <li><a href="/phones">All Mobiles</a></li>
+            <li><a href="/pta-tax-calculator">PTA Tax Calculator 🇵🇰</a></li>
             <li><a href="/compare">Compare Devices</a></li>
             <li><a href="/brands">All Brands</a></li>
           </ul>
@@ -265,8 +282,8 @@
   </footer>
   <!-- Scripts (Deferred for non-blocking rendering) -->
   
-  <script defer src="/js/app.js"></script>
-  <script defer src="/js/phones.js"></script>
+  <script defer src="/js/app.js?v=2026.4"></script>
+  <script defer src="/js/phones.js?v=2026.4"></script>
   {{WHATSAPP_BUTTON_HTML}}
 </body>
 </html>

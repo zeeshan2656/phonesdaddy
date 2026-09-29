@@ -20,6 +20,7 @@ const newsRoutes = require('./routes/newsRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const pageRoutes = require('./routes/pageRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const ptaRoutes = require('./routes/ptaRoutes');
 const viewRoutes = require('./routes/viewRoutes');
 
 // Middleware
@@ -29,6 +30,36 @@ const app = express();
 
 // Trust reverse proxy (Hostinger, Cloudflare, Nginx, LiteSpeed, etc.)
 app.set('trust proxy', 1);
+
+// Single-hop Canonical Host & HTTPS Enforcement (Saves ~3.3s redirect chain)
+app.use((req, res, next) => {
+  const host = (req.headers.host || '').toLowerCase();
+  
+  // Skip local testing environments
+  if (host.includes('localhost') || host.includes('127.0.0.1') || host.startsWith('192.168.')) {
+    return next();
+  }
+
+  const isWww = host.startsWith('www.');
+  const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+  const isHttp = proto === 'http';
+
+  // If WWW or plain HTTP, perform a single 301 redirect to canonical https://phonesdaddy.com
+  if (isWww || isHttp) {
+    const cleanHost = host.replace(/^www\./i, '');
+    const canonicalUrl = `https://${cleanHost}${req.originalUrl}`;
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache 301 permanent redirect
+    return res.redirect(301, canonicalUrl);
+  }
+
+  next();
+});
+
+// Fast health-check endpoint for internal keep-alive and Hostinger ping
+app.get('/api/health', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store');
+  res.status(200).json({ status: 'ok', uptime: Math.round(process.uptime()), time: Date.now() });
+});
 
 // HTTP Compression (Gzip / Deflate for fast TTFB and payload reduction)
 app.use(compression({
@@ -153,6 +184,7 @@ app.use('/api/pages', pageRoutes); // Handles /api/pages/footer, /slug/:slug, /a
 app.use('/api/admin/pages', pageRoutes);
 app.use('/api/categories', categoryRoutes); // Handles /api/categories, /admin/*
 app.use('/api/admin/categories', categoryRoutes);
+app.use('/api/pta-tax', ptaRoutes); // Handles /api/pta-tax/calculate, /popular, /slabs
 
 
 // View & Page Routes (HTML templates & SEO)

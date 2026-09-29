@@ -64,7 +64,15 @@ class SettingsController {
         ad_article_bottom_enabled,
         whatsapp_number,
         whatsapp_message,
-        whatsapp_enabled
+        whatsapp_enabled,
+        facebook_url,
+        facebook_enabled,
+        tiktok_url,
+        tiktok_enabled,
+        youtube_url,
+        youtube_enabled,
+        instagram_url,
+        instagram_enabled
       } = req.body;
 
       const payload = {};
@@ -82,6 +90,24 @@ class SettingsController {
       if (whatsapp_message !== undefined) payload.whatsapp_message = String(whatsapp_message || '').trim();
       if (whatsapp_enabled !== undefined) {
         payload.whatsapp_enabled = (whatsapp_enabled === '1' || whatsapp_enabled === true || whatsapp_enabled === 'true') ? '1' : '0';
+      }
+
+      // Floating Social Channels (Facebook, TikTok, YouTube, Instagram)
+      if (facebook_url !== undefined) payload.facebook_url = String(facebook_url || '').trim();
+      if (facebook_enabled !== undefined) {
+        payload.facebook_enabled = (facebook_enabled === '1' || facebook_enabled === true || facebook_enabled === 'true') ? '1' : '0';
+      }
+      if (tiktok_url !== undefined) payload.tiktok_url = String(tiktok_url || '').trim();
+      if (tiktok_enabled !== undefined) {
+        payload.tiktok_enabled = (tiktok_enabled === '1' || tiktok_enabled === true || tiktok_enabled === 'true') ? '1' : '0';
+      }
+      if (youtube_url !== undefined) payload.youtube_url = String(youtube_url || '').trim();
+      if (youtube_enabled !== undefined) {
+        payload.youtube_enabled = (youtube_enabled === '1' || youtube_enabled === true || youtube_enabled === 'true') ? '1' : '0';
+      }
+      if (instagram_url !== undefined) payload.instagram_url = String(instagram_url || '').trim();
+      if (instagram_enabled !== undefined) {
+        payload.instagram_enabled = (instagram_enabled === '1' || instagram_enabled === true || instagram_enabled === 'true') ? '1' : '0';
       }
 
       // Helper to decode safe base64-encoded snippets to bypass Hostinger ModSecurity false positives
