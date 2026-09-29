@@ -80,11 +80,9 @@
     <div class="gsm-page-wrapper phone-page-wrapper">
 
       <!-- ====================================================================
-           1. Advanced Filters Widget (Collapsible on Mobile Top, Sidebar on Desktop)
+           1. Mobile Top Collapsible Filter Slot (Visible ONLY on mobile <= 991px)
            ==================================================================== -->
       <div class="detail-adv-filter-wrapper" id="detailAdvFilterWrapper">
-        
-        <!-- Mobile Toggle Bar (Visible ONLY on mobile screens <= 991px) -->
         <div class="mobile-filter-bar detail-mobile-filter-bar">
           <button type="button" class="mobile-filter-bar-btn" id="btnToggleDetailMobileFilter" onclick="toggleDetailMobileFilter()" aria-label="Toggle Advanced Filters">
             <span style="display: flex; align-items: center; gap: 8px;">
@@ -96,9 +94,17 @@
             <span class="mobile-filter-toggle-state" id="detailMobileFilterStateText">Tap to Open ▾</span>
           </button>
         </div>
+        <div id="mobileFilterTopSlot"></div>
+      </div>
 
-        <!-- Advanced Filter Card -->
-        <div class="adv-filter-card" id="advFilterCard">
+      <!-- ====================================================================
+           2. GSMArena Left Sidebar Column (~270px on Desktop, Below Phone on Mobile)
+           ==================================================================== -->
+      <aside class="gsm-sidebar-col" id="gsmSidebarCol">
+
+        <!-- Advanced Filter Card (Desktop Slot - Sits directly above Prices with normal gap) -->
+        <div id="desktopFilterSlot">
+          <div class="adv-filter-card" id="advFilterCard">
           
           <!-- Header -->
           <div class="adv-filter-header">
@@ -223,16 +229,10 @@
           </button>
 
         </div>
-
       </div>
 
-      <!-- ====================================================================
-           2. GSMArena Left Sidebar Column (~270px on Desktop, Below Phone on Mobile)
-           ==================================================================== -->
-      <aside class="gsm-sidebar-col" id="gsmSidebarCol">
-
-        <!-- 2. PRICES Widget -->
-        <div class="gsm-widget-card" id="widgetSidebarPrices">
+      <!-- 2. PRICES Widget -->
+      <div class="gsm-widget-card" id="widgetSidebarPrices">
           <div class="gsm-widget-title">
             <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg> Prices</span>
             <span class="widget-icon"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg></span>
@@ -751,6 +751,23 @@
 
   <!-- Scripts (Deferred for non-blocking rendering) -->
   <script>
+    function syncMobileFilterPosition() {
+      const filterCard = document.getElementById('advFilterCard');
+      const mobileSlot = document.getElementById('mobileFilterTopSlot');
+      const desktopSlot = document.getElementById('desktopFilterSlot');
+      if (!filterCard || !mobileSlot || !desktopSlot) return;
+
+      if (window.innerWidth <= 991) {
+        if (filterCard.parentElement !== mobileSlot) {
+          mobileSlot.appendChild(filterCard);
+        }
+      } else {
+        if (filterCard.parentElement !== desktopSlot) {
+          desktopSlot.appendChild(filterCard);
+        }
+      }
+    }
+
     function toggleDetailMobileFilter() {
       const wrapper = document.getElementById('detailAdvFilterWrapper');
       const stateText = document.getElementById('detailMobileFilterStateText');
@@ -761,6 +778,9 @@
         stateText.innerHTML = isOpen ? 'Tap to Close ▴' : 'Tap to Open ▾';
       }
     }
+
+    syncMobileFilterPosition();
+    window.addEventListener('resize', syncMobileFilterPosition);
   </script>
   <script defer src="/js/icons.js?v=2026.4"></script>
   <script defer src="/js/app.js?v=2026.4"></script>

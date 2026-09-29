@@ -1642,6 +1642,23 @@ async function handleReplyImageFile(parentId, input) {
   }
 }
 
+function syncMobileFilterPosition() {
+  const filterCard = document.getElementById('advFilterCard');
+  const mobileSlot = document.getElementById('mobileFilterTopSlot');
+  const desktopSlot = document.getElementById('desktopFilterSlot');
+  if (!filterCard || !mobileSlot || !desktopSlot) return;
+
+  if (window.innerWidth <= 991) {
+    if (filterCard.parentElement !== mobileSlot) {
+      mobileSlot.appendChild(filterCard);
+    }
+  } else {
+    if (filterCard.parentElement !== desktopSlot) {
+      desktopSlot.appendChild(filterCard);
+    }
+  }
+}
+
 function toggleDetailMobileFilter() {
   const wrapper = document.getElementById('detailAdvFilterWrapper');
   const stateText = document.getElementById('detailMobileFilterStateText');
@@ -1657,6 +1674,8 @@ function toggleDetailMobileFilter() {
 document.addEventListener('DOMContentLoaded', () => {
   const pathParts = window.location.pathname.split('/');
   currentPhoneSlug = pathParts[pathParts.length - 1] || '';
+  syncMobileFilterPosition();
+  window.addEventListener('resize', syncMobileFilterPosition);
   initPhoneDetail();
   initStarPicker();
   initReviewQuill();
