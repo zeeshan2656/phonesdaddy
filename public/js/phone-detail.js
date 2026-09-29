@@ -1642,6 +1642,18 @@ async function handleReplyImageFile(parentId, input) {
   }
 }
 
+function toggleDetailMobileFilter() {
+  const wrapper = document.getElementById('detailAdvFilterWrapper');
+  const stateText = document.getElementById('detailMobileFilterStateText');
+  if (!wrapper) return;
+
+  wrapper.classList.toggle('mobile-open');
+  const isOpen = wrapper.classList.contains('mobile-open');
+  if (stateText) {
+    stateText.innerHTML = isOpen ? 'Tap to Close ▴' : 'Tap to Open ▾';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const pathParts = window.location.pathname.split('/');
   currentPhoneSlug = pathParts[pathParts.length - 1] || '';

@@ -3828,6 +3828,47 @@ button, input, select, textarea {
   width: 100%;
 }
 
+/* Single Phone Detail Page Grid Layout */
+.phone-page-wrapper {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  grid-template-areas:
+    "filter  main"
+    "sidebar main";
+  gap: 20px 24px;
+  align-items: start;
+  width: 100%;
+}
+
+.phone-page-wrapper .detail-adv-filter-wrapper {
+  grid-area: filter;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.phone-page-wrapper .detail-mobile-filter-bar {
+  display: none !important;
+}
+
+.phone-page-wrapper .detail-adv-filter-wrapper .adv-filter-card {
+  display: block !important;
+  margin-bottom: 0;
+}
+
+.phone-page-wrapper .gsm-sidebar-col {
+  grid-area: sidebar;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.phone-page-wrapper .gsm-main-col {
+  grid-area: main;
+  min-width: 0;
+  width: 100%;
+}
+
 @media (max-width: 991px) {
   .gsm-page-wrapper {
     display: flex;
@@ -3845,6 +3886,53 @@ button, input, select, textarea {
     width: 100%;
     margin-top: 10px;
   }
+
+  /* Single Phone Page: Collapsible Advanced Filter on Top */
+  .phone-page-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .phone-page-wrapper .detail-adv-filter-wrapper {
+    order: 1 !important; /* Advanced filter bar is on the VERY TOP */
+    width: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  .phone-page-wrapper .detail-mobile-filter-bar {
+    display: block !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* By default on mobile, the filter card is collapsed */
+  .phone-page-wrapper .detail-adv-filter-wrapper .adv-filter-card {
+    display: none !important;
+    margin-top: 10px !important;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+    animation: detailFilterSlide 0.22s ease-out;
+  }
+
+  /* When opened on mobile, it expands smoothly */
+  .phone-page-wrapper .detail-adv-filter-wrapper.mobile-open .adv-filter-card {
+    display: block !important;
+  }
+
+  .phone-page-wrapper .gsm-main-col {
+    order: 2 !important; /* Mobile phone post shows directly under the filter toggle */
+    width: 100% !important;
+  }
+
+  .phone-page-wrapper .gsm-sidebar-col {
+    order: 3 !important; /* Sidebar widgets show AFTER the mobile post */
+    width: 100% !important;
+    margin-top: 10px !important;
+  }
+}
+
+@keyframes detailFilterSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .gsm-sidebar-col {

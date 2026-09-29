@@ -77,15 +77,28 @@
   <!-- Phone Detail Content with GSMArena 2-Column Layout -->
   <main class="container" id="phoneDetailContainer" style="padding-top: 16px; padding-bottom: 60px;">
 
-    <div class="gsm-page-wrapper">
+    <div class="gsm-page-wrapper phone-page-wrapper">
 
       <!-- ====================================================================
-           GSMArena Left Sidebar Column (~270px)
+           1. Advanced Filters Widget (Collapsible on Mobile Top, Sidebar on Desktop)
            ==================================================================== -->
-      <aside class="gsm-sidebar-col" id="gsmSidebarCol">
+      <div class="detail-adv-filter-wrapper" id="detailAdvFilterWrapper">
+        
+        <!-- Mobile Toggle Bar (Visible ONLY on mobile screens <= 991px) -->
+        <div class="mobile-filter-bar detail-mobile-filter-bar">
+          <button type="button" class="mobile-filter-bar-btn" id="btnToggleDetailMobileFilter" onclick="toggleDetailMobileFilter()" aria-label="Toggle Advanced Filters">
+            <span style="display: flex; align-items: center; gap: 8px;">
+              <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              <span>Advanced Filters</span>
+            </span>
+            <span class="mobile-filter-toggle-state" id="detailMobileFilterStateText">Tap to Open ▾</span>
+          </button>
+        </div>
 
-        <!-- 1. Advanced Filters Widget (Same as Landing Page) -->
-        <div class="adv-filter-card" id="advFilterCard" style="margin-bottom: 18px;">
+        <!-- Advanced Filter Card -->
+        <div class="adv-filter-card" id="advFilterCard">
           
           <!-- Header -->
           <div class="adv-filter-header">
@@ -210,6 +223,13 @@
           </button>
 
         </div>
+
+      </div>
+
+      <!-- ====================================================================
+           2. GSMArena Left Sidebar Column (~270px on Desktop, Below Phone on Mobile)
+           ==================================================================== -->
+      <aside class="gsm-sidebar-col" id="gsmSidebarCol">
 
         <!-- 2. PRICES Widget -->
         <div class="gsm-widget-card" id="widgetSidebarPrices">
@@ -730,11 +750,23 @@
   </footer>
 
   <!-- Scripts (Deferred for non-blocking rendering) -->
-  <script defer src="/js/icons.js"></script>
-  <script defer src="/js/app.js"></script>
+  <script>
+    function toggleDetailMobileFilter() {
+      const wrapper = document.getElementById('detailAdvFilterWrapper');
+      const stateText = document.getElementById('detailMobileFilterStateText');
+      if (!wrapper) return;
+      wrapper.classList.toggle('mobile-open');
+      const isOpen = wrapper.classList.contains('mobile-open');
+      if (stateText) {
+        stateText.innerHTML = isOpen ? 'Tap to Close ▴' : 'Tap to Open ▾';
+      }
+    }
+  </script>
+  <script defer src="/js/icons.js?v=2026.4"></script>
+  <script defer src="/js/app.js?v=2026.4"></script>
   <!-- Quill Rich Text Editor -->
   <script defer src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-  <script defer src="/js/phone-detail.js"></script>
+  <script defer src="/js/phone-detail.js?v=2026.4"></script>
 
   <!-- Image Gallery Lightbox -->
   <div id="galleryLightbox" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
