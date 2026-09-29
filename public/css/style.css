@@ -4427,12 +4427,12 @@ button, input, select, textarea {
 }
 
 /* ==========================================================================
-   Floating WhatsApp Contact Button (Directly Above Scroll To Top)
+   Floating WhatsApp Contact Button (Dynamic Slide with Scroll-To-Top)
    ========================================================================== */
 
 #whatsappFloatBtn {
   position: fixed;
-  bottom: 86px;
+  bottom: 28px; /* Default: Sits in bottom spot when scroll-to-top is hidden */
   right: 24px;
   z-index: 9998;
   width: 48px;
@@ -4441,15 +4441,20 @@ button, input, select, textarea {
   background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   color: #fff;
   box-shadow: 0 4px 18px rgba(37, 211, 102, 0.42), 0 2px 8px rgba(0, 0, 0, 0.18);
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   text-decoration: none;
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background 0.25s ease;
+  transition: bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background 0.25s ease;
   animation: waPulseSubtle 3s infinite ease-in-out;
+}
+
+/* Smoothly slides up when the scroll-to-top button becomes visible */
+#whatsappFloatBtn.has-scroll-btn {
+  bottom: 86px;
 }
 
 @keyframes waPulseSubtle {
@@ -4474,10 +4479,11 @@ button, input, select, textarea {
 
 #whatsappFloatBtn svg,
 #whatsappFloatBtn .whatsapp-icon {
-  width: 26px;
-  height: 26px;
-  fill: #fff;
+  width: 28px;
+  height: 28px;
+  display: block;
   flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
 }
 
 /* Tooltip on hover */
@@ -4509,19 +4515,20 @@ button, input, select, textarea {
 /* Mobile adjustments for WhatsApp button */
 @media (max-width: 768px) {
   #whatsappFloatBtn {
-    bottom: 68px;
+    bottom: 18px; /* Default at bottom on mobile */
     right: 14px;
     width: 42px;
     height: 42px;
   }
+  #whatsappFloatBtn.has-scroll-btn {
+    bottom: 68px; /* Slides up when topup button appears */
+  }
   #whatsappFloatBtn svg,
   #whatsappFloatBtn .whatsapp-icon {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
   #whatsappFloatBtn .whatsapp-tooltip {
     display: none;
   }
 }
-
-
