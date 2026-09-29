@@ -320,23 +320,25 @@ class SettingsModel {
    */
   static async getWhatsAppButtonHtml() {
     const settings = await this.getAllSettings();
+    const defaultProfileUrl = 'https://www.facebook.com/zeeshankhanturi?rdid=Ybz9oO06xu59okY7&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1KEaM4feXc%2F#';
+
     const waEnabled = settings.whatsapp_enabled !== '0' && settings.whatsapp_enabled !== false;
-    const rawNumber = (settings.whatsapp_number || '').trim();
+    const rawNumber = (settings.whatsapp_number || '923061881882').trim();
     const cleanNumber = rawNumber.replace(/[^\d]/g, '');
     const defaultMsg = settings.whatsapp_message || 'Hello! I have an inquiry from PhonesDaddy.';
     const waUrl = (waEnabled && cleanNumber) ? `https://wa.me/${cleanNumber}?text=${encodeURIComponent(defaultMsg)}` : '';
 
     const fbEnabled = settings.facebook_enabled !== '0' && settings.facebook_enabled !== false;
-    const fbUrl = (fbEnabled && (settings.facebook_url || '').trim()) ? settings.facebook_url.trim() : '';
+    const fbUrl = fbEnabled ? ((settings.facebook_url && settings.facebook_url.trim()) ? settings.facebook_url.trim() : defaultProfileUrl) : '';
 
     const ttEnabled = settings.tiktok_enabled !== '0' && settings.tiktok_enabled !== false;
-    const ttUrl = (ttEnabled && (settings.tiktok_url || '').trim()) ? settings.tiktok_url.trim() : '';
+    const ttUrl = ttEnabled ? ((settings.tiktok_url && settings.tiktok_url.trim()) ? settings.tiktok_url.trim() : defaultProfileUrl) : '';
 
     const ytEnabled = settings.youtube_enabled !== '0' && settings.youtube_enabled !== false;
-    const ytUrl = (ytEnabled && (settings.youtube_url || '').trim()) ? settings.youtube_url.trim() : '';
+    const ytUrl = ytEnabled ? ((settings.youtube_url && settings.youtube_url.trim()) ? settings.youtube_url.trim() : defaultProfileUrl) : '';
 
     const igEnabled = settings.instagram_enabled !== '0' && settings.instagram_enabled !== false;
-    const igUrl = (igEnabled && (settings.instagram_url || '').trim()) ? settings.instagram_url.trim() : '';
+    const igUrl = igEnabled ? ((settings.instagram_url && settings.instagram_url.trim()) ? settings.instagram_url.trim() : defaultProfileUrl) : '';
 
     if (!waUrl && !fbUrl && !ttUrl && !ytUrl && !igUrl) {
       return '';

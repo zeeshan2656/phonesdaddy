@@ -245,6 +245,29 @@ async function runSafeMigrations() {
       await ensureIndex('news', 'idx_news_status_hot_date', '(`status`, `is_hot`, `created_at`)');
       await ensureIndex('brands', 'idx_brands_status_name', '(`status`, `name`)');
 
+      // 4. Ensure default social settings exist if missing or empty
+      const ensureSetting = async (key, defaultValue) => {
+        try {
+          const [rows] = await connection.query(`SELECT setting_value FROM site_settings WHERE setting_key = ?`, [key]);
+          if (rows.length === 0) {
+            await connection.query(`INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)`, [key, defaultValue]);
+          } else if (!rows[0].setting_value || !rows[0].setting_value.trim()) {
+            await connection.query(`UPDATE site_settings SET setting_value = ? WHERE setting_key = ?`, [defaultValue, key]);
+          }
+        } catch (_) {}
+      };
+
+      const defaultProfileUrl = 'https://www.facebook.com/zeeshankhanturi?rdid=Ybz9oO06xu59okY7&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1KEaM4feXc%2F#';
+      await ensureSetting('facebook_enabled', '1');
+      await ensureSetting('facebook_url', defaultProfileUrl);
+      await ensureSetting('instagram_enabled', '1');
+      await ensureSetting('instagram_url', defaultProfileUrl);
+      await ensureSetting('tiktok_enabled', '1');
+      await ensureSetting('tiktok_url', defaultProfileUrl);
+      await ensureSetting('youtube_enabled', '1');
+      await ensureSetting('youtube_url', defaultProfileUrl);
+      await ensureSetting('whatsapp_enabled', '1');
+
       console.log('✅ Database schema verified: 100% up-to-date. (Existing articles, phones & settings preserved).');
       return true;
     } finally {
