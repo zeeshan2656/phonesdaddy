@@ -218,8 +218,32 @@ async function runSafeMigrations() {
       await ensureColumn('pages', 'show_in_footer', 'BOOLEAN DEFAULT TRUE');
       await ensureColumn('pages', 'views', 'INT DEFAULT 0');
 
-      await ensureColumn('reviews_comments', 'is_admin', 'BOOLEAN DEFAULT FALSE');
-      await ensureColumn('reviews_comments', 'ip_address', 'VARCHAR(45) DEFAULT NULL');
+      // 3. Helper to safely add composite indexes if they do not exist
+      const ensureIndex = async (tableName, indexName, columnsDefinition) => {
+        const [idxs] = await connection.query(`
+          SELECT INDEX_NAME 
+          FROM INFORMATION_SCHEMA.STATISTICS 
+          WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = ? 
+            AND INDEX_NAME = ?
+          LIMIT 1
+        `, [tableName, indexName]);
+
+        if (idxs.length === 0) {
+          try {
+            console.log(`  ⚡ Adding performance index ${tableName}.${indexName}...`);
+            await connection.query(`ALTER TABLE \`${tableName}\` ADD INDEX \`${indexName}\` ${columnsDefinition}`);
+          } catch (e) {
+            console.warn(`  ⚠️ Could not add index ${indexName}:`, e.message);
+          }
+        }
+      };
+
+      await ensureIndex('phones', 'idx_phones_pop_views_id', '(`popular`, `views`, `id`)');
+      await ensureIndex('phones', 'idx_phones_status_id', '(`status`, `id`)');
+      await ensureIndex('phones', 'idx_phones_brand_status', '(`brand_id`, `status`)');
+      await ensureIndex('news', 'idx_news_status_hot_date', '(`status`, `is_hot`, `created_at`)');
+      await ensureIndex('brands', 'idx_brands_status_name', '(`status`, `name`)');
 
       console.log('✅ Database schema verified: 100% up-to-date. (Existing articles, phones & settings preserved).');
       return true;
