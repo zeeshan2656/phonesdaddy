@@ -511,7 +511,7 @@ class SettingsModel {
 
     if (b.site_logo && b.site_logo.trim()) {
       return `
-        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-header-logo-img" width="160" height="38" style="max-height: 38px; width: auto; object-fit: contain; vertical-align: middle;">
+        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-header-logo-img" width="160" height="38" loading="eager" fetchpriority="high" decoding="sync" style="max-height: 38px; width: auto; object-fit: contain; vertical-align: middle;">
         <span class="brand-text">${titleHtml}</span>
       `;
     }
@@ -533,7 +533,7 @@ class SettingsModel {
 
     if (b.site_logo && b.site_logo.trim()) {
       return `
-        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-footer-logo-img" width="160" height="36" style="max-height: 36px; width: auto; object-fit: contain; vertical-align: middle;">
+        <img src="${escapeAttr(b.site_logo)}" alt="${escapeAttr(b.site_name)}" class="site-footer-logo-img" width="160" height="36" loading="lazy" decoding="async" style="max-height: 36px; width: auto; object-fit: contain; vertical-align: middle;">
         <span class="brand-text">${titleHtml}</span>
       `;
     }

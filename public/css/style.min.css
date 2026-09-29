@@ -1,1 +1,4535 @@
-root--primary#0d9488--primary-hover#0f766e--primary-light#f0fdfa--primary-border#99f6e4--dark#0f172a--dark-light#1e293b--text-main#1e293b--text-muted#64748b--text-light#94a3b8--bg-page#f8fafc--bg-surface#ffffff--border-color#e2e8f0--border-light#f1f5f9--success#16a34a--warning#f59e0b--danger#dc2626--info#0284c7--shadow-sm0 1px 2px 0 rgba(0000.05)--shadow-md0 4px 6px -1px rgba(0000.07)0 2px 4px -2px rgba(0000.05)--shadow-lg0 10px 15px -3px rgba(0000.08)0 4px 6px -4px rgba(0000.04)--shadow-dropdown0 12px 24px -4px rgba(1523420.12)--radius-sm4px--radius-md6px--radius-lg10px--radius-full9999px--font-main-apple-systemBlinkMacSystemFont"Segoe UI"Roboto"Helvetica Neue"Arialsans-serif--max-width1240px**before*afterbox-sizingborder-boxmargin0padding0.svg-icondisplayinline-blockvertical-alignmiddleflex-shrink0line-height1.svg-icon-smwidth12pxheight12px.svg-icon-lgwidth18pxheight18px.svg-icon-xlwidth22pxheight22px.icon-with-textdisplayinline-flexalign-itemscentergap4pxbodyfont-familyvar(--font-main)background-colorvar(--bg-page)colorvar(--text-main)line-height1.5font-size15px-webkit-font-smoothingantialiasedmin-height100vhbodynot(.admin-body)displayflexflex-directioncolumnacolorinherittext-decorationnoneimgmax-width100%heightautodisplayblockbuttoninputselecttextareafont-familyinheritfont-sizeinherit.containerwidth100%max-widthvar(--max-width)margin-leftautomargin-rightautopadding-left20pxpadding-right20px.site-headerbackgroundvar(--bg-surface)border-bottom1px solid var(--border-color)positionstickytop0z-index1000box-shadowvar(--shadow-sm).header-innerdisplayflexalign-itemscenterjustify-contentspace-betweenheight68pxgap20px.brand-logodisplayflexalign-itemscentergap10pxfont-size1.4remfont-weight800colorvar(--dark)letter-spacing-0.5px.brand-logo .brand-highlightcolorvar(--primary).brand-logo .brand-textdisplayinline-flexalign-itemscenterline-height1.1font-weight800.site-header-logo-imgmax-height38pxmax-width160pxwidthautoobject-fitcontainvertical-alignmiddleflex-shrink0.site-footer-logo-imgmax-height36pxmax-width150pxwidthautoobject-fitcontainvertical-alignmiddleflex-shrink0.brand-iconwidth32pxheight32pxbackgroundvar(--primary)border-radiusvar(--radius-md)displayflexalign-itemscenterjustify-contentcentercolor#ffffont-weight900font-size18px.nav-linksdisplayflexalign-itemscentergap24pxlist-stylenone.nav-linkfont-weight600colorvar(--dark-light)transitioncolor 0.15s easefont-size15pxpadding6px 0positionrelative.nav-linkhover.nav-link.activecolorvar(--primary).nav-link.activeaftercontent''positionabsolutebottom-20pxleft0right0height2pxbackgroundvar(--primary).nav-link.nav-login-btndisplayinline-flexalign-itemscentergap5pxpadding5px 14px !importantbackgroundrgba(131481360.08)colorvar(--primary) !importantborder1px solid var(--primary)border-radius20pxfont-weight700font-size13.5pxtransitionall 0.2s ease.nav-link.nav-login-btnhoverbackgroundvar(--primary)color#ffffff !importantbox-shadow0 2px 8px rgba(131481360.25)transformtranslateY(-1px).nav-link.nav-login-btnafterdisplaynone !important.header-searchflex0 1 360pxpositionrelative.header-search inputwidth100%height40pxpadding8px 16px 8px 38pxborder1px solid var(--border-color)border-radiusvar(--radius-full)backgroundvar(--bg-page)colorvar(--text-main)outlinenonetransitionall 0.2s ease.header-search inputfocusbackground#fffborder-colorvar(--primary)box-shadow0 0 0 3px rgba(131481360.15).header-search .search-iconpositionabsoluteleft14pxtop50%transformtranslateY(-50%)colorvar(--text-light)pointer-eventsnone.header-mobile-actionsdisplaynonealign-itemscentergap6px.mobile-search-toggledisplaynonebackgroundnonebordernonefont-size20pxcursorpointercolorvar(--dark)padding7pxborder-radiusvar(--radius-md)align-itemscenterjustify-contentcentertransitionall 0.2s ease.mobile-search-togglehover.mobile-search-toggle.activecolorvar(--primary)backgroundrgba(131481360.1).mobile-nav-search-itemdisplaynone !important.mobile-toggledisplaynonebackgroundnonebordernonefont-size24pxcursorpointercolorvar(--dark)padding6pxalign-itemscenterjustify-contentcenterborder-radiusvar(--radius-md)transitionall 0.2s ease.mobile-togglehoverbackgroundrgba(0000.05).search-results-dropdownpositionabsolutetopcalc(100% + 8px)left0right0background#fffborder1px solid var(--border-color)border-radiusvar(--radius-lg)box-shadowvar(--shadow-dropdown)max-height420pxoverflow-yautoz-index1100displaynone.search-results-dropdown.showdisplayblock.search-itemdisplayflexalign-itemscentergap12pxpadding10px 14pxborder-bottom1px solid var(--border-light)transitionbackground 0.15s.search-itemlast-childborder-bottomnone.search-itemhoverbackgroundvar(--primary-light).search-thumbwidth38pxheight48pxobject-fitcontainbackground#f8fafcborder-radiusvar(--radius-sm)padding2px.search-item-infoflex1.search-item-namefont-weight600font-size14pxcolorvar(--dark).search-item-metafont-size12pxcolorvar(--text-muted).search-item-pricefont-weight700colorvar(--primary)font-size13pxtext-alignright.hero-slider-sectionpositionrelativebackground#060b13color#ffffffoverflowhiddenpadding42px 0 32pxborder-bottom1px solid rgba(2552552550.08).hero-ambient-glowpositionabsolutetop-160pxright6%width680pxheight680pxborder-radius50%backgroundradial-gradient(circlevar(--current-glowrgba(131481360.45)) 0%rgba(37992350.15) 50%transparent 72%)filterblur(85px)pointer-eventsnonez-index1transitionbackground 0.8s easeanimationambientPulse 8s ease-in-out infinite alternatewill-changetransformopacitytransformtranslateZ(0)@keyframes ambientPulse0%transformtranslate3d(000) scale(0.95)opacity0.75100%transformtranslate3d(20px25px0) scale(1.1)opacity0.95.hero-grid-overlaypositionabsoluteinset0background-imageradial-gradient(rgba(2552552550.07) 1pxtransparent 1px)linear-gradient(to rightrgba(2552552550.015) 1pxtransparent 1px)linear-gradient(to bottomrgba(2552552550.015) 1pxtransparent 1px)background-size32px 32pxbackground-positioncentermask-imageradial-gradient(ellipse 90% 75% at 50% 40%#000 35%transparent 95%)-webkit-mask-imageradial-gradient(ellipse 90% 75% at 50% 40%#000 35%transparent 95%)pointer-eventsnonez-index2.hero-slider-containerpositionrelativez-index3.hero-slides-wrapperpositionrelativemin-height480px.hero-slidedisplaynoneopacity0transformtranslateY(12px)transitionopacity 0.45s cubic-bezier(0.1610.31)transform 0.45s cubic-bezier(0.1610.31).hero-slide.activedisplayblockopacity1transformtranslateY(0).hero-slide-griddisplaygridgrid-template-columns1.15fr 0.85fralign-itemscentergap36px.hero-slide-contentpadding-right15px.hero-spotlight-pilldisplayinline-flexalign-itemscentergap8pxbackgroundrgba(2552552550.06)border1px solid rgba(2552552550.12)backdrop-filterblur(10px)padding6px 14pxborder-radiusvar(--radius-full)font-size11.5pxfont-weight700letter-spacing0.8pxtext-transformuppercasecolor#38bdf8margin-bottom14px.pulsing-beaconwidth8pxheight8pxborder-radius50%background#38bdf8box-shadow0 0 10px #38bdf8animationbeaconPing 1.8s cubic-bezier(000.21) infinitewill-changetransformopacitytransformtranslateZ(0)@keyframes beaconPing0%100%transformtranslate3d(000) scale(1)opacity150%transformtranslate3d(000) scale(1.35)opacity0.5.hero-phone-headingfont-size2.75remfont-weight900line-height1.12letter-spacing-1pxmargin-bottom12pxcolor#fffffftext-shadow0 4px 20px rgba(0000.5).hero-phone-heading span.gradient-textbackgroundlinear-gradient(135deg#ffffff 30%#38bdf8 100%)-webkit-background-cliptext-webkit-text-fill-colortransparent.hero-meta-stripdisplayflexalign-itemscenterflex-wrapwrapgap12pxmargin-bottom14px.hero-price-badgefont-size1.35remfont-weight800color#2dd4bfletter-spacing-0.5pxdisplayinline-flexalign-itemscentergap6px.hero-status-pilldisplayinline-flexalign-itemscentergap6pxbackgroundrgba(131481360.15)border1px solid rgba(452121910.35)color#5eead4font-size12pxfont-weight600padding3px 10pxborder-radius6px.hero-status-pill.upcomingbackgroundrgba(245158110.15)border-colorrgba(245158110.35)color#fbbf24.hero-desc-textfont-size15pxcolor#94a3b8line-height1.6max-width580pxmargin-bottom22px.hero-specs-huddisplaygridgrid-template-columnsrepeat(21fr)gap12pxmargin-bottom24pxmax-width580px.spec-hud-carddisplayflexalign-itemsflex-startgap12pxbackgroundrgba(2552552550.04)border1px solid rgba(2552552550.08)backdrop-filterblur(12px)padding12px 14pxborder-radius12pxtransitionall 0.25s ease.spec-hud-cardhoverbackgroundrgba(2552552550.08)border-colorrgba(561892480.35)transformtranslateY(-2px)box-shadow0 8px 20px rgba(0000.3).spec-hud-iconwidth34pxheight34pxborder-radius8pxbackgroundrgba(131481360.2)color#2dd4bfdisplayflexalign-itemscenterjustify-contentcenterflex-shrink0.spec-hud-infoflex1min-width0.spec-hud-labelfont-size11pxfont-weight700text-transformuppercasecolor#64748bletter-spacing0.5pxmargin-bottom2px.spec-hud-valfont-size13.5pxfont-weight700color#f1f5f9white-spacenowrapoverflowhiddentext-overflowellipsis.hero-slide-actionsdisplayflexalign-itemscentergap14px.btn-hero-primarydisplayinline-flexalign-itemscentergap8pxbackgroundlinear-gradient(135deg#0d9488 0%#0f766e 100%)color#ffffff !importantpadding12px 24pxborder-radiusvar(--radius-full)font-size14.5pxfont-weight700text-decorationnonebox-shadow0 8px 24px rgba(131481360.4)transitionall 0.25s easebordernone.btn-hero-primaryhoverbackgroundlinear-gradient(135deg#14b8a6 0%#0d9488 100%)transformtranslateY(-2px)box-shadow0 12px 30px rgba(131481360.55).btn-hero-secondarydisplayinline-flexalign-itemscentergap6pxbackgroundrgba(2552552550.07)color#e2e8f0 !importantborder1px solid rgba(2552552550.15)padding12px 20pxborder-radiusvar(--radius-full)font-size14pxfont-weight600text-decorationnonecursorpointerbackdrop-filterblur(8px)transitionall 0.2s ease.btn-hero-secondaryhoverbackgroundrgba(2552552550.14)border-colorrgba(2552552550.3)color#ffffff !importanttransformtranslateY(-2px).hero-phone-stagepositionrelativedisplayflexalign-itemscenterjustify-contentcentermin-height440pxperspective1200px.phone-halo-glowpositionabsolutewidth320pxheight320pxborder-radius50%backgroundradial-gradient(circlevar(--slide-accentrgba(131481360.45)) 0%transparent 70%)filterblur(50px)z-index1pointer-eventsnoneanimationhaloBreathe 5s ease-in-out infinite alternatewill-changetransformopacitytransformtranslateZ(0)@keyframes haloBreathe0%transformtranslate3d(000) scale(0.9)opacity0.6100%transformtranslate3d(000) scale(1.15)opacity0.9.hero-phone-cardpositionrelativez-index2width100%max-width360pxheight420pxdisplayflexalign-itemscenterjustify-contentcenteranimationphoneFloat 6s ease-in-out infinitewill-changetransformtransformtranslateZ(0)@keyframes phoneFloat0%100%transformtranslate3d(00px0) rotate(0deg)50%transformtranslate3d(0-12px0) rotate(0.8deg).hero-phone-imgmax-width100%max-height100%object-fitcontainfilterdrop-shadow(0 25px 40px rgba(0000.75))border-radius24pxtransitiontransform 0.4s ease.hero-phone-cardhover .hero-phone-imgtransformscale(1.03) rotate(-1deg).floating-callout-badgepositionabsolutez-index3displayinline-flexalign-itemscentergap7pxbackgroundrgba(1523420.85)border1px solid rgba(2552552550.16)backdrop-filterblur(12px)padding8px 14pxborder-radiusvar(--radius-full)font-size12pxfont-weight700color#f8fafcbox-shadow0 10px 25px rgba(0000.4)pointer-eventsnonewhite-spacenowrapwill-changetransformtransformtranslateZ(0).floating-callout-badge.badge-top-righttop15%right-10pxanimationfloatBadge1 5s ease-in-out infinite.floating-callout-badge.badge-mid-lefttop52%left-20pxanimationfloatBadge2 6s ease-in-out infinite.floating-callout-badge.badge-bot-rightbottom12%right10pxanimationfloatBadge3 5.5s ease-in-out infinite@keyframes floatBadge10%100%transformtranslate3d(000)50%transformtranslate3d(0-8px0)@keyframes floatBadge20%100%transformtranslate3d(000)50%transformtranslate3d(08px0)@keyframes floatBadge30%100%transformtranslate3d(000)50%transformtranslate3d(0-6px0).hero-slider-bottom-barmargin-top32pxpadding-top20pxborder-top1px solid rgba(2552552550.08)displayflexalign-itemscenterjustify-contentspace-betweengap20px.hero-slider-tabsdisplayflexalign-itemscentergap12pxflex1overflow-xautoscrollbar-widthnone.hero-slider-tabs-webkit-scrollbardisplaynone.hero-slider-tabpositionrelativebackgroundrgba(2552552550.04)border1px solid rgba(2552552550.08)border-radius10pxpadding10px 16px 12pxcursorpointerflex1min-width170pxtext-alignlefttransitionall 0.25s easeoverflowhidden.hero-slider-tabhoverbackgroundrgba(2552552550.08)border-colorrgba(2552552550.2).hero-slider-tab.activebackgroundrgba(131481360.12)border-colorrgba(452121910.4).hero-tab-indexfont-size11pxfont-weight800color#64748bletter-spacing0.5pxmargin-bottom2px.hero-slider-tab.active .hero-tab-indexcolor#2dd4bf.hero-tab-titlefont-size13pxfont-weight700color#e2e8f0white-spacenowrapoverflowhiddentext-overflowellipsis.hero-slider-tab.active .hero-tab-titlecolor#ffffff.hero-tab-progress-wrappositionabsolutebottom0left0right0height3pxbackgroundrgba(2552552550.06).hero-tab-progressheight100%width100%transformscaleX(0)transform-originleftbackgroundlinear-gradient(90deg#0d9488#38bdf8)border-radius2pxwill-changetransform.hero-slider-tab.active .hero-tab-progressanimationheroTabProgress 6s linear forwards@keyframes heroTabProgressfromtransformscaleX(0)totransformscaleX(1).hero-slider-sectionhover .hero-slider-tab.active .hero-tab-progressanimation-play-statepaused.hero-slider-arrowsdisplayflexalign-itemscentergap8px.slider-arrow-btnwidth42pxheight42pxborder-radius50%backgroundrgba(2552552550.06)border1px solid rgba(2552552550.12)color#ffffffdisplayflexalign-itemscenterjustify-contentcentercursorpointertransitionall 0.2s easebackdrop-filterblur(8px).slider-arrow-btnhoverbackgroundrgba(2552552550.15)border-colorrgba(2552552550.3)transformscale(1.06).brands-stripbackground#fffborder-bottom1px solid var(--border-color)padding14px 0.brands-scrolldisplayflexalign-itemscentergap12pxoverflow-xautopadding-bottom4pxscrollbar-widththin.brand-pilldisplayinline-flexalign-itemscentergap8pxpadding6px 14pxbackgroundvar(--bg-page)border1px solid var(--border-color)border-radiusvar(--radius-full)font-weight600font-size13pxcolorvar(--dark-light)white-spacenowraptransitionall 0.15s ease.brand-pillhoverbackgroundvar(--primary-light)border-colorvar(--primary-border)colorvar(--primary)transformtranslateY(-1px).sectionpadding22px 0content-visibilityautocontain-intrinsic-size1px 400px.section-headerdisplayflexalign-itemsflex-endjustify-contentspace-betweenmargin-bottom14pxpadding-bottom10pxborder-bottom2px solid var(--border-color).section-titlefont-size1.4remfont-weight800colorvar(--dark)displayflexalign-itemscentergap8px.section-titlebeforecontent''displayinline-blockwidth4pxheight22pxbackgroundvar(--primary)border-radius2px.view-all-linkfont-weight600colorvar(--primary)font-size14pxdisplayflexalign-itemscentergap4px.view-all-linkhovertext-decorationunderline.phones-griddisplaygridgrid-template-columnsrepeat(81fr)gap0border-top1px solid var(--border-color)border-left1px solid var(--border-color)backgroundvar(--border-color)@media (max-width1200px).phones-gridgrid-template-columnsrepeat(71fr)@media (max-width1024px).phones-gridgrid-template-columnsrepeat(61fr)@media (max-width860px).phones-gridgrid-template-columnsrepeat(51fr)@media (max-width700px).phones-gridgrid-template-columnsrepeat(41fr)@media (max-width540px).phones-gridgrid-template-columnsrepeat(31fr)@media (max-width380px).phones-gridgrid-template-columnsrepeat(21fr).catalog-layout .phones-gridgrid-template-columnsrepeat(61fr)@media (max-width1200px).catalog-layout .phones-gridgrid-template-columnsrepeat(51fr)@media (max-width1024px).catalog-layout .phones-gridgrid-template-columnsrepeat(41fr)@media (max-width768px).catalog-layout .phones-gridgrid-template-columnsrepeat(31fr)@media (max-width500px).catalog-layout .phones-gridgrid-template-columnsrepeat(21fr).phone-cardbackground#ffffffborder1px solid var(--border-color)border-topnoneborder-leftnoneborder-radius0 !importantoverflowhiddendisplayflexflex-directioncolumnpositionrelativetransitionbackground 0.15s easebox-shadow 0.15s easecursorpointer.phone-cardhoverbackground#f8fafcbox-shadow0 4px 16px rgba(0000.08)z-index2.phone-card-image-wrappositionrelativebackground#f8fafcpadding10px 6px 6pxdisplayflexjustify-contentcenteralign-itemscenterheight130pxmin-height130pxmax-height130pxborder-bottom1px solid var(--border-color)border-radius0 !important.phone-card-imagemax-height112pxmax-width88%widthautoaspect-ratio160 / 212object-fitcontaintransitiontransform 0.2s easeborder-radius0 !important.phone-cardhover .phone-card-imagetransformscale(1.05).phone-card-brand-badgepositionabsolutetop5pxleft5pxz-index3background#ffffffcolor#475569border1px solid #cbd5e1font-size8.5pxfont-weight700text-transformuppercaseletter-spacing0.3pxpadding1px 5pxborder-radius3pxline-height1.25pointer-eventsnonebox-shadow0 1px 2px rgba(0000.05)transitionall 0.15s ease.phone-cardhover .phone-card-brand-badgebackgroundvar(--primary)color#ffffffborder-colorvar(--primary).phone-card-badgedisplaynone !important.badge-availablebackground#dcfce7color#15803d.badge-upcomingbackground#fef3c7color#b45309.badge-rumoredbackground#e0f2fecolor#0369a1.badge-discontinuedbackground#f1f5f9color#64748b.phone-card-branddisplaynone.phone-card-bodypadding5px 6px 7pxdisplayflexflex-directioncolumnalign-itemscentertext-aligncenterjustify-contentcenterflex1border-radius0 !important.phone-card-titlefont-size11.5pxfont-weight700colorvar(--dark)line-height1.25margin-bottom2pxtext-aligncenterdisplay-webkit-box-webkit-line-clamp2-webkit-box-orientverticaloverflowhiddenmin-height28pxmax-height28pxwidth100%.phone-card-titlehovercolorvar(--primary).home-phone-card .phone-card-bodypadding6px 4px 8pxdisplayflexalign-itemscenterjustify-contentcentertext-aligncenterflex0 0 automin-height38pxbox-sizingborder-box.home-phone-card .phone-card-titlefont-size11.5pxfont-weight700colorvar(--dark)line-height1.25margin0padding0text-aligncenterdisplay-webkit-box-webkit-line-clamp2-webkit-box-orientverticaloverflowhiddenmin-heightautomax-height30pxwidth100%.phone-card-pricefont-size12pxfont-weight800colorvar(--primary)margin-bottom0line-height1.2text-aligncenter.phone-card-specsdisplaynone !important.phone-card-actionsdisplaynone !important.btndisplayinline-flexalign-itemscenterjustify-contentcentergap6pxpadding8px 14pxborder-radiusvar(--radius-md)font-weight600font-size13pxcursorpointerborder1px solid transparenttransitionall 0.15s easetext-aligncenter.btn-primarybackgroundvar(--primary)color#fff.btn-primaryhoverbackgroundvar(--primary-hover).btn-outlinebackgroundtransparentborder-colorvar(--border-color)colorvar(--dark-light).btn-outlinehoverbackgroundvar(--bg-page)border-color#cbd5e1colorvar(--dark).btn-smpadding5px 10pxfont-size12px.btn-blockwidth100%.brands-griddisplaygridgrid-template-columnsrepeat(auto-fillminmax(180px1fr))gap16px.brand-cardbackground#fffborder1px solid var(--border-color)border-radiusvar(--radius-md)padding18pxtext-aligncenterdisplayflexflex-directioncolumnalign-itemscentertransitionall 0.2s.brand-cardhoverborder-colorvar(--primary)box-shadowvar(--shadow-sm)transformtranslateY(-2px).brand-card-logoheight48pxwidthautomax-width110pxobject-fitcontainmargin-bottom12px.brand-card-namefont-weight700font-size15pxcolorvar(--dark).brand-card-countfont-size12pxcolorvar(--text-muted)backgroundvar(--bg-page)padding2px 8pxborder-radiusvar(--radius-full)margin-top6pxdisplayinline-block.news-cardbackground#ffffffborder1px solid var(--border-color)border-radiusvar(--radius-lg)overflowhiddendisplayflexflex-directioncolumntransitiontransform 0.2s easebox-shadow 0.2s ease.news-cardhovertransformtranslateY(-3px)box-shadowvar(--shadow-md)border-color#cbd5e1.news-card-thumb-wrappositionrelativewidth100%height185pxbackground#f1f5f9overflowhidden.news-card-thumbwidth100%height100%object-fitcovertransitiontransform 0.3s ease.news-cardhover .news-card-thumbtransformscale(1.04).news-card-badgepositionabsolutetop10pxleft10pxbackgroundrgba(1523420.82)backdrop-filterblur(4px)color#ffffont-size11pxfont-weight700padding3px 8pxborder-radius4pxtext-transformuppercaseletter-spacing0.5px.news-card-hotpositionabsolutetop10pxright10pxbackground#ea580ccolor#ffffont-size11pxfont-weight800padding3px 8pxborder-radius4pxbox-shadow0 2px 6px rgba(23488120.4).news-card-bodypadding16px 18pxdisplayflexflex-directioncolumnflex1.news-card-metadisplayflexalign-itemscentergap8pxfont-size12pxcolorvar(--text-muted)margin-bottom8px.news-card-titlefont-size15.5pxfont-weight700colorvar(--dark)line-height1.35margin-bottom8pxdisplay-webkit-box-webkit-line-clamp2-webkit-box-orientverticaloverflowhidden.news-card-title ahovercolorvar(--primary).news-card-excerptfont-size13pxcolorvar(--text-muted)line-height1.5margin-bottom12pxdisplay-webkit-box-webkit-line-clamp2-webkit-box-orientverticaloverflowhidden.news-card-footermargin-topautodisplayflexjustify-contentspace-betweenalign-itemscenterpadding-top10pxborder-top1px solid var(--border-light)font-size12pxcolorvar(--primary)font-weight700.compare-widget-boxbackground#fffborder1px solid var(--border-color)border-radiusvar(--radius-lg)padding28pxbox-shadowvar(--shadow-sm).compare-inputs-griddisplaygridgrid-template-columns1fr auto 1fr autoalign-itemscentergap16pxmargin-top20px.compare-select-wrappositionrelative.compare-vs-badgewidth42pxheight42pxborder-radius50%backgroundvar(--dark)color#fffdisplayflexalign-itemscenterjustify-contentcenterfont-weight800font-size14px@media (max-width768px).compare-inputs-gridgrid-template-columns1frgap12px.compare-vs-badgemargin4px auto#btnLaunchQuickComparewidth100%margin-top8px !important.phone-detail-headerbackground#fffborder1px solid var(--border-color)border-radiusvar(--radius-lg)padding28pxmargin-bottom28pxbox-shadowvar(--shadow-sm).phone-detail-top-griddisplaygridgrid-template-columns320px 1frgap36px.phone-visual-coldisplayflexflex-directioncolumngap12pxwidth100%.phone-main-card.phone-main-image-wrapbackground#ffffffborder1px solid var(--border-light)border-radiusvar(--radius-md)padding24px 20pxdisplayflexalign-itemscenterjustify-contentcentermin-height350pxpositionrelativebox-shadow0 2px 10px rgba(0000.04).phone-main-imagemax-height290pxmax-width100%widthautoobject-fitcontaincursorpointertransitiontransform 0.25s ease.phone-main-imagehovertransformscale(1.03).gallery-count-pillpositionabsolutebottom12pxright12pxbackgroundrgba(1523420.78)backdrop-filterblur(6px)color#ffffffborder1px solid rgba(2552552550.2)border-radius20pxpadding4px 10pxfont-size11pxfont-weight600displayinline-flexalign-itemscentergap5pxcursorpointertransitionbackground 0.2stransform 0.15sz-index2.gallery-count-pillhoverbackgroundrgba(131481360.9)transformscale(1.04).phone-gallery-thumbsdisplayflexgap8pxflex-wrapwrapjustify-contentcenteralign-itemscenterpadding2px 0.phone-thumb-itemwidth58pxheight68pxborder-radius8pxborder2px solid #e2e8f0background#ffffffpadding3pxcursorpointerdisplayflexalign-itemscenterjustify-contentcentertransitionall 0.2s easeflex-shrink0box-shadow0 1px 3px rgba(0000.04).phone-thumb-itemhoverborder-colorvar(--primary)transformtranslateY(-2px)box-shadow0 4px 10px rgba(0000.08).phone-thumb-item.activeborder-colorvar(--primary)box-shadow0 0 0 2px rgba(131481360.3).phone-thumb-item imgwidth100%height100%object-fitcontainpointer-eventsnone.phone-info-col h1font-size2remfont-weight800colorvar(--dark)line-height1.2margin-top6pxmargin-bottom12pxletter-spacing-0.5px.phone-brand-tagdisplayinline-flexalign-itemscentergap5pxfont-weight700colorvar(--primary)font-size13pxbackground#f0fdfaborder1px solid #ccfbf1padding4px 10pxborder-radius6pxtext-transformuppercaseletter-spacing0.5pxtext-decorationnonetransitionall 0.2s ease.phone-brand-taghoverbackgroundvar(--primary)color#ffffffborder-colorvar(--primary).phone-meta-rowdisplayflexflex-wrapwrapalign-itemscentergap8pxmargin-bottom18px.phone-meta-chipdisplayinline-flexalign-itemscentergap5pxpadding5px 10pxbackground#f8fafcborder1px solid #e2e8f0border-radius6pxfont-size12pxfont-weight600color#475569line-height1.2transitionall 0.15s ease.phone-meta-chip .chip-iconfont-size12.5pxline-height1.phone-meta-clickablecursorpointerbackground#f0fdfaborder-color#ccfbf1colorvar(--primary).phone-meta-clickablehoverbackground#ccfbf1border-color#99f6e4transformtranslateY(-1px).phone-detail-price-boxbackgroundlinear-gradient(135deg#f0fdfa 0%#e6fffa 100%)border1px solid #99f6e4border-left4px solid var(--primary)padding14px 20pxborder-radius10pxdisplayinline-flexflex-directioncolumngap6pxmargin-bottom20pxbox-shadow0 2px 6px rgba(131481360.05).price-header-rowdisplayflexalign-itemscentergap6pxflex-wrapwrap.price-flagfont-size14pxline-height1.price-labelfont-size11.5pxfont-weight800text-transformuppercaseletter-spacing0.5pxcolor#0f766e.price-verified-badgefont-size11pxfont-weight700color#059669background#ecfdf5border1px solid #a7f3d0padding1px 7pxborder-radius4pxmargin-leftauto.price-val-wrapdisplayflexalign-itemsbaselinegap6px.price-valfont-size1.85remfont-weight900colorvar(--primary)line-height1.1letter-spacing-0.5px.phone-short-desccolorvar(--text-main)line-height1.6margin-bottom20pxmax-width720px.phone-action-buttonsdisplayflexgap12pxflex-wrapwrap.btn-compare-main.btn-compare-subpadding10px 20pxfont-size14pxfont-weight700border-radius8pxdisplayinline-flexalign-itemscenterjustify-contentcentertext-decorationnonetransitionall 0.2s ease.phone-quick-tabsdisplaygridgrid-template-columnsrepeat(51fr)width100%max-width100%background#ffffffborder1px solid var(--border-color)border-radius8pxmargin-bottom24pxbox-shadow0 1px 3px rgba(1523420.05)overflowhiddenbox-sizingborder-box.phone-quick-tab-itemdisplayflexalign-itemscenterjustify-contentcentergap6pxpadding12px 6pxtext-aligncenterfont-size12pxfont-weight800text-transformuppercasecolor#1e293bborder-right1px solid var(--border-light)background#fffffftransitionall 0.2s easetext-decorationnonemin-width0box-sizingborder-box.phone-quick-tab-itemlast-childborder-rightnone.phone-quick-tab-itemhover.phone-quick-tab-itemactivebackground#f0fdfacolorvar(--primary).phone-quick-tab-item.tab-item-pricescolorvar(--primary).phone-quick-tab-item .tab-iconfont-size14pxline-height1.phone-quick-tab-item .tab-textdisplayinline-flexalign-itemscentergap4pxwhite-spacenowrap.phone-quick-tab-item .tab-badgebackgroundrgba(131481360.12)colorvar(--primary)font-size10.5pxfont-weight800padding1px 6pxborder-radius999pxdisplayinline-block.quick-spec-griddisplaygridgrid-template-columnsrepeat(auto-fitminmax(130px1fr))gap12pxmargin-bottom24px.quick-spec-itembackgroundvar(--bg-page)border1px solid var(--border-color)padding10px 12pxborder-radiusvar(--radius-sm).quick-spec-labelfont-size11pxfont-weight600text-transformuppercasecolorvar(--text-muted)margin-bottom2px.quick-spec-valuefont-size13pxfont-weight700colorvar(--dark)white-spacenowrapoverflowhiddentext-overflowellipsis.specs-containerdisplayflexflex-directioncolumngap20px.spec-section-cardbackground#fffborder1px solid var(--border-color)border-radiusvar(--radius-md)overflowhiddenbox-shadowvar(--shadow-sm).spec-section-titlebackground#f1f5f9colorvar(--dark)font-size15pxfont-weight800text-transformuppercaseletter-spacing0.8pxpadding12px 20pxborder-bottom1px solid var(--border-color)displayflexalign-itemscentergap10px.spec-tablewidth100%border-collapsecollapse.spec-table trborder-bottom1px solid var(--border-light).spec-table trlast-childborder-bottomnone.spec-table trhoverbackground#fafafa.spec-keywidth28%min-width160pxpadding12px 20pxfont-weight600colorvar(--dark-light)font-size14pxvertical-aligntopborder-right1px solid var(--border-light)background#fafcfd.spec-valpadding12px 20pxcolorvar(--text-main)font-size14pxline-height1.5vertical-aligntop.prices-tablewidth100%border-collapsecollapse.prices-table thbackground#f8fafcpadding10px 18pxfont-size13pxfont-weight700text-alignleftborder-bottom2px solid var(--border-color).prices-table tdpadding12px 18pxborder-bottom1px solid var(--border-light)font-size14px.phone-affiliate-sectionbackground#ffffffborder1px solid var(--border-color)border-radiusvar(--radius-md)overflowhidden.phone-affiliate-bodypadding18px 20px.phone-affiliate-listdisplayflexflex-directioncolumngap12px.affiliate-deal-itemdisplayflexalign-itemscenterjustify-contentspace-betweengap16pxpadding12px 18pxbackground#f8fafcborder1px solid var(--border-color)border-radius8pxtransitionall 0.2s ease.affiliate-deal-itemhoverbackground#ffffffborder-color#cbd5e1box-shadow0 4px 14px rgba(0000.06)transformtranslateY(-1px).deal-store-infodisplayflexalign-itemscentergap12pxmin-width180px.deal-store-badgedisplayinline-flexalign-itemscentergap7pxpadding6px 14pxborder-radius6pxfont-size13.5pxfont-weight700box-shadow0 1px 2px rgba(0000.04).deal-store-badge .store-dotwidth7pxheight7pxborder-radius50%displayinline-block.deal-tagfont-size11.5pxcolorvar(--text-muted)font-weight600.deal-price-coldisplayflexalign-itemscentergap8px.deal-price-labelfont-size12pxcolorvar(--text-muted)font-weight600text-transformuppercase.deal-price-valfont-size16pxfont-weight800color#0f172a.deal-action-colmargin-leftauto.deal-buy-btndisplayinline-flexalign-itemscentergap7pxpadding8px 18pxborder-radius6pxfont-size13.5pxfont-weight700text-decorationnonebox-shadow0 2px 6px rgba(0000.12)transitionall 0.15s easewhite-spacenowrap.deal-buy-btnhoverfilterbrightness(1.08)transformtranslateY(-1px)box-shadow0 4px 10px rgba(0000.18)@media (max-width640px).phone-affiliate-bodypadding12px 14px.phone-affiliate-listgap9px.affiliate-deal-itemflex-directionrowflex-wrapnowrapalign-itemscenterjustify-contentspace-betweengap8pxpadding9px 12px.deal-store-infomin-width0flex0 1 autodisplayflexflex-directioncolumnalign-itemsflex-startgap2px.deal-store-badgepadding4px 8pxfont-size11.5pxgap5px.deal-store-badge .store-dotwidth6pxheight6px.deal-tagfont-size10pxmax-width85pxwhite-spacenowrapoverflowhiddentext-overflowellipsisline-height1.2.deal-price-colmargin-leftautomargin-right4pxdisplayflexflex-directioncolumnalign-itemsflex-endgap1pxtext-alignrightmin-width0flex-shrink0.deal-price-labelfont-size9pxcolor#64748bletter-spacing0.3pxline-height1.deal-price-valfont-size13.5pxfont-weight800white-spacenowrapline-height1.2.deal-action-colwidthautomargin-left0flex-shrink0.deal-buy-btnwidthautopadding7px 12pxfont-size12pxfont-weight700gap5pxborder-radius6pxjustify-contentcenterwhite-spacenowrap.deal-buy-btn svgwidth12pxheight12px@media (max-width380px).affiliate-deal-itempadding8px 10pxgap6px.deal-tagdisplaynone.deal-price-labeldisplaynone.deal-price-valfont-size12.5px.deal-buy-btnpadding6px 10pxfont-size11pxgap4px.phone-video-sectionbackground#ffffffborder1px solid var(--border-color)border-radiusvar(--radius-md)overflowhidden.phone-video-bodypadding18px 20pxbackground#0f172a.phone-video-responsive-wrappositionrelativepadding-bottom56.25%height0overflowhiddenborder-radius8pxbackground#000box-shadow0 8px 24px rgba(0000.35).phone-video-responsive-wrap iframepositionabsolutetop0left0width100%height100%border0.compare-matrix-wrapoverflow-xautobackground#fffborder1px solid var(--border-color)border-radiusvar(--radius-lg)box-shadowvar(--shadow-sm).compare-matrixwidth100%border-collapsecollapsemin-width760px.compare-matrix th.compare-matrix tdpadding14px 18pxborder1px solid var(--border-color)vertical-aligntop.compare-head-colwidth200pxbackground#f8fafcfont-weight700font-size14pxcolorvar(--dark).compare-phone-cardtext-aligncenterpositionrelative.compare-phone-thumbmax-height140pxmargin0 auto 10pxobject-fitcontain.compare-phone-titlefont-size15pxfont-weight700colorvar(--dark)margin-bottom4px.compare-phone-pricefont-weight800colorvar(--primary)font-size16px.compare-section-header-rowbackground#0f172acolor#ffffont-weight800font-size14pxtext-transformuppercaseletter-spacing0.5px.compare-section-header-row tdborder-color#0f172apadding10px 18px.compare-add-cardmin-width220pxvertical-alignmiddlebackground#f8fafcborder2px dashed #cbd5e1 !importantborder-radiusvar(--radius-md)padding24px 16pxtransitionborder-color var(--transition-fast)background var(--transition-fast).compare-add-cardhoverborder-colorvar(--primary) !importantbackground#f1f5f9.compare-add-slotdisplayflexflex-directioncolumnalign-itemscenterjustify-contentcentertext-aligncenterpositionrelative.compare-add-iconwidth44pxheight44pxborder-radius50%background#e2e8f0colorvar(--primary)displayflexalign-itemscenterjustify-contentcenterfont-size22pxfont-weight700margin-bottom8pxtransitionall var(--transition-fast).compare-add-cardhover .compare-add-iconbackgroundvar(--primary)color#fff.compare-add-titlefont-size14pxfont-weight700colorvar(--dark)margin-bottom12px.compare-slot-search-wrapwidth100%positionrelative.compare-slot-searchwidth100%font-size13pxpadding8px 12pxborder-radiusvar(--radius-sm)border1px solid var(--border-color)background#fff.compare-slot-dropdownpositionabsolutetop100%left0right0background#fffborder1px solid var(--border-color)border-radiusvar(--radius-md)box-shadowvar(--shadow-md)max-height240pxoverflow-yautoz-index50displaynonetext-alignleft.compare-slot-dropdown.showdisplayblock.compare-suggestions-barbackground#f8fafcborder1px solid var(--border-color)border-radiusvar(--radius-md)padding14px 20pxmargin-bottom24pxdisplayflexalign-itemscenterflex-wrapwrapgap12px.compare-suggestions-labelfont-size13pxfont-weight700colorvar(--dark).compare-chipdisplayinline-flexalign-itemscentergap6pxpadding6px 14pxbackground#fffborder1px solid var(--border-color)border-radius20pxfont-size12.5pxfont-weight600colorvar(--text-dark)text-decorationnonecursorpointertransitionall var(--transition-fast).compare-chiphoverbackgroundvar(--primary)color#fffborder-colorvar(--primary).compare-cell-emptybackground#fcfdfeborder-styledashed !importantcolor#94a3b8text-aligncenter.catalog-layoutdisplaygridgrid-template-columns260px 1frgap28pxalign-itemsflex-start.filter-sidebarbackground#fffborder1px solid var(--border-color)border-radiusvar(--radius-md)padding20pxpositionstickytop88px.filter-groupmargin-bottom20pxpadding-bottom18pxborder-bottom1px solid var(--border-light).filter-grouplast-childborder-bottomnonemargin-bottom0padding-bottom0.mobile-filter-bardisplaynone.filter-titlefont-size14pxfont-weight700colorvar(--dark)margin-bottom10pxdisplayflexjustify-contentspace-betweenalign-itemscenter.filter-chevrondisplaynonefont-size12pxcolor#94a3b8transitiontransform 0.2s ease.filter-group-contentdisplayblock.filter-options-listdisplayflexflex-directioncolumngap8pxmax-height200pxoverflow-yauto.filter-labeldisplayflexalign-itemscentergap8pxfont-size14pxcolorvar(--text-main)cursorpointer.filter-label input[type="checkbox"].filter-label input[type="radio"]accent-colorvar(--primary)width16pxheight16px.filter-price-inputsdisplayflexalign-itemscentergap8px.filter-price-inputs inputwidth100%padding6px 10pxborder1px solid var(--border-color)border-radiusvar(--radius-sm)font-size13px.catalog-top-bardisplayflexalign-itemscenterjustify-contentspace-betweenmargin-bottom20pxflex-wrapwrapgap12px.catalog-countfont-weight600colorvar(--text-muted)font-size14px.catalog-sortdisplayflexalign-itemscentergap10pxfont-size14px.catalog-sort selectpadding6px 12pxborder1px solid var(--border-color)border-radiusvar(--radius-md)background#fffoutlinenone.pagination-wrapdisplayflexalign-itemscenterjustify-contentcentergap8pxmargin-top36px.page-btnmin-width38pxheight38pxdisplayinline-flexalign-itemscenterjustify-contentcenterborder1px solid var(--border-color)background#fffborder-radiusvar(--radius-md)font-weight600font-size14pxcolorvar(--dark-light)cursorpointertransitionall 0.15s.page-btnhoverborder-colorvar(--primary)colorvar(--primary).page-btn.activebackgroundvar(--primary)color#fffborder-colorvar(--primary).page-btndisabledopacity0.5cursornot-allowed.site-footerbackgroundvar(--dark)color#94a3b8margin-topautoborder-top1px solid #1e293b.footer-toppadding48px 0 32px.footer-griddisplaygridgrid-template-columns2fr 1fr 1fr 1.5frgap36px.footer-col h4color#ffffont-size15pxfont-weight700margin-bottom16px.footer-linkslist-stylenonedisplayflexflex-directioncolumngap8pxfont-size14px.footer-links ahovercolor#fff.footer-bottomborder-top1px solid #1e293bpadding20px 0font-size13pxtext-aligncenter@media (max-width992px).catalog-layoutgrid-template-columns1fr.phone-detail-top-gridgrid-template-columns1fr.phone-main-image-wrapmin-height280px.footer-gridgrid-template-columns1fr 1fr@media (max-width768px).header-innerheight56pxgap8px.brand-logofont-size1.15remgap7px.brand-iconwidth28pxheight28pxfont-size15px.mobile-toggledisplayflexalign-itemscenterjustify-contentcenterwidth40pxheight40pxborder-radius8pxfont-size22pxtransitionbackground 0.15s ease.mobile-togglehover.mobile-toggleactivebackground#f1f5f9.nav-linksdisplaynonepositionabsolutetop56pxleft0right0background#fffflex-directioncolumnpadding8px 0box-shadow0 8px 30px rgba(0000.12)border-bottom2px solid var(--primary)gap0z-index999.nav-links.showdisplayflexanimationmobileNavSlide 0.2s ease-out@keyframes mobileNavSlidefromopacity0transformtranslateY(-8px)toopacity1transformtranslateY(0).mobile-filter-bardisplayblockmargin-bottom14px.mobile-filter-bar-btnwidth100%displayflexalign-itemscenterjustify-contentspace-betweenpadding11px 16pxbackground#ffffffborder1.5px solid var(--primary)border-radiusvar(--radius-md)colorvar(--primary)font-size14pxfont-weight700cursorpointerbox-shadow0 2px 8px rgba(131481360.08)transitionall 0.2s ease.mobile-filter-bar-btnactivebackground#f0fdfatransformscale(0.99).mobile-filter-toggle-statefont-size12.5pxfont-weight600color#64748b.filter-sidebardisplaynonemargin-bottom20pxpositionstaticborder-radiusvar(--radius-md)box-shadow0 4px 16px rgba(0000.06)padding16px.filter-sidebar.mobile-opendisplayblock !importantanimationfadeInSlide 0.25s ease@keyframes fadeInSlidefromopacity0transformtranslateY(-8px)toopacity1transformtranslateY(0).filter-accordion-groupmargin-bottom10pxpadding-bottom10pxborder-bottom1px solid var(--border-light).filter-accordion-group .filter-titlecursorpointeruser-selectnonepadding8px 4pxborder-radius6pxmargin-bottom0transitionbackground 0.15s ease.filter-accordion-group .filter-titleactivebackground#f8fafc.filter-accordion-group .filter-chevrondisplayinline-block !important.filter-accordion-group .filter-group-contentdisplaynonepadding-top10pxpadding-bottom4px.filter-accordion-group.is-expanded .filter-group-contentdisplayblockanimationfadeInSlide 0.2s ease.filter-accordion-group.is-expanded .filter-chevrontransformrotate(180deg)colorvar(--primary).nav-links liwidth100%.nav-links .nav-linkdisplayblockpadding14px 24pxfont-size15pxfont-weight600border-left3px solid transparenttransitionall 0.15s ease.nav-links .nav-linkhover.nav-links .nav-linkactivebackground#f0fdfaborder-left-colorvar(--primary).nav-links .nav-link.activebackground#f0fdfaborder-left-colorvar(--primary)colorvar(--primary).nav-links .nav-link.activeafterdisplaynone.header-mobile-actionsdisplayflexalign-itemscentergap8px.mobile-search-toggledisplayinline-flex.header-searchdisplaynonepositionabsolutetop100%left0right0width100%background#ffffffpadding12px 16pxborder-bottom1px solid var(--border-color)box-shadow0 12px 25px -4px rgba(0000.12)0 8px 10px -6px rgba(0000.08)z-index1001.header-search.mobile-opendisplayblockanimationheaderSearchSlideDown 0.22s cubic-bezier(0.1610.31) forwards.header-search.mobile-open inputwidth100%height44pxfont-size15pxpadding10px 18px 10px 42pxborder1.5px solid var(--border-color)backgroundvar(--bg-page)border-radiusvar(--radius-full).header-search.mobile-open inputfocusbackground#ffffffborder-colorvar(--primary)box-shadow0 0 0 3px rgba(131481360.15).header-search.mobile-open .search-iconleft28px.header-search.mobile-open .search-results-dropdownpositionabsolutetopcalc(100% + 6px)left16pxright16pxwidthcalc(100% - 32px)max-height70vhz-index1002box-shadow0 14px 28px rgba(0000.15)@keyframes headerSearchSlideDownfromopacity0transformtranslateY(-8px)toopacity1transformtranslateY(0).hero-slider-sectionpadding22px 0 16pxoverflowhidden.hero-slides-wrappermin-heightauto.hero-slide-gridgrid-template-columns1frgap16pxtext-aligncenter.hero-slide-contentpadding-right0max-width100%.hero-spotlight-pillmargin-leftautomargin-rightautofont-size11pxpadding5px 12pxmargin-bottom10px.hero-phone-headingfont-size1.7remline-height1.18margin-bottom8pxletter-spacing-0.5px.hero-meta-stripjustify-contentcentergap8pxmargin-bottom10px.hero-price-badgefont-size1.25rem.hero-status-pillfont-size11pxpadding3px 8px.hero-desc-textmargin-leftautomargin-rightautofont-size13pxline-height1.5margin-bottom14pxmax-width520px.hero-specs-huddisplaygridgrid-template-columnsrepeat(21fr)margin-leftautomargin-rightautogap8pxmargin-bottom16pxmax-width520pxwidth100%.spec-hud-cardpadding8px 10pxgap8pxalign-itemscenterborder-radius10pxmin-width0text-alignleft.spec-hud-iconwidth30pxheight30pxborder-radius6pxflex-shrink0.spec-hud-icon svgwidth16pxheight16px.spec-hud-infomin-width0flex1overflowhidden.spec-hud-labelfont-size9.5pxmargin-bottom1px.spec-hud-valfont-size12pxwhite-spacenowrapoverflowhiddentext-overflowellipsis.hero-slide-actionsjustify-contentcentergap10pxmargin-top4px.btn-hero-primary.btn-hero-secondarypadding9px 18pxfont-size13px.hero-phone-stagemin-height220pxmax-height250pxorder-1perspective800pxmargin-bottom4px.hero-phone-cardheight210pxmax-width220pxanimationphoneFloat 5s ease-in-out infinite.hero-phone-imgmax-height200pxwidthautoobject-fitcontainborder-radius16px.phone-halo-glowwidth220pxheight220pxfilterblur(40px).floating-callout-badgefont-size10.5pxpadding5px 10pxgap5pxbox-shadow0 4px 12px rgba(0000.35).floating-callout-badge.badge-top-righttop6pxright8px.floating-callout-badge.badge-bot-rightbottom6pxright8px.hero-slider-bottom-barmargin-top14pxpadding-top12pxflex-directioncolumngap10px.hero-slider-tabswidth100%displayflexgap7pxoverflow-xautoscroll-snap-typex mandatory-webkit-overflow-scrollingtouchpadding2px 2px 6pxscrollbar-widthnone.hero-slider-tabs-webkit-scrollbardisplaynone.hero-slider-tabflex0 0 automin-width115pxmax-width140pxscroll-snap-aligncenterpadding7px 10px 8pxborder-radius8pxtext-alignleft.hero-tab-indexfont-size9.5pxletter-spacing0.3px.hero-tab-titlefont-size11.5pxwhite-spacenowrapoverflowhiddentext-overflowellipsis.hero-slider-arrowsdisplaynone.compare-inputs-gridgrid-template-columns1fr.compare-vs-badgemargin0 auto.spec-tabledisplaytablewidth100%table-layoutfixed.spec-table trdisplaytable-row.spec-keydisplaytable-cellwidth32%min-width95pxmax-width130pxpadding10px 12pxfont-size13pxfont-weight600colorvar(--dark-light)border-right1px solid var(--border-light)border-bottomnonebackground#fafcfdvertical-aligntopword-breakbreak-word.spec-valdisplaytable-cellpadding10px 12pxfont-size13pxline-height1.5vertical-aligntopword-breakbreak-wordoverflow-wrapbreak-word.footer-toppadding32px 0 20px.footer-gridgrid-template-columns1frgap24pxtext-aligncenter.footer-col .brand-logojustify-contentcenterfont-size1.2rem.footer-col pfont-size13px.footer-col h4font-size14pxmargin-bottom10px.footer-linksalign-itemscenterfont-size13px.footer-bottompadding14px 0font-size12px.phone-detail-headerpadding16pxborder-radius12pxmargin-bottom16pxbox-shadow0 1px 4px rgba(0000.05).phone-detail-top-gridgrid-template-columns1frgap16px.phone-main-card.phone-main-image-wrapmin-height240pxpadding16px 12px.phone-main-imagemax-height220px.phone-info-col h1font-size1.55remline-height1.22margin-top4pxmargin-bottom10px.phone-brand-tagfont-size11.5pxpadding3px 8pxmargin-bottom6px.phone-meta-rowgap6pxmargin-bottom14px.phone-meta-chippadding4px 8pxfont-size11.5pxborder-radius6px.phone-detail-price-boxwidth100%padding12px 14pxmargin-bottom16pxborder-radius8pxbox-sizingborder-box.price-header-rowgap5px.price-labelfont-size11px.price-verified-badgefont-size10pxpadding1px 5px.price-valfont-size1.55rem.phone-short-descfont-size13.5pxline-height1.55margin-bottom16px.phone-action-buttonsdisplaygridgrid-template-columns1fr 1frgap8pxwidth100%.btn-compare-main.btn-compare-subwidth100%padding10px 6pxfont-size12.5pxtext-aligncenterbox-sizingborder-box.phone-quick-tabsgrid-template-columnsrepeat(51fr)width100%max-width100%margin-bottom16pxborder-radius8pxoverflowhidden.phone-quick-tab-itemflex-directioncolumngap2pxpadding8px 1pxfont-size10pxletter-spacing-0.2pxmin-width0.phone-quick-tab-item .tab-iconfont-size15pxmargin-bottom1px.phone-quick-tab-item .tab-textfont-size10pxdisplayflexflex-directioncolumnalign-itemscentergap0line-height1.15white-spacenormal.phone-quick-tab-item .tab-badgefont-size9pxpadding0 4pxmargin-left0margin-top1px@media (max-width480px).header-innerpadding-left12pxpadding-right12px.brand-logofont-size1.05remgap6px.brand-iconwidth26pxheight26pxfont-size14px.nav-links .nav-linkpadding12px 20pxfont-size14px.mobile-nav-search-itempadding10px 16px 6px.mobile-nav-search inputheight38pxfont-size13px.hero-titlefont-size1.3rem.hero-subtitlefont-size13px.hero-slider-sectionpadding16px 0 14px.hero-slide-gridgap12px.hero-phone-stagemin-height185pxmax-height200px.hero-phone-cardheight180pxmax-width180px.hero-phone-imgmax-height175px.phone-halo-glowwidth180pxheight180pxfilterblur(30px).floating-callout-badgefont-size9.5pxpadding3px 8pxgap4px.hero-spotlight-pillfont-size10pxpadding3px 9pxmargin-bottom6px.hero-phone-headingfont-size1.42remline-height1.2margin-bottom6px.hero-price-badgefont-size1.15rem.hero-status-pillfont-size10pxpadding2px 7px.hero-desc-textfont-size12pxline-height1.45margin-bottom12pxdisplay-webkit-box-webkit-line-clamp2-webkit-box-orientverticaloverflowhidden.hero-specs-hudgap6pxmargin-bottom12px.spec-hud-cardpadding6px 8pxgap6px.spec-hud-iconwidth26pxheight26px.spec-hud-icon svgwidth14pxheight14px.spec-hud-labelfont-size8.5px.spec-hud-valfont-size11px.hero-slide-actionsgap8px.btn-hero-primary.btn-hero-secondarypadding8px 14pxfont-size12px.hero-slider-tabmin-width100pxmax-width125pxpadding6px 8px 7px.hero-tab-indexfont-size8.5px.hero-tab-titlefont-size11px.spec-keywidth30%min-width85pxpadding8px 10pxfont-size12px.spec-valpadding8px 10pxfont-size12pxline-height1.45.spec-section-titlepadding10px 14pxfont-size13.5px.phones-gridgrid-template-columnsrepeat(21fr).brands-gridgrid-template-columnsrepeat(21fr).footer-toppadding24px 0 16px.footer-gridgap20px.footer-col h4font-size13pxmargin-bottom8px.footer-linksfont-size12pxgap5px.footer-bottomfont-size11pxpadding12px 0.phone-detail-headerpadding12px.phone-info-col h1font-size1.4rem.price-valfont-size1.45rem.phone-quick-tab-itempadding7px 1px.phone-quick-tab-item .tab-iconfont-size13.5px.phone-quick-tab-item .tab-textfont-size9px.phone-action-buttonsgrid-template-columns1fr 1frgap6px@media (max-width360px).phone-action-buttonsgrid-template-columns1fr.phone-quick-tab-item .tab-textfont-size8.5px.phone-quick-tab-item .tab-iconfont-size12.5px.comment-inline-imagemax-width100%max-height380pxheightautoborder-radius8pxmargin10px 0displayblockborder1px solid #cbd5e1object-fitcontainbackground#ffffffbox-shadow0 1px 3px rgba(0000.05).ql-toolbar.ql-snowborder-color#cbd5e1 !importantborder-radius6px 6px 0 0 !importantbackground#f8fafc !important.ql-container.ql-snowborder-color#cbd5e1 !importantborder-radius0 0 6px 6px !importantfont-familyinherit !importantbackground#ffffff !important.ql-editorline-height1.65font-size14px.ql-editor.ql-blankbeforecolor#94a3b8font-stylenormal.gsm-page-wrapperdisplaygridgrid-template-columns270px 1frgap24pxalign-itemsstartwidth100%@media (max-width991px).gsm-page-wrapperdisplayflexflex-directioncolumngap24px.gsm-main-colorder1width100%.gsm-sidebar-colorder2width100%margin-top10px.gsm-sidebar-colwidth100%displayflexflex-directioncolumngap18px.gsm-main-colmin-width0width100%.gsm-widget-cardbackground#ffffffborder1px solid var(--border-color)border-radius6pxoverflowhiddenbox-shadow0 1px 3px rgba(1523420.05).gsm-widget-titlebackgroundlinear-gradient(180deg#f8fafc 0%#f1f5f9 100%)color#0f172afont-size12pxfont-weight800text-transformuppercaseletter-spacing0.6pxpadding10px 14pxborder-bottom1px solid var(--border-color)displayflexjustify-contentspace-betweenalign-itemscenter.gsm-widget-title .widget-iconfont-size14px.gsm-widget-bodypadding12px.gsm-widget-footer-linkdisplayblockpadding8px 12pxbackground#f8fafcborder-top1px solid var(--border-color)text-alignrightfont-size11.5pxfont-weight700colorvar(--primary)text-transformuppercaseletter-spacing0.4pxtransitionall 0.15s ease.gsm-widget-footer-linkhoverbackgroundvar(--primary-light)colorvar(--primary-hover)text-decorationunderline.gsm-brands-griddisplaygridgrid-template-columnsrepeat(31fr)gap1pxbackgroundvar(--border-color)border-bottom1px solid var(--border-color).gsm-brand-itembackground#ffffffpadding7px 4pxtext-aligncenterfont-size11pxfont-weight700color#334155text-transformuppercaseletter-spacing0.3pxtransitionall 0.12s easewhite-spacenowrapoverflowhiddentext-overflowellipsisdisplayblock.gsm-brand-itemhoverbackgroundvar(--primary)color#ffffff.gsm-brand-actionsdisplaygridgrid-template-columns1fr 1frgap1pxbackgroundvar(--border-color).gsm-brand-action-btnbackground#f8fafcpadding8px 6pxtext-aligncenterfont-size11pxfont-weight800text-transformuppercasecolorvar(--primary)letter-spacing0.5pxdisplayblocktransitionall 0.15s ease.gsm-brand-action-btnhoverbackground#0f172acolor#ffffff.gsm-price-variant-selectorwidth100%padding6px 10pxfont-size12pxfont-weight600border1px solid var(--border-color)border-radius4pxbackground#ffffffcolor#1e293bmargin-bottom10pxoutlinenone.gsm-prices-listdisplayflexflex-directioncolumngap8px.gsm-price-rowdisplayflexjustify-contentspace-betweenalign-itemscenterpadding7px 10pxbackground#f8fafcborder1px solid #f1f5f9border-radius4pxfont-size12pxtransitionbackground 0.12s.gsm-price-rowhoverbackground#f1f5f9.gsm-price-storedisplayflexalign-itemscentergap6pxfont-weight600color#334155.gsm-price-valuefont-weight800color#b91c1cfont-size13px.gsm-btn-show-pricesdisplayblockwidth100%padding7px 0background#0f172acolor#fffffftext-aligncenterfont-size11pxfont-weight800text-transformuppercaseborder-radius4pxmargin-top10pxletter-spacing0.4pxtransitionbackground 0.15s easebordernonecursorpointer.gsm-btn-show-priceshoverbackgroundvar(--primary).gsm-news-listdisplayflexflex-directioncolumn.gsm-news-itemdisplayflexgap10pxpadding10px 12pxborder-bottom1px solid var(--border-light)align-itemscentertransitionbackground 0.12s easetext-decorationnone.gsm-news-itemlast-childborder-bottomnone.gsm-news-itemhoverbackground#f8fafc.gsm-news-thumbwidth52pxheight52pxborder-radius4pxobject-fitcoverflex-shrink0background#f1f5f9border1px solid #e2e8f0.gsm-news-infomin-width0flex1.gsm-news-titlefont-size12pxfont-weight700color#1e293bline-height1.35display-webkit-box-webkit-line-clamp2-webkit-box-orientverticaloverflowhiddenmargin-bottom4px.gsm-news-itemhover .gsm-news-titlecolorvar(--primary).gsm-news-metafont-size10.5pxcolor#94a3b8displayflexalign-itemscentergap6px.gsm-review-bannerpositionrelativeborder-radius4pxoverflowhiddenbackground#0f172acolor#ffffffcursorpointer.gsm-review-banner-imgwidth100%height130pxobject-fitcoveropacity0.85transitiontransform 0.3s easeopacity 0.3s ease.gsm-review-bannerhover .gsm-review-banner-imgtransformscale(1.04)opacity1.gsm-review-banner-overlaypositionabsoluteinset0backgroundlinear-gradient(to toprgba(1523420.9) 0%rgba(1523420.2) 60%transparent 100%)displayflexflex-directioncolumnjustify-contentflex-endpadding12px.gsm-review-banner-tagbackground#b91c1ccolor#fffffffont-size10pxfont-weight800text-transformuppercaseletter-spacing0.5pxpadding2px 6pxborder-radius3pxalign-selfflex-startmargin-bottom4px.gsm-review-banner-titlefont-size13pxfont-weight800line-height1.25color#ffffff.gsm-devices-griddisplaygridgrid-template-columnsrepeat(31fr)gap8pxpadding10px.gsm-device-itemdisplayflexflex-directioncolumnalign-itemscentertext-aligncenterpadding8px 4pxborder1px solid #f1f5f9border-radius4pxbackground#fffffftransitionall 0.15s easetext-decorationnone.gsm-device-itemhoverborder-colorvar(--primary-border)box-shadow0 2px 6px rgba(131481360.12)transformtranslateY(-2px).gsm-device-thumbwidth54pxheight68pxobject-fitcontainmargin-bottom6px.gsm-device-namefont-size10.5pxfont-weight700color#334155line-height1.25display-webkit-box-webkit-line-clamp2-webkit-box-orientverticaloverflowhiddenheight26px.gsm-device-itemhover .gsm-device-namecolorvar(--primary).gsm-sidebar-ad-boxwidth100%displayflexflex-directioncolumnalign-itemscenterjustify-contentcenteroverflowhidden.gsm-sticky-sidebarpositionstickytop76pxz-index20.reviews-content-wrappadding24px.comments-content-wrappadding28px@media (max-width768px).reviews-content-wrappadding14px 10px !important.comments-content-wrappadding16px 12px !important.phone-rating-overview-griddisplaygridgrid-template-columns220px 1frgap24pxpadding-bottom24pxborder-bottom1px solid #e2e8f0margin-bottom24px.phone-rating-score-cardtext-aligncenterbackground#f8fafcpadding20pxborder-radius8pxborder1px solid #e2e8f0displayflexflex-directioncolumnalign-itemscenterjustify-contentcenter@media (max-width640px).phone-rating-overview-gridgrid-template-columns1frgap14pxpadding-bottom18pxmargin-bottom18px.phone-rating-score-cardpadding14px 16px.review-form-card.comment-form-cardbackground#f8fafcborder1px solid #e2e8f0border-radius8pxpadding20px 22pxmargin-bottom28px@media (max-width768px).review-form-card.comment-form-cardpadding14px 12px !importantmargin-bottom18pxborder-radius6px.reviews-feed-list.comments-feed-listdisplayflexflex-directioncolumngap0 !important.review-thread-item.comment-thread-itembackgroundtransparent !importantbordernone !importantborder-bottom1px solid #f1f5f9 !importantborder-radius0 !importantbox-shadownone !importantpadding18px 0 !importantmargin-bottom0 !importanttransitionbackground 0.15s ease.review-thread-itemlast-child.comment-thread-itemlast-childborder-bottomnone !important@media (max-width768px).review-thread-item.comment-thread-itempadding14px 0 !important.thread-reply-item.comment-reply-itembackgroundtransparent !importantbordernone !importantborder-left2.5px solid #cbd5e1 !importantborder-radius0 !importantbox-shadownone !importantpadding8px 0 8px 14px !importantmargin-top10px !importantmargin-left14px !important.thread-reply-item.is-admin-reply.comment-reply-item.is-admin-replyborder-left-color#3b82f6 !importantbackgroundrgba(2392462550.4) !importantborder-radius0 6px 6px 0 !importantpadding-right8px !important@media (max-width768px).thread-reply-item.comment-reply-itemmargin-left8px !importantpadding-left10px !importantpadding-top6px !importantpadding-bottom6px !important.inline-reply-boxbackground#f8fafc !importantborder1px solid #e2e8f0 !importantborder-radius6px !importantpadding14px 16px !importantmargin-top12px !importantmargin-left14px !important@media (max-width768px).inline-reply-boxmargin-left0 !importantpadding10px 12px !important@media (max-width768px).phone-card-stats-row .stat-labeldisplayinlinefont-size11pxfont-weight600.phone-card-stats-row > spangap3px !importantfont-size12px.phone-gallery-thumbsdisplayflexgap8pxmargin-top12pxoverflow-xautopadding-bottom6pxscrollbar-widththin.phone-thumb-itemwidth58pxheight64pxflex-shrink0border2px solid #e2e8f0border-radiusvar(--radius-sm)background#ffffffpadding3pxcursorpointertransitionall var(--transition-fast)displayflexalign-itemscenterjustify-contentcenter.phone-thumb-itemhoverborder-colorvar(--primary)transformtranslateY(-2px).phone-thumb-item.activeborder-colorvar(--primary)box-shadow0 0 0 2px rgba(141652330.25).phone-thumb-item imgwidth100%height100%object-fitcontain.gallery-count-pillpositionabsolutebottom12pxright12pxbackgroundrgba(1523420.85)color#ffffffborder1px solid rgba(2552552550.2)backdrop-filterblur(4px)padding5px 12pxborder-radius20pxfont-size12pxfont-weight700displayinline-flexalign-itemscentergap6pxcursorpointertransitionall var(--transition-fast)z-index2.gallery-count-pillhoverbackgroundvar(--primary)color#fff.phone-video-sectionbackground#ffffffborder1px solid var(--border-color)border-radiusvar(--radius-lg)overflowhiddenbox-shadowvar(--shadow-sm)margin-bottom28px.phone-video-bodypadding16pxbackground#f8fafc.phone-video-responsive-wrappositionrelativewidth100%padding-bottom56.25%height0overflowhiddenborder-radiusvar(--radius-md)background#0f172abox-shadowvar(--shadow-sm).phone-video-responsive-wrap iframepositionabsolutetop0left0width100%height100%border0#scrollToTopBtnpositionfixedbottom28pxright24pxz-index9999width48pxheight48pxborder-radius50%bordernonecursorpointerbackgroundlinear-gradient(135degvar(--primary) 0%var(--primary-hover) 100%)color#fffbox-shadow0 4px 20px rgba(131481360.45)0 2px 8px rgba(0000.18)displayflexalign-itemscenterjustify-contentcenteropacity0visibilityhiddentransformtranslateY(16px) scale(0.85)transitionopacity 0.3s easetransform 0.3s cubic-bezier(0.341.560.641)visibility 0.3s easebox-shadow 0.2s easeoutlinenone-webkit-tap-highlight-colortransparent#scrollToTopBtn.visibleopacity1visibilityvisibletransformtranslateY(0) scale(1)#scrollToTopBtnhoverbackgroundlinear-gradient(135degvar(--primary-hover) 0%#0a6660 100%)box-shadow0 6px 28px rgba(131481360.6)0 2px 10px rgba(0000.22)transformtranslateY(-2px) scale(1.07)#scrollToTopBtnactivetransformtranslateY(0) scale(0.96)#scrollToTopBtn svgwidth22pxheight22pxstroke#fffflex-shrink0#scrollToTopBtnaftercontent''positionabsoluteinset0border-radius50%backgroundrgba(2552552550.25)opacity0transformscale(0.5)transitionopacity 0.4s easetransform 0.4s easepointer-eventsnone#scrollToTopBtn.rippleafteropacity1transformscale(1.6)@media (max-width768px)#scrollToTopBtnbottom18pxright14pxwidth42pxheight42px#scrollToTopBtn svgwidth18pxheight18px#whatsappFloatBtnpositionfixedbottom28pxright24pxz-index9998width50pxheight50pxborder-radius50%background#25D366color#fffbox-shadow0 4px 18px rgba(372111020.45)0 2px 8px rgba(0000.18)displayflex !importantalign-itemscenterjustify-contentcentertext-decorationnonecursorpointeroutlinenone-webkit-tap-highlight-colortransparenttransitionbottom 0.35s cubic-bezier(0.341.560.641)transform 0.25s cubic-bezier(0.341.560.641)box-shadow 0.25s easebackground 0.25s easeanimationwaPulseSubtle 3s infinite ease-in-out#whatsappFloatBtn.has-scroll-btnbottom86px@keyframes waPulseSubtle0%100%box-shadow0 4px 18px rgba(372111020.42)0 2px 8px rgba(0000.18)50%box-shadow0 6px 24px rgba(372111020.62)0 0 0 8px rgba(372111020.14)#whatsappFloatBtnhovertransformtranslateY(-3px) scale(1.08)background#20ba5abox-shadow0 8px 28px rgba(372111020.65)0 4px 12px rgba(0000.22)color#fff#whatsappFloatBtnactivetransformtranslateY(0) scale(0.96)#whatsappFloatBtn svg#whatsappFloatBtn .whatsapp-iconwidth30pxheight30pxdisplayblockflex-shrink0filterdrop-shadow(0 1px 2px rgba(0000.18))#whatsappFloatBtn .whatsapp-tooltippositionabsoluteright58pxbackground#0f172acolor#fffffffont-size12pxfont-weight600padding6px 12pxborder-radius20pxwhite-spacenowrapbox-shadow0 4px 14px rgba(0000.25)opacity0visibilityhiddentransformtranslateX(8px)transitionopacity 0.2s easetransform 0.2s easevisibility 0.2s easepointer-eventsnonefont-familyinherit#whatsappFloatBtnhover .whatsapp-tooltipopacity1visibilityvisibletransformtranslateX(0)@media (max-width768px)#whatsappFloatBtnbottom18pxright14pxwidth42pxheight42px#whatsappFloatBtn.has-scroll-btnbottom68px#whatsappFloatBtn svg#whatsappFloatBtn .whatsapp-iconwidth24pxheight24px#whatsappFloatBtn .whatsapp-tooltipdisplaynone
+/* ==========================================================================
+   PhonesDaddy - Modern Mobile Specifications Design System
+   ========================================================================== */
+
+:root {
+  --primary: #0d9488;
+  --primary-hover: #0f766e;
+  --primary-light: #f0fdfa;
+  --primary-border: #99f6e4;
+  
+  --dark: #0f172a;
+  --dark-light: #1e293b;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  
+  --bg-page: #f8fafc;
+  --bg-surface: #ffffff;
+  --border-color: #e2e8f0;
+  --border-light: #f1f5f9;
+  
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --info: #0284c7;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-dropdown: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
+
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --max-width: 1240px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* SVG Icon Utility Classes */
+.svg-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.svg-icon-sm { width: 12px; height: 12px; }
+.svg-icon-lg { width: 18px; height: 18px; }
+.svg-icon-xl { width: 22px; height: 22px; }
+.icon-with-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.5;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+body:not(.admin-body) {
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* ==========================================================================
+   Header & Navigation
+   ========================================================================== */
+.site-header {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  gap: 20px;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--dark);
+  letter-spacing: -0.5px;
+}
+
+.brand-logo .brand-highlight {
+  color: var(--primary);
+}
+
+.brand-logo .brand-text {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.site-header-logo-img {
+  max-height: 38px;
+  max-width: 160px;
+  width: auto;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.site-footer-logo-img {
+  max-height: 36px;
+  max-width: 150px;
+  width: auto;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  list-style: none;
+}
+
+.nav-link {
+  font-weight: 600;
+  color: var(--dark-light);
+  transition: color 0.15s ease;
+  font-size: 15px;
+  padding: 6px 0;
+  position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--primary);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+}
+
+.nav-link.nav-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px !important;
+  background: rgba(13, 148, 136, 0.08);
+  color: var(--primary) !important;
+  border: 1px solid var(--primary);
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
+}
+
+.nav-link.nav-login-btn:hover {
+  background: var(--primary);
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+  transform: translateY(-1px);
+}
+
+.nav-link.nav-login-btn::after {
+  display: none !important;
+}
+
+.header-search {
+  flex: 0 1 360px;
+  position: relative;
+}
+
+.header-search input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 16px 8px 38px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--bg-page);
+  color: var(--text-main);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.header-search input:focus {
+  background: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.header-search .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  pointer-events: none;
+}
+
+/* Mobile Header Actions (Search Icon + Hamburger) */
+.header-mobile-actions {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-search-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--dark);
+  padding: 7px;
+  border-radius: var(--radius-md);
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mobile-search-toggle:hover,
+.mobile-search-toggle.active {
+  color: var(--primary);
+  background: rgba(13, 148, 136, 0.1);
+}
+
+/* Hide mobile-specific nav search item on desktop */
+.mobile-nav-search-item {
+  display: none !important;
+}
+
+/* Mobile Toggle */
+.mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--dark);
+  padding: 6px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.mobile-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Global Search Dropdown */
+.search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-dropdown);
+  max-height: 420px;
+  overflow-y: auto;
+  z-index: 1100;
+  display: none;
+}
+
+.search-results-dropdown.show {
+  display: block;
+}
+
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.15s;
+}
+
+.search-item:last-child {
+  border-bottom: none;
+}
+
+.search-item:hover {
+  background: var(--primary-light);
+}
+
+.search-thumb {
+  width: 38px;
+  height: 48px;
+  object-fit: contain;
+  background: #f8fafc;
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.search-item-info {
+  flex: 1;
+}
+
+.search-item-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--dark);
+}
+
+.search-item-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.search-item-price {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 13px;
+  text-align: right;
+}
+
+/* ==========================================================================
+   Hero Flagship Slider (Ultra-Modern, Unusual Showcase)
+   ========================================================================== */
+.hero-slider-section {
+  position: relative;
+  background: #060b13;
+  color: #ffffff;
+  overflow: hidden;
+  padding: 42px 0 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Ambient Dynamic Glow */
+.hero-ambient-glow {
+  position: absolute;
+  top: -160px;
+  right: 6%;
+  width: 680px;
+  height: 680px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--current-glow, rgba(13, 148, 136, 0.45)) 0%, rgba(37, 99, 235, 0.15) 50%, transparent 72%);
+  filter: blur(85px);
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.8s ease;
+  animation: ambientPulse 8s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+@keyframes ambientPulse {
+  0% { transform: translate3d(0, 0, 0) scale(0.95); opacity: 0.75; }
+  100% { transform: translate3d(20px, 25px, 0) scale(1.1); opacity: 0.95; }
+}
+
+/* Subtle Cyber Tech Grid Pattern */
+.hero-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center;
+  mask-image: radial-gradient(ellipse 90% 75% at 50% 40%, #000 35%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 40%, #000 35%, transparent 95%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-slider-container {
+  position: relative;
+  z-index: 3;
+}
+
+/* Slides Wrapper */
+.hero-slides-wrapper {
+  position: relative;
+  min-height: 480px;
+}
+
+.hero-slide {
+  display: none;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-slide.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-slide-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 36px;
+}
+
+/* Left Specs Deck */
+.hero-slide-content {
+  padding-right: 15px;
+}
+
+.hero-spotlight-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #38bdf8;
+  margin-bottom: 14px;
+}
+
+.pulsing-beacon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+  animation: beaconPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+@keyframes beaconPing {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  50% { transform: translate3d(0, 0, 0) scale(1.35); opacity: 0.5; }
+}
+
+.hero-phone-heading {
+  font-size: 2.75rem;
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+  color: #ffffff;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.hero-phone-heading span.gradient-text {
+  background: linear-gradient(135deg, #ffffff 30%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-meta-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hero-price-badge {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #2dd4bf;
+  letter-spacing: -0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(13, 148, 136, 0.15);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  color: #5eead4;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.hero-status-pill.upcoming {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.hero-desc-text {
+  font-size: 15px;
+  color: #94a3b8;
+  line-height: 1.6;
+  max-width: 580px;
+  margin-bottom: 22px;
+}
+
+/* Unusual Specs HUD (4-Box Glass Cards) */
+.hero-specs-hud {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+  max-width: 580px;
+}
+
+.spec-hud-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  padding: 12px 14px;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.spec-hud-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.spec-hud-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(13, 148, 136, 0.2);
+  color: #2dd4bf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spec-hud-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.spec-hud-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.spec-hud-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Slide Action Buttons */
+.hero-slide-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-hero-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  color: #ffffff !important;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.4);
+  transition: all 0.25s ease;
+  border: none;
+}
+
+.btn-hero-primary:hover {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(13, 148, 136, 0.55);
+}
+
+.btn-hero-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 20px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+/* Right 3D Showcase Stage */
+.hero-phone-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 440px;
+  perspective: 1200px;
+}
+
+.phone-halo-glow {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--slide-accent, rgba(13, 148, 136, 0.45)) 0%, transparent 70%);
+  filter: blur(50px);
+  z-index: 1;
+  pointer-events: none;
+  animation: haloBreathe 5s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+@keyframes haloBreathe {
+  0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.6; }
+  100% { transform: translate3d(0, 0, 0) scale(1.15); opacity: 0.9; }
+}
+
+.hero-phone-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 360px;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: phoneFloat 6s ease-in-out infinite;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+@keyframes phoneFloat {
+  0%, 100% { transform: translate3d(0, 0px, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -12px, 0) rotate(0.8deg); }
+}
+
+.hero-phone-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.75));
+  border-radius: 24px;
+  transition: transform 0.4s ease;
+}
+
+.hero-phone-card:hover .hero-phone-img {
+  transform: scale(1.03) rotate(-1deg);
+}
+
+/* Floating Feature Badges (3D Depth Effect) */
+.floating-callout-badge {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  color: #f8fafc;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  white-space: nowrap;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.floating-callout-badge.badge-top-right {
+  top: 15%;
+  right: -10px;
+  animation: floatBadge1 5s ease-in-out infinite;
+}
+
+.floating-callout-badge.badge-mid-left {
+  top: 52%;
+  left: -20px;
+  animation: floatBadge2 6s ease-in-out infinite;
+}
+
+.floating-callout-badge.badge-bot-right {
+  bottom: 12%;
+  right: 10px;
+  animation: floatBadge3 5.5s ease-in-out infinite;
+}
+
+@keyframes floatBadge1 {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+}
+
+@keyframes floatBadge2 {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, 8px, 0); }
+}
+
+@keyframes floatBadge3 {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -6px, 0); }
+}
+
+/* Slider Controls & Tabs Bar */
+.hero-slider-bottom-bar {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.hero-slider-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hero-slider-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.hero-slider-tab {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 16px 12px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 170px;
+  text-align: left;
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.hero-slider-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.hero-slider-tab.active {
+  background: rgba(13, 148, 136, 0.12);
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+.hero-tab-index {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.hero-slider-tab.active .hero-tab-index {
+  color: #2dd4bf;
+}
+
+.hero-tab-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-slider-tab.active .hero-tab-title {
+  color: #ffffff;
+}
+
+.hero-tab-progress-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.hero-tab-progress {
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, #0d9488, #38bdf8);
+  border-radius: 2px;
+  will-change: transform;
+}
+
+.hero-slider-tab.active .hero-tab-progress {
+  animation: heroTabProgress 6s linear forwards;
+}
+
+@keyframes heroTabProgress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.hero-slider-section:hover .hero-slider-tab.active .hero-tab-progress {
+  animation-play-state: paused;
+}
+
+.hero-slider-arrows {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-arrow-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.slider-arrow-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.06);
+}
+
+/* Quick Brands Strip */
+.brands-strip {
+  background: #fff;
+  border-bottom: 1px solid var(--border-color);
+  padding: 14px 0;
+}
+
+.brands-scroll {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--dark-light);
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.brand-pill:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-border);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Section Headers & Grids
+   ========================================================================== */
+.section {
+  padding: 22px 0;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 400px;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 22px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.view-all-link {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+/* Phone Cards Grid - Reduced Width Layout (8 Cards Per Row on Desktop) */
+.phones-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  background: var(--border-color);
+}
+
+@media (max-width: 1200px) {
+  .phones-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .phones-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .phones-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .phones-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .phones-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .phones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.catalog-layout .phones-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .catalog-layout .phones-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .catalog-layout .phones-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .catalog-layout .phones-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .catalog-layout .phones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.phone-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-left: none;
+  border-radius: 0 !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.phone-card:hover {
+  background: #f8fafc;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+}
+
+.phone-card-image-wrap {
+  position: relative;
+  background: #f8fafc;
+  padding: 10px 6px 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 130px;
+  min-height: 130px;
+  max-height: 130px;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0 !important;
+}
+
+.phone-card-image {
+  max-height: 112px;
+  max-width: 88%;
+  width: auto;
+  aspect-ratio: 160 / 212;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+  border-radius: 0 !important;
+}
+
+.phone-card:hover .phone-card-image {
+  transform: scale(1.05);
+}
+
+/* Brand Name Label - Upper Top Left Corner */
+.phone-card-brand-badge {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 3;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.25;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
+}
+
+.phone-card:hover .phone-card-brand-badge {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.phone-card-badge {
+  display: none !important;
+}
+
+.badge-available {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-upcoming {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.badge-rumored {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-discontinued {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.phone-card-brand {
+  display: none; /* Replaced by top-left label */
+}
+
+/* Compact Centered Phone Card Body */
+.phone-card-body {
+  padding: 5px 6px 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  flex: 1;
+  border-radius: 0 !important;
+}
+
+.phone-card-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--dark);
+  line-height: 1.25;
+  margin-bottom: 2px;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 28px;
+  max-height: 28px;
+  width: 100%;
+}
+
+.phone-card-title:hover {
+  color: var(--primary);
+}
+
+/* Landing Page Compact Phone Card - Model Centered Below Image with Zero Excess Space */
+.home-phone-card .phone-card-body {
+  padding: 6px 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 0 0 auto;
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+.home-phone-card .phone-card-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--dark);
+  line-height: 1.25;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: auto;
+  max-height: 30px;
+  width: 100%;
+}
+
+.phone-card-price {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 0;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* Specs highlights hidden per user instruction */
+.phone-card-specs {
+  display: none !important;
+}
+
+.phone-card-actions {
+  display: none !important;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--border-color);
+  color: var(--dark-light);
+}
+
+.btn-outline:hover {
+  background: var(--bg-page);
+  border-color: #cbd5e1;
+  color: var(--dark);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ==========================================================================
+   Brand Cards Grid
+   ========================================================================== */
+.brands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.brand-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.brand-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.brand-card-logo {
+  height: 48px;
+  width: auto;
+  max-width: 110px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+.brand-card-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--dark);
+}
+
+.brand-card-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-page);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-top: 6px;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   News & Tech Blog Cards System
+   ========================================================================== */
+.news-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.news-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+}
+
+.news-card-thumb-wrap {
+  position: relative;
+  width: 100%;
+  height: 185px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+.news-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.news-card:hover .news-card-thumb {
+  transform: scale(1.04);
+}
+
+.news-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.news-card-hot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ea580c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.4);
+}
+
+.news-card-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.news-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.news-card-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--dark);
+  line-height: 1.35;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-card-title a:hover {
+  color: var(--primary);
+}
+
+.news-card-excerpt {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Compare Section / Widget
+   ========================================================================== */
+.compare-widget-box {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.compare-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.compare-select-wrap {
+  position: relative;
+}
+
+.compare-vs-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .compare-inputs-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .compare-vs-badge {
+    margin: 4px auto;
+  }
+  #btnLaunchQuickCompare {
+    width: 100%;
+    margin-top: 8px !important;
+  }
+}
+
+/* ==========================================================================
+   Phone Detail Page Layout & Specifications Table
+   ========================================================================== */
+.phone-detail-header {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.phone-detail-top-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 36px;
+}
+
+.phone-visual-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.phone-main-card,
+.phone-main-image-wrap {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 350px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.phone-main-image {
+  max-height: 290px;
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+
+.phone-main-image:hover {
+  transform: scale(1.03);
+}
+
+.gallery-count-pill {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  z-index: 2;
+}
+
+.gallery-count-pill:hover {
+  background: rgba(13, 148, 136, 0.9);
+  transform: scale(1.04);
+}
+
+.phone-gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.phone-thumb-item {
+  width: 58px;
+  height: 68px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  padding: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.phone-thumb-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.phone-thumb-item.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.3);
+}
+
+.phone-thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.phone-info-col h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--dark);
+  line-height: 1.2;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.phone-brand-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 13px;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.phone-brand-tag:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.phone-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.phone-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+}
+
+.phone-meta-chip .chip-icon {
+  font-size: 12.5px;
+  line-height: 1;
+}
+
+.phone-meta-clickable {
+  cursor: pointer;
+  background: #f0fdfa;
+  border-color: #ccfbf1;
+  color: var(--primary);
+}
+
+.phone-meta-clickable:hover {
+  background: #ccfbf1;
+  border-color: #99f6e4;
+  transform: translateY(-1px);
+}
+
+.phone-detail-price-box {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
+  border: 1px solid #99f6e4;
+  border-left: 4px solid var(--primary);
+  padding: 14px 20px;
+  border-radius: 10px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.05);
+}
+
+.price-header-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.price-flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.price-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #0f766e;
+}
+
+.price-verified-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.price-val-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.price-val {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: var(--primary);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.phone-short-desc {
+  color: var(--text-main);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  max-width: 720px;
+}
+
+.phone-action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-compare-main,
+.btn-compare-sub {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+/* ── Phone Quick Action Tab Bar ── */
+.phone-quick-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: 100%;
+  max-width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.phone-quick-tab-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 6px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #1e293b;
+  border-right: 1px solid var(--border-light);
+  background: #ffffff;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.phone-quick-tab-item:last-child {
+  border-right: none;
+}
+
+.phone-quick-tab-item:hover,
+.phone-quick-tab-item:active {
+  background: #f0fdfa;
+  color: var(--primary);
+}
+
+.phone-quick-tab-item.tab-item-prices {
+  color: var(--primary);
+}
+
+.phone-quick-tab-item .tab-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.phone-quick-tab-item .tab-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.phone-quick-tab-item .tab-badge {
+  background: rgba(13, 148, 136, 0.12);
+  color: var(--primary);
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.quick-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.quick-spec-item {
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.quick-spec-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.quick-spec-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Specifications Table Sections */
+.specs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.spec-section-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.spec-section-title {
+  background: #f1f5f9;
+  color: var(--dark);
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.spec-table tr {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.spec-table tr:last-child {
+  border-bottom: none;
+}
+
+.spec-table tr:hover {
+  background: #fafafa;
+}
+
+.spec-key {
+  width: 28%;
+  min-width: 160px;
+  padding: 12px 20px;
+  font-weight: 600;
+  color: var(--dark-light);
+  font-size: 14px;
+  vertical-align: top;
+  border-right: 1px solid var(--border-light);
+  background: #fafcfd;
+}
+
+.spec-val {
+  padding: 12px 20px;
+  color: var(--text-main);
+  font-size: 14px;
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+/* Multi-country Price Table */
+.prices-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.prices-table th {
+  background: #f8fafc;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.prices-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   External Store Deals / Affiliate Links (Where to Buy)
+   ========================================================================== */
+.phone-affiliate-section {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.phone-affiliate-body {
+  padding: 18px 20px;
+}
+
+.phone-affiliate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.affiliate-deal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 18px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.affiliate-deal-item:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.deal-store-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.deal-store-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.deal-store-badge .store-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.deal-tag {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.deal-price-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deal-price-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.deal-price-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.deal-action-col {
+  margin-left: auto;
+}
+
+.deal-buy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.deal-buy-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 640px) {
+  .phone-affiliate-body {
+    padding: 12px 14px;
+  }
+  .phone-affiliate-list {
+    gap: 9px;
+  }
+  .affiliate-deal-item {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 12px;
+  }
+  .deal-store-info {
+    min-width: 0;
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .deal-store-badge {
+    padding: 4px 8px;
+    font-size: 11.5px;
+    gap: 5px;
+  }
+  .deal-store-badge .store-dot {
+    width: 6px;
+    height: 6px;
+  }
+  .deal-tag {
+    font-size: 10px;
+    max-width: 85px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+  .deal-price-col {
+    margin-left: auto;
+    margin-right: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+    text-align: right;
+    min-width: 0;
+    flex-shrink: 0;
+  }
+  .deal-price-label {
+    font-size: 9px;
+    color: #64748b;
+    letter-spacing: 0.3px;
+    line-height: 1;
+  }
+  .deal-price-val {
+    font-size: 13.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  .deal-action-col {
+    width: auto;
+    margin-left: 0;
+    flex-shrink: 0;
+  }
+  .deal-buy-btn {
+    width: auto;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 5px;
+    border-radius: 6px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .deal-buy-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .affiliate-deal-item {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .deal-tag {
+    display: none;
+  }
+  .deal-price-label {
+    display: none;
+  }
+  .deal-price-val {
+    font-size: 12.5px;
+  }
+  .deal-buy-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 4px;
+  }
+}
+
+/* ==========================================================================
+   Video Review & Unboxing (YouTube Responsive Player)
+   ========================================================================== */
+.phone-video-section {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.phone-video-body {
+  padding: 18px 20px;
+  background: #0f172a;
+}
+
+.phone-video-responsive-wrap {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.phone-video-responsive-wrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ==========================================================================
+   Comparison Page
+   ========================================================================== */
+.compare-matrix-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.compare-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.compare-matrix th, .compare-matrix td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  vertical-align: top;
+}
+
+.compare-head-col {
+  width: 200px;
+  background: #f8fafc;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--dark);
+}
+
+.compare-phone-card {
+  text-align: center;
+  position: relative;
+}
+
+.compare-phone-thumb {
+  max-height: 140px;
+  margin: 0 auto 10px;
+  object-fit: contain;
+}
+
+.compare-phone-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+
+.compare-phone-price {
+  font-weight: 800;
+  color: var(--primary);
+  font-size: 16px;
+}
+
+.compare-section-header-row {
+  background: #0f172a;
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.compare-section-header-row td {
+  border-color: #0f172a;
+  padding: 10px 18px;
+}
+
+.compare-add-card {
+  min-width: 220px;
+  vertical-align: middle;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1 !important;
+  border-radius: var(--radius-md);
+  padding: 24px 16px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.compare-add-card:hover {
+  border-color: var(--primary) !important;
+  background: #f1f5f9;
+}
+
+.compare-add-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.compare-add-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  transition: all var(--transition-fast);
+}
+
+.compare-add-card:hover .compare-add-icon {
+  background: var(--primary);
+  color: #fff;
+}
+
+.compare-add-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 12px;
+}
+
+.compare-slot-search-wrap {
+  width: 100%;
+  position: relative;
+}
+
+.compare-slot-search {
+  width: 100%;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: #fff;
+}
+
+.compare-slot-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+  text-align: left;
+}
+
+.compare-slot-dropdown.show {
+  display: block;
+}
+
+.compare-suggestions-bar {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.compare-suggestions-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.compare-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-dark);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.compare-chip:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.compare-cell-empty {
+  background: #fcfdfe;
+  border-style: dashed !important;
+  color: #94a3b8;
+  text-align: center;
+}
+
+
+/* ==========================================================================
+   Catalog & Filter Sidebar (/phones)
+   ========================================================================== */
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.filter-sidebar {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  position: sticky;
+  top: 88px;
+}
+
+.filter-group {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.filter-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Mobile Filter Bar Toggle Button (Desktop: Hidden) */
+.mobile-filter-bar {
+  display: none;
+}
+
+.filter-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-chevron {
+  display: none;
+  font-size: 12px;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.filter-group-content {
+  display: block;
+}
+
+.filter-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.filter-label input[type="checkbox"],
+.filter-label input[type="radio"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+}
+
+.filter-price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-price-inputs input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.catalog-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.catalog-count {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.catalog-sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.catalog-sort select {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: #fff;
+  outline: none;
+}
+
+/* Pagination */
+.pagination-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 36px;
+}
+
+.page-btn {
+  min-width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--dark-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.page-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.page-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.site-footer {
+  background: var(--dark);
+  color: #94a3b8;
+  margin-top: auto;
+  border-top: 1px solid #1e293b;
+}
+
+.footer-top {
+  padding: 48px 0 32px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 36px;
+}
+
+.footer-col h4 {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+.footer-bottom {
+  border-top: 1px solid #1e293b;
+  padding: 20px 0;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 992px) {
+  .catalog-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .phone-detail-top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .phone-main-image-wrap {
+    min-height: 280px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  /* ── Mobile Header ── */
+  .header-inner {
+    height: 56px;
+    gap: 8px;
+  }
+
+  .brand-logo {
+    font-size: 1.15rem;
+    gap: 7px;
+  }
+
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 22px;
+    transition: background 0.15s ease;
+  }
+
+  .mobile-toggle:hover,
+  .mobile-toggle:active {
+    background: #f1f5f9;
+  }
+
+  /* Mobile Nav Dropdown */
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: #fff;
+    flex-direction: column;
+    padding: 8px 0;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    border-bottom: 2px solid var(--primary);
+    gap: 0;
+    z-index: 999;
+  }
+
+  .nav-links.show {
+    display: flex;
+    animation: mobileNavSlide 0.2s ease-out;
+  }
+
+  @keyframes mobileNavSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Mobile Filters Collapsible Drawer & Closed Filter Groups ── */
+  .mobile-filter-bar {
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .mobile-filter-bar-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 16px;
+    background: #ffffff;
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius-md);
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.08);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-filter-bar-btn:active {
+    background: #f0fdfa;
+    transform: scale(0.99);
+  }
+
+  .mobile-filter-toggle-state {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  .filter-sidebar {
+    display: none; /* Closed by default in mobile view */
+    margin-bottom: 20px;
+    position: static;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    padding: 16px;
+  }
+
+  .filter-sidebar.mobile-open {
+    display: block !important;
+    animation: fadeInSlide 0.25s ease;
+  }
+
+  @keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Inside mobile view, all filter groups are closed by default! */
+  .filter-accordion-group {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .filter-accordion-group .filter-title {
+    cursor: pointer;
+    user-select: none;
+    padding: 8px 4px;
+    border-radius: 6px;
+    margin-bottom: 0;
+    transition: background 0.15s ease;
+  }
+
+  .filter-accordion-group .filter-title:active {
+    background: #f8fafc;
+  }
+
+  .filter-accordion-group .filter-chevron {
+    display: inline-block !important;
+  }
+
+  .filter-accordion-group .filter-group-content {
+    display: none; /* Closed by default on mobile! */
+    padding-top: 10px;
+    padding-bottom: 4px;
+  }
+
+  .filter-accordion-group.is-expanded .filter-group-content {
+    display: block; /* Opens on click! */
+    animation: fadeInSlide 0.2s ease;
+  }
+
+  .filter-accordion-group.is-expanded .filter-chevron {
+    transform: rotate(180deg);
+    color: var(--primary);
+  }
+
+  .nav-links li {
+    width: 100%;
+  }
+
+  .nav-links .nav-link {
+    display: block;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+  }
+
+  .nav-links .nav-link:hover,
+  .nav-links .nav-link:active {
+    background: #f0fdfa;
+    border-left-color: var(--primary);
+  }
+
+  .nav-links .nav-link.active {
+    background: #f0fdfa;
+    border-left-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .nav-links .nav-link.active::after {
+    display: none;
+  }
+
+  /* Mobile Header Actions (Search Icon + Hamburger) */
+  .header-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-search-toggle {
+    display: inline-flex;
+  }
+
+  /* Desktop search hidden by default on mobile */
+  .header-search {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #ffffff;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 12px 25px -4px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    z-index: 1001;
+  }
+
+  /* When mobile search icon is clicked, search bar appears smoothly below header */
+  .header-search.mobile-open {
+    display: block;
+    animation: headerSearchSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .header-search.mobile-open input {
+    width: 100%;
+    height: 44px;
+    font-size: 15px;
+    padding: 10px 18px 10px 42px;
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-page);
+    border-radius: var(--radius-full);
+  }
+
+  .header-search.mobile-open input:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  }
+
+  .header-search.mobile-open .search-icon {
+    left: 28px;
+  }
+
+  .header-search.mobile-open .search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 16px;
+    right: 16px;
+    width: calc(100% - 32px);
+    max-height: 70vh;
+    z-index: 1002;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15);
+  }
+
+  @keyframes headerSearchSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Hero Flagship Slider Mobile ── */
+  .hero-slider-section {
+    padding: 22px 0 16px;
+    overflow: hidden;
+  }
+
+  .hero-slides-wrapper {
+    min-height: auto;
+  }
+
+  .hero-slide-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .hero-slide-content {
+    padding-right: 0;
+    max-width: 100%;
+  }
+
+  .hero-spotlight-pill {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 11px;
+    padding: 5px 12px;
+    margin-bottom: 10px;
+  }
+
+  .hero-phone-heading {
+    font-size: 1.7rem;
+    line-height: 1.18;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-meta-strip {
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .hero-price-badge {
+    font-size: 1.25rem;
+  }
+
+  .hero-status-pill {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .hero-desc-text {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+    max-width: 520px;
+  }
+
+  /* 2-Column Clean HUD Grid */
+  .hero-specs-hud {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-left: auto;
+    margin-right: auto;
+    gap: 8px;
+    margin-bottom: 16px;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .spec-hud-card {
+    padding: 8px 10px;
+    gap: 8px;
+    align-items: center;
+    border-radius: 10px;
+    min-width: 0;
+    text-align: left;
+  }
+
+  .spec-hud-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .spec-hud-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .spec-hud-info {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .spec-hud-label {
+    font-size: 9.5px;
+    margin-bottom: 1px;
+  }
+
+  .spec-hud-val {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hero-slide-actions {
+    justify-content: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    padding: 9px 18px;
+    font-size: 13px;
+  }
+
+  /* Compact 3D Stage on Mobile */
+  .hero-phone-stage {
+    min-height: 220px;
+    max-height: 250px;
+    order: -1;
+    perspective: 800px;
+    margin-bottom: 4px;
+  }
+
+  .hero-phone-card {
+    height: 210px;
+    max-width: 220px;
+    animation: phoneFloat 5s ease-in-out infinite;
+  }
+
+  .hero-phone-img {
+    max-height: 200px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 16px;
+  }
+
+  .phone-halo-glow {
+    width: 220px;
+    height: 220px;
+    filter: blur(40px);
+  }
+
+  .floating-callout-badge {
+    font-size: 10.5px;
+    padding: 5px 10px;
+    gap: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  .floating-callout-badge.badge-top-right {
+    top: 6px;
+    right: 8px;
+  }
+
+  .floating-callout-badge.badge-bot-right {
+    bottom: 6px;
+    right: 8px;
+  }
+
+  /* Bottom Navigation Tabs */
+  .hero-slider-bottom-bar {
+    margin-top: 14px;
+    padding-top: 12px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-slider-tabs {
+    width: 100%;
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 2px 6px;
+    scrollbar-width: none;
+  }
+
+  .hero-slider-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero-slider-tab {
+    flex: 0 0 auto;
+    min-width: 115px;
+    max-width: 140px;
+    scroll-snap-align: center;
+    padding: 7px 10px 8px;
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  .hero-tab-index {
+    font-size: 9.5px;
+    letter-spacing: 0.3px;
+  }
+
+  .hero-tab-title {
+    font-size: 11.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hero-slider-arrows {
+    display: none;
+  }
+
+  /* ── Compare Mobile ── */
+  .compare-inputs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-vs-badge {
+    margin: 0 auto;
+  }
+
+  .spec-table {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .spec-table tr {
+    display: table-row;
+  }
+
+  .spec-key {
+    display: table-cell;
+    width: 32%;
+    min-width: 95px;
+    max-width: 130px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark-light);
+    border-right: 1px solid var(--border-light);
+    border-bottom: none;
+    background: #fafcfd;
+    vertical-align: top;
+    word-break: break-word;
+  }
+
+  .spec-val {
+    display: table-cell;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    vertical-align: top;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* ── Footer Mobile ── */
+  .footer-top {
+    padding: 32px 0 20px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .footer-col .brand-logo {
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .footer-col p {
+    font-size: 13px;
+  }
+
+  .footer-col h4 {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .footer-links {
+    align-items: center;
+    font-size: 13px;
+  }
+
+  .footer-bottom {
+    padding: 14px 0;
+    font-size: 12px;
+  }
+
+  /* ── Phone Detail Page Mobile Responsiveness ── */
+  .phone-detail-header {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .phone-detail-top-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .phone-main-card,
+  .phone-main-image-wrap {
+    min-height: 240px;
+    padding: 16px 12px;
+  }
+
+  .phone-main-image {
+    max-height: 220px;
+  }
+
+  .phone-info-col h1 {
+    font-size: 1.55rem;
+    line-height: 1.22;
+    margin-top: 4px;
+    margin-bottom: 10px;
+  }
+
+  .phone-brand-tag {
+    font-size: 11.5px;
+    padding: 3px 8px;
+    margin-bottom: 6px;
+  }
+
+  .phone-meta-row {
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .phone-meta-chip {
+    padding: 4px 8px;
+    font-size: 11.5px;
+    border-radius: 6px;
+  }
+
+  .phone-detail-price-box {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  .price-header-row {
+    gap: 5px;
+  }
+
+  .price-label {
+    font-size: 11px;
+  }
+
+  .price-verified-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+  }
+
+  .price-val {
+    font-size: 1.55rem;
+  }
+
+  .phone-short-desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin-bottom: 16px;
+  }
+
+  .phone-action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .btn-compare-main,
+  .btn-compare-sub {
+    width: 100%;
+    padding: 10px 6px;
+    font-size: 12.5px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  /* ── Quick Action Tab Bar: 100% Inside Screen, No Scrollbar ── */
+  .phone-quick-tabs {
+    grid-template-columns: repeat(5, 1fr);
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .phone-quick-tab-item {
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 1px;
+    font-size: 10px;
+    letter-spacing: -0.2px;
+    min-width: 0;
+  }
+
+  .phone-quick-tab-item .tab-icon {
+    font-size: 15px;
+    margin-bottom: 1px;
+  }
+
+  .phone-quick-tab-item .tab-text {
+    font-size: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  .phone-quick-tab-item .tab-badge {
+    font-size: 9px;
+    padding: 0 4px;
+    margin-left: 0;
+    margin-top: 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* ── Header Extra Small ── */
+  .header-inner {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .brand-logo {
+    font-size: 1.05rem;
+    gap: 6px;
+  }
+
+  .brand-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+
+  .nav-links .nav-link {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .mobile-nav-search-item {
+    padding: 10px 16px 6px;
+  }
+
+  .mobile-nav-search input {
+    height: 38px;
+    font-size: 13px;
+  }
+
+  /* ── Hero Extra Small ── */
+  .hero-title {
+    font-size: 1.3rem;
+  }
+
+  .hero-subtitle {
+    font-size: 13px;
+  }
+
+  /* ── Hero Flagship Slider Extra Small ── */
+  .hero-slider-section {
+    padding: 16px 0 14px;
+  }
+
+  .hero-slide-grid {
+    gap: 12px;
+  }
+
+  .hero-phone-stage {
+    min-height: 185px;
+    max-height: 200px;
+  }
+
+  .hero-phone-card {
+    height: 180px;
+    max-width: 180px;
+  }
+
+  .hero-phone-img {
+    max-height: 175px;
+  }
+
+  .phone-halo-glow {
+    width: 180px;
+    height: 180px;
+    filter: blur(30px);
+  }
+
+  .floating-callout-badge {
+    font-size: 9.5px;
+    padding: 3px 8px;
+    gap: 4px;
+  }
+
+  .hero-spotlight-pill {
+    font-size: 10px;
+    padding: 3px 9px;
+    margin-bottom: 6px;
+  }
+
+  .hero-phone-heading {
+    font-size: 1.42rem;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .hero-price-badge {
+    font-size: 1.15rem;
+  }
+
+  .hero-status-pill {
+    font-size: 10px;
+    padding: 2px 7px;
+  }
+
+  .hero-desc-text {
+    font-size: 12px;
+    line-height: 1.45;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hero-specs-hud {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .spec-hud-card {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .spec-hud-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .spec-hud-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .spec-hud-label {
+    font-size: 8.5px;
+  }
+
+  .spec-hud-val {
+    font-size: 11px;
+  }
+
+  .hero-slide-actions {
+    gap: 8px;
+  }
+
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .hero-slider-tab {
+    min-width: 100px;
+    max-width: 125px;
+    padding: 6px 8px 7px;
+  }
+
+  .hero-tab-index {
+    font-size: 8.5px;
+  }
+
+  .hero-tab-title {
+    font-size: 11px;
+  }
+
+  /* ── Spec Table Extra Small ── */
+  .spec-key {
+    width: 30%;
+    min-width: 85px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .spec-val {
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .spec-section-title {
+    padding: 10px 14px;
+    font-size: 13.5px;
+  }
+
+  /* ── Grid Extra Small ── */
+  .phones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brands-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* ── Footer Extra Small ── */
+  .footer-top {
+    padding: 24px 0 16px;
+  }
+
+  .footer-grid {
+    gap: 20px;
+  }
+
+  .footer-col h4 {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .footer-links {
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .footer-bottom {
+    font-size: 11px;
+    padding: 12px 0;
+  }
+
+  /* ── Phone Detail Extra Small ── */
+  .phone-detail-header {
+    padding: 12px;
+  }
+
+  .phone-info-col h1 {
+    font-size: 1.4rem;
+  }
+
+  .price-val {
+    font-size: 1.45rem;
+  }
+
+  .phone-quick-tab-item {
+    padding: 7px 1px;
+  }
+
+  .phone-quick-tab-item .tab-icon {
+    font-size: 13.5px;
+  }
+
+  .phone-quick-tab-item .tab-text {
+    font-size: 9px;
+  }
+
+  .phone-action-buttons {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .phone-action-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .phone-quick-tab-item .tab-text {
+    font-size: 8.5px;
+  }
+
+  .phone-quick-tab-item .tab-icon {
+    font-size: 12.5px;
+  }
+}
+
+/* ── Rich Comment & Review Inline Styling ── */
+.comment-inline-image {
+  max-width: 100%;
+  max-height: 380px;
+  height: auto;
+  border-radius: 8px;
+  margin: 10px 0;
+  display: block;
+  border: 1px solid #cbd5e1;
+  object-fit: contain;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ql-toolbar.ql-snow {
+  border-color: #cbd5e1 !important;
+  border-radius: 6px 6px 0 0 !important;
+  background: #f8fafc !important;
+}
+
+.ql-container.ql-snow {
+  border-color: #cbd5e1 !important;
+  border-radius: 0 0 6px 6px !important;
+  font-family: inherit !important;
+  background: #ffffff !important;
+}
+
+.ql-editor {
+  line-height: 1.65;
+  font-size: 14px;
+}
+
+.ql-editor.ql-blank::before {
+  color: #94a3b8;
+  font-style: normal;
+}
+
+/* ==========================================================================
+   GSMArena-Style 2-Column Layout & Sidebar Widgets
+   ========================================================================== */
+
+.gsm-page-wrapper {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+}
+
+@media (max-width: 991px) {
+  .gsm-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .gsm-main-col {
+    order: 1; /* Mobile phone post shows FIRST on mobile screens */
+    width: 100%;
+  }
+
+  .gsm-sidebar-col {
+    order: 2; /* Sidebar widgets show AFTER the mobile post on mobile screens */
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+.gsm-sidebar-col {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.gsm-main-col {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Widget Card Shell */
+.gsm-widget-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.gsm-widget-title {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gsm-widget-title .widget-icon {
+  font-size: 14px;
+}
+
+.gsm-widget-body {
+  padding: 12px;
+}
+
+.gsm-widget-footer-link {
+  display: block;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border-color);
+  text-align: right;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  transition: all 0.15s ease;
+}
+
+.gsm-widget-footer-link:hover {
+  background: var(--primary-light);
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* 1. Phone Finder / Brands Grid */
+.gsm-brands-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.gsm-brand-item {
+  background: #ffffff;
+  padding: 7px 4px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.gsm-brand-item:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.gsm-brand-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-color);
+}
+
+.gsm-brand-action-btn {
+  background: #f8fafc;
+  padding: 8px 6px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 0.5px;
+  display: block;
+  transition: all 0.15s ease;
+}
+
+.gsm-brand-action-btn:hover {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+/* 2. Prices Widget */
+.gsm-price-variant-selector {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1e293b;
+  margin-bottom: 10px;
+  outline: none;
+}
+
+.gsm-prices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gsm-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 10px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: background 0.12s;
+}
+
+.gsm-price-row:hover {
+  background: #f1f5f9;
+}
+
+.gsm-price-store {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.gsm-price-value {
+  font-weight: 800;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+.gsm-btn-show-prices {
+  display: block;
+  width: 100%;
+  padding: 7px 0;
+  background: #0f172a;
+  color: #ffffff;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-radius: 4px;
+  margin-top: 10px;
+  letter-spacing: 0.4px;
+  transition: background 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.gsm-btn-show-prices:hover {
+  background: var(--primary);
+}
+
+/* 3. In The News Widget */
+.gsm-news-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.gsm-news-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-light);
+  align-items: center;
+  transition: background 0.12s ease;
+  text-decoration: none;
+}
+
+.gsm-news-item:last-child {
+  border-bottom: none;
+}
+
+.gsm-news-item:hover {
+  background: #f8fafc;
+}
+
+.gsm-news-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.gsm-news-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.gsm-news-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.gsm-news-item:hover .gsm-news-title {
+  color: var(--primary);
+}
+
+.gsm-news-meta {
+  font-size: 10.5px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 4. Phone Reviews Banner Widget */
+.gsm-review-banner {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0f172a;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.gsm-review-banner-img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.gsm-review-banner:hover .gsm-review-banner-img {
+  transform: scale(1.04);
+  opacity: 1;
+}
+
+.gsm-review-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.2) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+}
+
+.gsm-review-banner-tag {
+  background: #b91c1c;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  align-self: flex-start;
+  margin-bottom: 4px;
+}
+
+.gsm-review-banner-title {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+}
+
+/* 5 & 6. Devices Grid (Related & Popular) */
+.gsm-devices-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10px;
+}
+
+.gsm-device-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 4px;
+  border: 1px solid #f1f5f9;
+  border-radius: 4px;
+  background: #ffffff;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.gsm-device-item:hover {
+  border-color: var(--primary-border);
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.12);
+  transform: translateY(-2px);
+}
+
+.gsm-device-thumb {
+  width: 54px;
+  height: 68px;
+  object-fit: contain;
+  margin-bottom: 6px;
+}
+
+.gsm-device-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 26px;
+}
+
+.gsm-device-item:hover .gsm-device-name {
+  color: var(--primary);
+}
+
+/* Sticky sidebar ad container */
+.gsm-sidebar-ad-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.gsm-sticky-sidebar {
+  position: sticky;
+  top: 76px;
+  z-index: 20;
+}
+
+/* ==========================================================================
+   Modern Flat Reviews & Comments Feed (Eliminates Nested "Block Inside Block")
+   ========================================================================== */
+
+/* Outer Section Wrappers */
+.reviews-content-wrap {
+  padding: 24px;
+}
+
+.comments-content-wrap {
+  padding: 28px;
+}
+
+@media (max-width: 768px) {
+  .reviews-content-wrap {
+    padding: 14px 10px !important;
+  }
+  .comments-content-wrap {
+    padding: 16px 12px !important;
+  }
+}
+
+/* Rating Overview Grid — Clean & Responsive */
+.phone-rating-overview-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.phone-rating-score-card {
+  text-align: center;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .phone-rating-overview-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+  }
+  .phone-rating-score-card {
+    padding: 14px 16px;
+  }
+}
+
+/* Clean Form Containers (Sleek, Not Heavy Cluttered Boxes) */
+.review-form-card,
+.comment-form-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px 22px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 768px) {
+  .review-form-card,
+  .comment-form-card {
+    padding: 14px 12px !important;
+    margin-bottom: 18px;
+    border-radius: 6px;
+  }
+}
+
+/* Reviews and Comments Feed — Flat, Divided Items (NO Box-in-Box) */
+.reviews-feed-list,
+.comments-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0 !important;
+}
+
+.review-thread-item,
+.comment-thread-item {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 18px 0 !important;
+  margin-bottom: 0 !important;
+  transition: background 0.15s ease;
+}
+
+.review-thread-item:last-child,
+.comment-thread-item:last-child {
+  border-bottom: none !important;
+}
+
+@media (max-width: 768px) {
+  .review-thread-item,
+  .comment-thread-item {
+    padding: 14px 0 !important;
+  }
+}
+
+/* Threaded Replies — Flat Indented Tree (NO Box-in-Box) */
+.thread-reply-item,
+.comment-reply-item {
+  background: transparent !important;
+  border: none !important;
+  border-left: 2.5px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 8px 0 8px 14px !important;
+  margin-top: 10px !important;
+  margin-left: 14px !important;
+}
+
+.thread-reply-item.is-admin-reply,
+.comment-reply-item.is-admin-reply {
+  border-left-color: #3b82f6 !important;
+  background: rgba(239, 246, 255, 0.4) !important;
+  border-radius: 0 6px 6px 0 !important;
+  padding-right: 8px !important;
+}
+
+@media (max-width: 768px) {
+  .thread-reply-item,
+  .comment-reply-item {
+    margin-left: 8px !important;
+    padding-left: 10px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+}
+
+/* Inline Reply Form (Clean & Flat) */
+.inline-reply-box {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  padding: 14px 16px !important;
+  margin-top: 12px !important;
+  margin-left: 14px !important;
+}
+
+@media (max-width: 768px) {
+  .inline-reply-box {
+    margin-left: 0 !important;
+    padding: 10px 12px !important;
+  }
+}
+
+/* ── Phone Card Stats: Compact count on mobile ── */
+@media (max-width: 768px) {
+  .phone-card-stats-row .stat-label {
+    display: inline;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .phone-card-stats-row > span {
+    gap: 3px !important;
+    font-size: 12px;
+  }
+}
+
+/* ==========================================================================
+   Phone Detail Gallery Strip & Lightbox Styling
+   ========================================================================== */
+.phone-gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.phone-thumb-item {
+  width: 58px;
+  height: 64px;
+  flex-shrink: 0;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  padding: 3px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-thumb-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.phone-thumb-item.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.25);
+}
+
+.phone-thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.gallery-count-pill {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: 2;
+}
+
+.gallery-count-pill:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ==========================================================================
+   Phone Detail Video Review & Unboxing Player Styling
+   ========================================================================== */
+.phone-video-section {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 28px;
+}
+
+.phone-video-body {
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.phone-video-responsive-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: #0f172a;
+  box-shadow: var(--shadow-sm);
+}
+
+.phone-video-responsive-wrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ==========================================================================
+   Scroll To Top Button
+   ========================================================================== */
+
+#scrollToTopBtn {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.45), 0 2px 8px rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.85);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1), visibility 0.3s ease, box-shadow 0.2s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#scrollToTopBtn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+#scrollToTopBtn:hover {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, #0a6660 100%);
+  box-shadow: 0 6px 28px rgba(13, 148, 136, 0.6), 0 2px 10px rgba(0,0,0,0.22);
+  transform: translateY(-2px) scale(1.07);
+}
+
+#scrollToTopBtn:active {
+  transform: translateY(0) scale(0.96);
+}
+
+#scrollToTopBtn svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  flex-shrink: 0;
+}
+
+/* Ripple animation on click */
+#scrollToTopBtn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+#scrollToTopBtn.ripple::after {
+  opacity: 1;
+  transform: scale(1.6);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #scrollToTopBtn {
+    bottom: 18px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+  }
+  #scrollToTopBtn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* ==========================================================================
+   Floating WhatsApp Contact Button (Dynamic Slide with Scroll-To-Top)
+   ========================================================================== */
+
+#whatsappFloatBtn {
+  position: fixed;
+  bottom: 28px; /* Default: Sits in bottom spot when scroll-to-top is hidden */
+  right: 24px;
+  z-index: 9998;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #25D366;
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.45), 0 2px 8px rgba(0, 0, 0, 0.18);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background 0.25s ease;
+  animation: waPulseSubtle 3s infinite ease-in-out;
+}
+
+/* Smoothly slides up when the scroll-to-top button becomes visible */
+#whatsappFloatBtn.has-scroll-btn {
+  bottom: 86px;
+}
+
+@keyframes waPulseSubtle {
+  0%, 100% {
+    box-shadow: 0 4px 18px rgba(37, 211, 102, 0.42), 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+  50% {
+    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.62), 0 0 0 8px rgba(37, 211, 102, 0.14);
+  }
+}
+
+#whatsappFloatBtn:hover {
+  transform: translateY(-3px) scale(1.08);
+  background: #20ba5a;
+  box-shadow: 0 8px 28px rgba(37, 211, 102, 0.65), 0 4px 12px rgba(0, 0, 0, 0.22);
+  color: #fff;
+}
+
+#whatsappFloatBtn:active {
+  transform: translateY(0) scale(0.96);
+}
+
+#whatsappFloatBtn svg,
+#whatsappFloatBtn .whatsapp-icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
+}
+
+/* Tooltip on hover */
+#whatsappFloatBtn .whatsapp-tooltip {
+  position: absolute;
+  right: 58px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  font-family: inherit;
+}
+
+#whatsappFloatBtn:hover .whatsapp-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* Mobile adjustments for WhatsApp button */
+@media (max-width: 768px) {
+  #whatsappFloatBtn {
+    bottom: 18px; /* Default at bottom on mobile */
+    right: 14px;
+    width: 42px;
+    height: 42px;
+  }
+  #whatsappFloatBtn.has-scroll-btn {
+    bottom: 68px; /* Slides up when topup button appears */
+  }
+  #whatsappFloatBtn svg,
+  #whatsappFloatBtn .whatsapp-icon {
+    width: 24px;
+    height: 24px;
+  }
+  #whatsappFloatBtn .whatsapp-tooltip {
+    display: none;
+  }
+}

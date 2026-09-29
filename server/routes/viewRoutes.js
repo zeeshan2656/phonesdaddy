@@ -95,6 +95,9 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
     if (!html.includes('rel="icon"') && !html.includes("rel='icon'")) {
       headInject += `\n  ${bundle.faviconTag}`;
     }
+    if (branding.site_logo && branding.site_logo.trim()) {
+      headInject += `\n  <link rel="preload" href="${escapeAttr(branding.site_logo)}" as="image" fetchpriority="high">`;
+    }
     if (branding.whatsapp_number && branding.whatsapp_enabled !== '0') {
       headInject += `\n  <meta name="whatsapp-number" content="${escapeAttr(branding.whatsapp_number)}">`;
       headInject += `\n  <meta name="whatsapp-message" content="${escapeAttr(branding.whatsapp_message || '')}">`;

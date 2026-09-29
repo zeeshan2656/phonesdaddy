@@ -170,7 +170,31 @@ class SettingsController {
         // Non-critical if old file cleanup fails
       }
 
-      const logoUrl = `/uploads/branding/${req.file.filename}`;
+      let logoUrl = `/uploads/branding/${req.file.filename}`;
+      try {
+        const sharp = require('sharp');
+        const { UPLOADS_BASE } = require('../utils/paths');
+        const brandingDir = path.join(UPLOADS_BASE, 'branding');
+        if (!fs.existsSync(brandingDir)) fs.mkdirSync(brandingDir, { recursive: true });
+
+        const webpFilename = `logo-${Date.now()}.webp`;
+        const webpDest = path.join(brandingDir, webpFilename);
+
+        await sharp(req.file.path)
+          .rotate()
+          .resize({ height: 76, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 92, effort: 5 })
+          .toFile(webpDest);
+
+        // Remove raw uploaded file if it was a bulky PNG/JPG
+        if (req.file.path !== webpDest && fs.existsSync(req.file.path)) {
+          try { fs.unlinkSync(req.file.path); } catch (_) {}
+        }
+        logoUrl = `/uploads/branding/${webpFilename}`;
+      } catch (optErr) {
+        console.warn('Logo optimization notice:', optErr.message);
+      }
+
       await SettingsModel.updateSettings({ site_logo: logoUrl });
 
       res.json({
