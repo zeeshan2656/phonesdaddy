@@ -301,19 +301,33 @@ async function loadDynamicFooterPages() {
   const THRESHOLD = 300;
   let ticking = false;
 
+    function updateScrollState() {
+    const isScrolled = window.scrollY > THRESHOLD;
+    if (isScrolled) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+    const waBtn = document.getElementById('whatsappFloatBtn');
+    if (waBtn) {
+      if (isScrolled) {
+        waBtn.classList.add('has-scroll-btn');
+      } else {
+        waBtn.classList.remove('has-scroll-btn');
+      }
+    }
+  }
+
   function onScroll() {
     if (!ticking) {
       window.requestAnimationFrame(() => {
-        if (window.scrollY > THRESHOLD) {
-          btn.classList.add('visible');
-        } else {
-          btn.classList.remove('visible');
-        }
+        updateScrollState();
         ticking = false;
       });
       ticking = true;
     }
   }
+  updateScrollState();
 
   window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -336,8 +350,9 @@ async function loadDynamicFooterPages() {
     style.id = 'waFloatBtnStyle';
     style.textContent = `
 #whatsappFloatBtn {
+  transition: bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
   position: fixed;
-  bottom: 86px;
+  bottom: 28px;
   right: 24px;
   z-index: 9998;
   width: 48px;
@@ -356,6 +371,7 @@ async function loadDynamicFooterPages() {
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
   animation: waPulseSubtle 3s infinite ease-in-out;
 }
+#whatsappFloatBtn.has-scroll-btn { bottom: 86px; }
 #whatsappFloatBtn:hover {
   transform: translateY(-3px) scale(1.08);
   background: linear-gradient(135deg, #2ae06e 0%, #0d796c 100%);
@@ -440,8 +456,9 @@ async function loadDynamicFooterPages() {
     btn.setAttribute('aria-label', 'Chat on WhatsApp');
     btn.setAttribute('title', 'Chat with Admin on WhatsApp');
     btn.innerHTML = `
-      <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
-        <path d="M16 2a13.9 13.9 0 0 0-12 21L2 30l7.2-1.9A13.9 13.9 0 1 0 16 2zm0 25.5a11.6 11.6 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.6 11.6 0 1 1 16 27.5zm6.4-8.7c-.3-.2-2-.9-2.3-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.4 0-.6.2-.8s.3-.4.5-.6.2-.4.3-.6 0-.4 0-.6-.7-1.8-1-2.4c-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 1 5.3 5.3 0 0 0 1.6 3.9 12.3 12.3 0 0 0 4.8 4.3 15.6 15.6 0 0 0 1.6.6c.7.2 1.4.2 1.9.1.6-.1 2-.8 2.3-1.6s.3-1.4.2-1.6-.3-.3-.6-.5z"/>
+      <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <path fill="#ffffff" d="M16 2C8.27 2 2 8.27 2 16c0 2.58.7 5.09 2.03 7.3L2 30l6.9-1.99c2.14 1.22 4.58 1.87 7.1 1.87 7.73 0 14-6.27 14-13.88S23.73 2 16 2z"/>
+        <path fill="#25D366" d="M22.8 19.4c-.3-.2-1.9-.9-2.2-1.1-.3-.1-.5-.2-.7.2-.2.3-.8 1.1-1 1.3-.2.2-.4.2-.7.1s-1.4-.5-2.6-1.6c-.9-.8-1.6-1.9-1.7-2.2-.2-.3 0-.5.1-.7.1-.1.3-.4.5-.6.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.2-.7-1.8-1-2.4-.3-.6-.6-.5-.8-.5h-.7c-.2 0-.7.1-1.1.5-.4.4-1.5 1.5-1.5 3.6s1.5 4.2 1.7 4.5c.2.3 3 4.6 7.3 6.4 1 .4 1.8.7 2.4.9.7.2 1.4.2 1.9.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.5z"/>
       </svg>
       <span class="whatsapp-tooltip">Chat with us</span>`;
     document.body.appendChild(btn);
@@ -476,4 +493,3 @@ async function loadDynamicFooterPages() {
     run();
   }
 })();
-

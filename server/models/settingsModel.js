@@ -285,7 +285,7 @@ class SettingsModel {
   /**
    * Generates floating WhatsApp button HTML positioned right above scroll-to-top button
    */
-  static async getWhatsAppButtonHtml() {
+    static async getWhatsAppButtonHtml() {
     const settings = await this.getAllSettings();
     const isEnabled = settings.whatsapp_enabled !== '0' && settings.whatsapp_enabled !== false;
     const rawNumber = (settings.whatsapp_number || '').trim();
@@ -301,11 +301,11 @@ class SettingsModel {
     const waUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(defaultMsg)}`;
 
     return `
-<!-- WhatsApp Floating Contact Button (Positioned above Scroll-To-Top) -->
+<!-- WhatsApp Floating Contact Button (Dynamic Slide with Scroll-To-Top) -->
 <style id="waFloatBtnStyle">
 #whatsappFloatBtn {
   position: fixed;
-  bottom: 86px;
+  bottom: 28px;
   right: 24px;
   z-index: 9998;
   width: 48px;
@@ -321,8 +321,11 @@ class SettingsModel {
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  transition: bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
   animation: waPulseSubtle 3s infinite ease-in-out;
+}
+#whatsappFloatBtn.has-scroll-btn {
+  bottom: 86px;
 }
 #whatsappFloatBtn:hover {
   transform: translateY(-3px) scale(1.08);
@@ -331,10 +334,11 @@ class SettingsModel {
   color: #fff;
 }
 #whatsappFloatBtn svg, #whatsappFloatBtn .whatsapp-icon {
-  width: 26px;
-  height: 26px;
-  fill: #fff;
+  width: 28px;
+  height: 28px;
+  display: block;
   flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
 }
 #whatsappFloatBtn .whatsapp-tooltip {
   position: absolute;
@@ -361,14 +365,17 @@ class SettingsModel {
 }
 @media (max-width: 768px) {
   #whatsappFloatBtn {
-    bottom: 68px;
+    bottom: 18px;
     right: 14px;
     width: 42px;
     height: 42px;
   }
+  #whatsappFloatBtn.has-scroll-btn {
+    bottom: 68px;
+  }
   #whatsappFloatBtn svg, #whatsappFloatBtn .whatsapp-icon {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 }
 @keyframes waPulseSubtle {
@@ -381,11 +388,33 @@ class SettingsModel {
 }
 </style>
 <a href="${waUrl}" id="whatsappFloatBtn" target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" aria-label="Chat on WhatsApp" title="Chat with Admin on WhatsApp">
-  <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
-    <path d="M16 2a13.9 13.9 0 0 0-12 21L2 30l7.2-1.9A13.9 13.9 0 1 0 16 2zm0 25.5a11.6 11.6 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.6 11.6 0 1 1 16 27.5zm6.4-8.7c-.3-.2-2-.9-2.3-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.4 0-.6.2-.8s.3-.4.5-.6.2-.4.3-.6 0-.4 0-.6-.7-1.8-1-2.4c-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 1 5.3 5.3 0 0 0 1.6 3.9 12.3 12.3 0 0 0 4.8 4.3 15.6 15.6 0 0 0 1.6.6c.7.2 1.4.2 1.9.1.6-.1 2-.8 2.3-1.6s.3-1.4.2-1.6-.3-.3-.6-.5z"/>
+  <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+    <path fill="#ffffff" d="M16 2C8.27 2 2 8.27 2 16c0 2.58.7 5.09 2.03 7.3L2 30l6.9-1.99c2.14 1.22 4.58 1.87 7.1 1.87 7.73 0 14-6.27 14-13.88S23.73 2 16 2z"/>
+    <path fill="#25D366" d="M22.8 19.4c-.3-.2-1.9-.9-2.2-1.1-.3-.1-.5-.2-.7.2-.2.3-.8 1.1-1 1.3-.2.2-.4.2-.7.1s-1.4-.5-2.6-1.6c-.9-.8-1.6-1.9-1.7-2.2-.2-.3 0-.5.1-.7.1-.1.3-.4.5-.6.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.2-.7-1.8-1-2.4-.3-.6-.6-.5-.8-.5h-.7c-.2 0-.7.1-1.1.5-.4.4-1.5 1.5-1.5 3.6s1.5 4.2 1.7 4.5c.2.3 3 4.6 7.3 6.4 1 .4 1.8.7 2.4.9.7.2 1.4.2 1.9.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.5z"/>
   </svg>
   <span class="whatsapp-tooltip">Chat with us</span>
-</a>`;
+</a>
+<script>
+(function() {
+  function syncWaFloatBtn() {
+    var wa = document.getElementById('whatsappFloatBtn');
+    if (!wa) return;
+    var topBtn = document.getElementById('scrollToTopBtn');
+    var isScrolled = window.scrollY > 300 || (topBtn && topBtn.classList.contains('visible'));
+    if (isScrolled) {
+      wa.classList.add('has-scroll-btn');
+    } else {
+      wa.classList.remove('has-scroll-btn');
+    }
+  }
+  window.addEventListener('scroll', syncWaFloatBtn, { passive: true });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncWaFloatBtn);
+  } else {
+    syncWaFloatBtn();
+  }
+})();
+</script>`;
   }
 
   /**
