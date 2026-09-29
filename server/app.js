@@ -31,6 +31,17 @@ const app = express();
 // Trust reverse proxy (Hostinger, Cloudflare, Nginx, LiteSpeed, etc.)
 app.set('trust proxy', 1);
 
+// Normalize duplicate slashes (e.g. Google Search Console //sitemap.xml -> /sitemap.xml)
+app.use((req, res, next) => {
+  const qIndex = req.url.indexOf('?');
+  const pathPart = qIndex === -1 ? req.url : req.url.slice(0, qIndex);
+  const queryPart = qIndex === -1 ? '' : req.url.slice(qIndex);
+  if (pathPart.includes('//')) {
+    req.url = pathPart.replace(/\/+/g, '/') + queryPart;
+  }
+  next();
+});
+
 // Single-hop Canonical Host & HTTPS Enforcement (Saves ~3.3s redirect chain)
 app.use((req, res, next) => {
   const host = (req.headers.host || '').toLowerCase();
