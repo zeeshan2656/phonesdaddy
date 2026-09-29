@@ -1,7 +1,24 @@
+# Google-Friendly Robots.txt for PhonesDaddy
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/*
 Disallow: /api/*
 
-Sitemap: /sitemap.xml
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+
+User-agent: Googlebot-Image
+Allow: /uploads/
+Allow: /images/
+Allow: /webfiles/
+
+# XML Sitemaps (Sitemap Index & Specialized Sub-Sitemaps)
+Sitemap: https://phonesdaddy.com/sitemap.xml
+Sitemap: https://phonesdaddy.com/sitemap-phones.xml
+Sitemap: https://phonesdaddy.com/sitemap-brands.xml
+Sitemap: https://phonesdaddy.com/sitemap-news.xml
+Sitemap: https://phonesdaddy.com/sitemap-pages.xml

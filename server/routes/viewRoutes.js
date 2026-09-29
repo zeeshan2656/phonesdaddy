@@ -15,6 +15,7 @@ const {
 } = require('../middleware/auth');
 const { pool } = require('../config/database');
 const { cache } = require('../utils/cache');
+const SitemapController = require('../controllers/sitemapController');
 
 const viewsDir = path.join(__dirname, '../../views');
 const adminDir = path.join(__dirname, '../../admin');
@@ -823,73 +824,52 @@ router.get('/disclaimer', async (req, res, next) => {
   await renderCustomPage(req, res, next, 'disclaimer');
 });
 
-// Dynamic XML Sitemap
-router.get('/sitemap.xml', async (req, res, next) => {
-  try {
-    const branding = await SettingsModel.getBranding();
-    const host = branding.site_url || `${req.protocol}://${req.get('host')}`;
-    const today = new Date().toISOString().split('T')[0];
+// --- Google Search Console & SEO XML Sitemaps ---
+router.get('/sitemap.xml', SitemapController.getSitemapIndex);
+router.get('/sitemap_index.xml', SitemapController.getSitemapIndex);
+router.get('/sitemap-phones.xml', SitemapController.getPhonesSitemap);
+router.get('/sitemap-brands.xml', SitemapController.getBrandsSitemap);
+router.get('/sitemap-news.xml', SitemapController.getNewsSitemap);
+router.get('/sitemap-pages.xml', SitemapController.getPagesSitemap);
+router.get('/sitemap-all.xml', SitemapController.getConsolidatedSitemap);
 
-    const { phones } = await PhoneModel.getPhones({ page: 1, limit: 1000 });
-    const brands = await BrandModel.getAllBrands(true);
-    const { articles: newsList } = await NewsModel.getArticles({ page: 1, limit: 500, status: 'published' });
-
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-
-    // Static pages
-    const staticPages = [
-      { loc: `${host}/`, changefreq: 'daily', priority: '1.0' },
-      { loc: `${host}/phones`, changefreq: 'daily', priority: '0.9' },
-      { loc: `${host}/pta-tax-calculator`, changefreq: 'weekly', priority: '0.9' },
-      { loc: `${host}/news`, changefreq: 'daily', priority: '0.9' },
-      { loc: `${host}/brands`, changefreq: 'weekly', priority: '0.8' },
-      { loc: `${host}/compare`, changefreq: 'weekly', priority: '0.8' }
-    ];
-
-    for (const page of staticPages) {
-      xml += `  <url>\n    <loc>${page.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${page.changefreq}</changefreq>\n    <priority>${page.priority}</priority>\n  </url>\n`;
-    }
-
-    // Brands
-    for (const b of brands) {
-      xml += `  <url>\n    <loc>${host}/brand/${b.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-    }
-
-    // Phones
-    for (const p of phones) {
-      xml += `  <url>\n    <loc>${host}/phone/${p.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
-    }
-
-    // News & Blog Articles
-    for (const a of newsList) {
-      xml += `  <url>\n    <loc>${host}/news/${a.slug}</loc>\n    <lastmod>${a.updated_at ? new Date(a.updated_at).toISOString().split('T')[0] : today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
-    }
-
-    // Custom Pages (About Us, Contact Us, Privacy Policy, Disclaimer, etc.)
-    const { pages: customPages } = await PageModel.getPages({ page: 1, limit: 100, status: 'published' });
-    for (const pg of customPages) {
-      const pageLoc = ['about-us', 'contact-us', 'privacy-policy', 'disclaimer'].includes(pg.slug)
-        ? `${host}/${pg.slug}`
-        : `${host}/page/${pg.slug}`;
-      xml += `  <url>\n    <loc>${pageLoc}</loc>\n    <lastmod>${pg.updated_at ? new Date(pg.updated_at).toISOString().split('T')[0] : today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
-    }
-
-    xml += `</urlset>`;
-
-    res.header('Content-Type', 'application/xml');
-    res.send(xml);
-  } catch (err) {
-    next(err);
-  }
-});
-
-// Robots.txt
+// Google-Friendly Robots.txt with Dynamic Branding
 router.get('/robots.txt', async (req, res) => {
   const branding = await SettingsModel.getBranding();
-  const host = branding.site_url || `${req.protocol}://${req.get('host')}`;
-  const robots = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/*\nDisallow: /api/*\n\nSitemap: ${host}/sitemap.xml\n`;
-  res.header('Content-Type', 'text/plain');
+  let host = branding.site_url;
+  if (!host || host.includes('localhost')) {
+    const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    host = `${proto}://${req.get('host') || 'phonesdaddy.com'}`;
+  }
+  host = host.replace(/\/+$/, '');
+
+  const robots = `# Google-Friendly robots.txt for ${branding.site_name || 'PhonesDaddy'}
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+
+User-agent: Googlebot-Image
+Allow: /uploads/
+Allow: /images/
+Allow: /webfiles/
+
+# XML Sitemaps (Sitemap Index & Specialized Sub-Sitemaps)
+Sitemap: ${host}/sitemap.xml
+Sitemap: ${host}/sitemap-phones.xml
+Sitemap: ${host}/sitemap-brands.xml
+Sitemap: ${host}/sitemap-news.xml
+Sitemap: ${host}/sitemap-pages.xml
+`;
+  res.header('Content-Type', 'text/plain; charset=utf-8');
+  res.header('Cache-Control', 'public, max-age=86400');
   res.send(robots);
 });
 
