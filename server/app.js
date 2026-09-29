@@ -119,6 +119,15 @@ if (fs.existsSync(localWebfiles) && path.resolve(WEBFILES_BASE) !== path.resolve
   app.use('/webfiles', express.static(localWebfiles, staticOptions));
 }
 
+// Fallback for media trapped inside Hostinger hbuilds temporary directories
+const hbuildsLegacyMedia = path.resolve(__dirname, '../../phonesdaddy_media');
+if (fs.existsSync(hbuildsLegacyMedia) && path.resolve(hbuildsLegacyMedia) !== path.resolve(UPLOADS_BASE) && path.resolve(hbuildsLegacyMedia) !== path.resolve(WEBFILES_BASE)) {
+  const hUploads = path.join(hbuildsLegacyMedia, 'uploads');
+  const hWebfiles = path.join(hbuildsLegacyMedia, 'webfiles');
+  if (fs.existsSync(hUploads)) app.use('/uploads', express.static(hUploads, staticOptions));
+  if (fs.existsSync(hWebfiles)) app.use('/webfiles', express.static(hWebfiles, staticOptions));
+}
+
 // 2. Persistent Images Directory (if configured)
 if (IMAGES_BASE && fs.existsSync(IMAGES_BASE) && path.resolve(IMAGES_BASE) !== path.resolve(__dirname, '../public/images')) {
   app.use('/images', express.static(IMAGES_BASE, staticOptions));

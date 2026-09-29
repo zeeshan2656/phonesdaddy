@@ -30,16 +30,15 @@ echo ""
 echo -e "  Project : ${BOLD}$PROJECT_DIR${NC}"
 
 # ── Determine media directory ─────────────────────────────────────────────────
-# Candidate 1: One level above deployment (e.g. ~/domains/yourdomain.com/phonesdaddy_media)
-PARENT_MEDIA="$(cd "$PROJECT_DIR/.." 2>/dev/null && pwd)/phonesdaddy_media"
-
-if mkdir -p "$PARENT_MEDIA" 2>/dev/null && [ -w "$PARENT_MEDIA" ]; then
-  PERSISTENT_MEDIA="$PARENT_MEDIA"
-elif [ -n "$HOME" ] && [ -d "$HOME" ]; then
+# On Hostinger (or any system with $HOME), persistent media MUST live in $HOME
+# completely outside temporary build folders like hbuilds!
+if [ -n "$HOME" ] && [ -d "$HOME" ] && [ -w "$HOME" ]; then
   PERSISTENT_MEDIA="$HOME/phonesdaddy_media"
-  mkdir -p "$PERSISTENT_MEDIA"
+elif [[ "$PROJECT_DIR" == *"hbuilds"* ]]; then
+  HOSTINGER_ROOT="${PROJECT_DIR%%/hbuilds*}"
+  PERSISTENT_MEDIA="$HOSTINGER_ROOT/phonesdaddy_media"
 else
-  PERSISTENT_MEDIA="$PARENT_MEDIA"
+  PERSISTENT_MEDIA="$(cd "$PROJECT_DIR/.." 2>/dev/null && pwd)/phonesdaddy_media"
 fi
 
 echo -e "  Media   : ${BOLD}${GREEN}$PERSISTENT_MEDIA${NC}"
@@ -62,8 +61,29 @@ mkdir -p "$PERSISTENT_MEDIA/images"
 echo -e "  ${GREEN}✓${NC} All media directories created"
 echo ""
 
-# ── Step 2: Migrate any existing media from project ──────────────────────────
-echo -e "${BOLD}Step 2/4 — Preserving any existing media...${NC}"
+# ── Step 2: Recover any images trapped inside Hostinger's temporary hbuilds ────
+echo -e "${BOLD}Step 2/4 — Recovering images from previous builds...${NC}"
+
+# Check hbuilds/current/phonesdaddy_media (from Image 2)
+if [ -d "$PROJECT_DIR/../phonesdaddy_media" ] && [ "$(cd "$PROJECT_DIR/../phonesdaddy_media" && pwd)" != "$PERSISTENT_MEDIA" ]; then
+  echo -e "  ${YELLOW}ℹ${NC}  Found trapped images in hbuilds/current/phonesdaddy_media. Recovering..."
+  cp -rn "$PROJECT_DIR/../phonesdaddy_media/"* "$PERSISTENT_MEDIA/" 2>/dev/null || true
+  echo -e "  ${GREEN}✓${NC} Recovered images from hbuilds/current/phonesdaddy_media"
+fi
+
+# Check all Hostinger build versions in hbuilds/versions/*/phonesdaddy_media
+if [[ "$PROJECT_DIR" == *"hbuilds"* ]]; then
+  HBUILDS_ROOT="${PROJECT_DIR%%/hbuilds*}/hbuilds"
+  if [ -d "$HBUILDS_ROOT/versions" ]; then
+    echo -e "  ${YELLOW}ℹ${NC}  Scanning previous build versions in $HBUILDS_ROOT/versions..."
+    for vdir in "$HBUILDS_ROOT/versions/"*/phonesdaddy_media; do
+      if [ -d "$vdir" ] && [ "$vdir" != "$PERSISTENT_MEDIA" ]; then
+        cp -rn "$vdir/"* "$PERSISTENT_MEDIA/" 2>/dev/null || true
+        echo -e "  ${GREEN}✓${NC} Recovered images from $vdir"
+      fi
+    done
+  fi
+fi
 
 if [ -d "$PROJECT_DIR/public/webfiles" ]; then
   cp -rn "$PROJECT_DIR/public/webfiles/"* "$PERSISTENT_MEDIA/webfiles/" 2>/dev/null || true

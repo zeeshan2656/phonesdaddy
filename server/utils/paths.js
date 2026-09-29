@@ -36,23 +36,37 @@ function resolveMediaBase() {
     }
   }
 
-  // 2. Candidate A: One level above project root (e.g., ../phonesdaddy_media)
-  // This is completely outside public_html / deployment root.
-  const parentCandidate = path.resolve(PROJECT_ROOT, '..', 'phonesdaddy_media');
-  if (fs.existsSync(parentCandidate)) {
-    return parentCandidate;
+  // 2. Candidate A: Hostinger Cloud Build environment (hbuilds detection)
+  // When running inside Hostinger's build system, PROJECT_ROOT is:
+  //   /home/uXXXX/hbuilds/current/public_html
+  // Or /home/uXXXX/hbuilds/versions/<hash>/public_html
+  // Any files stored inside hbuilds/ get wiped on the next build!
+  // We MUST store media in the user home directory OUTSIDE hbuilds: /home/uXXXX/phonesdaddy_media
+  const normalized = PROJECT_ROOT.replace(/\\/g, '/');
+  const hbuildsIdx = normalized.indexOf('/hbuilds');
+  if (hbuildsIdx !== -1) {
+    const hostingerUserRoot = normalized.substring(0, hbuildsIdx);
+    const hbuildsRoot = normalized.substring(0, hbuildsIdx + 8); // includes /hbuilds
+
+    // Candidate 1: In top-level Home (/home/uXXXX/phonesdaddy_media)
+    const homeMediaDir = path.join(hostingerUserRoot, 'phonesdaddy_media');
+    if (fs.existsSync(homeMediaDir)) return homeMediaDir;
+
+    // Candidate 2: In hbuilds (/home/uXXXX/hbuilds/phonesdaddy_media - where you just copied it!)
+    const hbuildsMediaDir = path.join(hbuildsRoot, 'phonesdaddy_media');
+    if (fs.existsSync(hbuildsMediaDir)) return hbuildsMediaDir;
+
+    // Default to creating in Home (safest location)
+    try {
+      if (!fs.existsSync(homeMediaDir)) fs.mkdirSync(homeMediaDir, { recursive: true });
+      return homeMediaDir;
+    } catch (_) {
+      return hbuildsMediaDir;
+    }
   }
 
-  // Try creating parent candidate automatically
-  try {
-    fs.mkdirSync(parentCandidate, { recursive: true });
-    fs.accessSync(parentCandidate, fs.constants.W_OK);
-    return parentCandidate;
-  } catch (err) {
-    // If not writable, fall through to next candidate
-  }
-
-  // 3. Candidate B: User home directory on Linux / cPanel / Hostinger (~/phonesdaddy_media)
+  // 3. Candidate B: Linux user home directory (~/phonesdaddy_media)
+  // On Hostinger / cPanel / Ubuntu, process.env.HOME is /home/username (outside public_html and outside hbuilds)
   if (process.env.HOME && fs.existsSync(process.env.HOME)) {
     const homeCandidate = path.resolve(process.env.HOME, 'phonesdaddy_media');
     if (fs.existsSync(homeCandidate)) {
@@ -65,12 +79,71 @@ function resolveMediaBase() {
     } catch (_) {}
   }
 
-  // 4. If running in production mode, force parentCandidate path even if not created yet
+  // 4. Candidate C: One level above project root (standard non-hbuilds cPanel or local dev)
+  const parentCandidate = path.resolve(PROJECT_ROOT, '..', 'phonesdaddy_media');
+  if (fs.existsSync(parentCandidate)) {
+    return parentCandidate;
+  }
+
+  try {
+    fs.mkdirSync(parentCandidate, { recursive: true });
+    fs.accessSync(parentCandidate, fs.constants.W_OK);
+    return parentCandidate;
+  } catch (_) {}
+
+  // 5. Production fallback
   if (process.env.NODE_ENV === 'production') {
     return parentCandidate;
   }
 
   return null;
+}
+
+// Safely migrate any media trapped inside Hostinger's temporary hbuilds directories
+function migrateTrappedHbuildsMedia(targetBase) {
+  if (!targetBase) return;
+  try {
+    const normalized = PROJECT_ROOT.replace(/\\/g, '/');
+    const hbuildsIdx = normalized.indexOf('/hbuilds');
+    if (hbuildsIdx === -1) return;
+
+    // Check hbuilds/current/phonesdaddy_media (from Image 2)
+    const trappedCurrent = path.resolve(PROJECT_ROOT, '..', 'phonesdaddy_media');
+    if (fs.existsSync(trappedCurrent) && path.resolve(trappedCurrent) !== path.resolve(targetBase)) {
+      copyRecursiveSafe(trappedCurrent, targetBase);
+    }
+
+    // Check all hbuilds/versions/*/phonesdaddy_media
+    const hbuildsRoot = normalized.substring(0, hbuildsIdx + 8);
+    const versionsDir = path.join(hbuildsRoot, 'versions');
+    if (fs.existsSync(versionsDir)) {
+      const versions = fs.readdirSync(versionsDir);
+      for (const ver of versions) {
+        const verMedia = path.join(versionsDir, ver, 'phonesdaddy_media');
+        if (fs.existsSync(verMedia) && path.resolve(verMedia) !== path.resolve(targetBase)) {
+          copyRecursiveSafe(verMedia, targetBase);
+        }
+      }
+    }
+  } catch (_) {}
+}
+
+function copyRecursiveSafe(src, dest) {
+  if (!fs.existsSync(src)) return;
+  try {
+    const items = fs.readdirSync(src);
+    for (const item of items) {
+      const s = path.join(src, item);
+      const d = path.join(dest, item);
+      const stat = fs.statSync(s);
+      if (stat.isDirectory()) {
+        if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+        copyRecursiveSafe(s, d);
+      } else {
+        if (!fs.existsSync(d)) fs.copyFileSync(s, d);
+      }
+    }
+  } catch (_) {}
 }
 
 const MEDIA_BASE = resolveMediaBase();
@@ -138,6 +211,11 @@ function ensureMediaDirectories() {
   }
   if (IMAGES_BASE && !fs.existsSync(IMAGES_BASE)) {
     try { fs.mkdirSync(IMAGES_BASE, { recursive: true }); } catch (_) {}
+  }
+
+  // Automatically migrate any images trapped in Hostinger's temporary hbuilds directories
+  if (MEDIA_BASE) {
+    migrateTrappedHbuildsMedia(MEDIA_BASE);
   }
 }
 

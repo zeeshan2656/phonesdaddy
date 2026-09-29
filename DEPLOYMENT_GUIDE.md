@@ -28,43 +28,29 @@ Go to **Hostinger → Node.js App Manager → click Restart**.
 
 ---
 
-## ⚡ Why Images Disappear (The Root Cause)
+## ⚡ Why Images Were Disappearing on Hostinger (The Root Cause)
 
-| Storage Location | What happens on Git Pull / ZIP Extract |
-|---|---|
-| `public_html/server/uploads/` ❌ | Git **replaces** or ZIP **overwrites** this folder with empty version |
-| `public_html/public/webfiles/` ❌ | Same — folder gets emptied by deployment |
-| `~/phonesdaddy_media/` ✅ | Git and ZIP can **NEVER touch** this folder — 100% safe |
+Hostinger's Cloud / Node.js build system uses **`hbuilds`**:
+- Every time you deploy a new version, Hostinger generates a new folder: `hbuilds/versions/<new-id>/` and updates a symlink `hbuilds/current` to point to it.
+- If media is stored inside `hbuilds/current/phonesdaddy_media`, every deployment creates a **brand new empty folder**, leaving your uploaded photos behind in the old build folder!
 
-The fix moves all media storage to `~/phonesdaddy_media/` which is one level **above** `public_html`. Neither Git nor ZIP can reach files there.
-
----
-
-## 🗂️ Safe Directory Layout (After Setup)
+### The Permanent Solution:
+Media is now moved completely **OUTSIDE** `hbuilds` to your top-level user home:
+👉 **`/home/u434697879/phonesdaddy_media/`** (or `~/phonesdaddy_media/`)
 
 ```text
-/home/yourusername/
+/home/u434697879/                       (Your User Root)
 │
-├── phonesdaddy_media/          ← 100% PERSISTENT — never touched by deployments
-│   ├── uploads/
-│   │   ├── phones/             ← Admin phone photo uploads
-│   │   ├── brands/             ← Brand logo uploads
-│   │   ├── branding/           ← Site logo & favicon
-│   │   ├── news/               ← Article banner images
-│   │   └── reviews/            ← User review attachments
-│   └── webfiles/
-│       ├── phones/             ← Scraped & optimized WebP phone images
-│       ├── brands/             ← Brand logo WebP files
-│       └── news/               ← Article thumbnail WebP files
+├── phonesdaddy_media/                  ← 100% PERSISTENT (Completely outside hbuilds)
+│   ├── uploads/                        ← Admin logos, news banners, branding
+│   └── webfiles/phones/                ← Scraped & optimized WebP phone photos
 │
-└── domains/yourdomain.com/
-    └── public_html/            ← Deployment folder (Git & ZIP update code here)
-        ├── server/
-        ├── public/
-        ├── views/
-        ├── .env                ← Contains MEDIA_DIR=~/phonesdaddy_media
-        └── package.json
+└── hbuilds/                            (Hostinger Build System)
+    ├── versions/                       ← Hostinger creates new folders here on deploy
+    └── current -> versions/<id>        ← Deployed code (Safe: media is NOT here!)
 ```
+
+Because `phonesdaddy_media` is sitting at `/home/u434697879/phonesdaddy_media` outside `hbuilds/`, Hostinger's build system can create 10,000 new versions without ever touching your photos!
 
 ---
 
