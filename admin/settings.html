@@ -979,7 +979,7 @@
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
               <button type="button" class="preset-pill" onclick="appendPreset('adsense')">
-                <span>undefined Google AdSense Auto Ads</span>
+                <span>💰 Google AdSense Auto Ads</span>
               </button>
               <button type="button" class="preset-pill" onclick="appendPreset('analytics')">
                 <span>📈 Google Analytics 4 (GA4)</span>
@@ -988,7 +988,7 @@
                 <span>★ Adsterra Banner / Popunder</span>
               </button>
               <button type="button" class="preset-pill" onclick="appendPreset('search_console')">
-                <span>undefined Google Search Console</span>
+                <span>🔍 Google Search Console</span>
               </button>
               <button type="button" class="preset-pill" onclick="appendPreset('meta_pixel')">
                 <span>🎯 Meta (Facebook) Pixel</span>
@@ -1009,14 +1009,14 @@
               id="head_snippets"
               name="head_snippets"
               class="code-textarea"
-              placeholder="&lt;!-- Paste any code here, e.g.: --&gt;&#10;&lt;script async src=&quot;https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxx&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;&#10;&#10;&lt;!-- Or Google Analytics --&gt;&#10;&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-xxxxxxxx&quot;&gt;&lt;/script&gt;&#10;&#10;&lt;!-- Or Adsterra script tag --&gt;&#10;&lt;script type='text/javascript' src='//your-adsterra-tag.js'&gt;&lt;/script&gt;"
+              placeholder="&lt;!-- Paste any code here, e.g.: --&gt;&#10;&lt;!-- Google Search Console verification --&gt;&#10;&lt;meta name=&quot;google-site-verification&quot; content=&quot;YOUR_TOKEN_HERE&quot; /&gt;&#10;&#10;&lt;!-- Or Google Analytics --&gt;&#10;&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-xxxxxxxx&quot;&gt;&lt;/script&gt;&#10;&#10;&lt;!-- Or Google AdSense --&gt;&#10;&lt;script async src=&quot;https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxx&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;"
             ></textarea>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
             <span style="font-size: 12px; color: var(--admin-text-muted);">
-              Supports <code>&lt;script&gt;</code>, <code>&lt;meta&gt;</code>, <code>&lt;link&gt;</code>, <code>&lt;style&gt;</code> and HTML comments.
+              Supports <code>&lt;meta&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;link&gt;</code>, <code>&lt;style&gt;</code> and HTML comments.
             </span>
-            <button type="button" onclick="copyHeadCode()" class="btn btn-outline btn-sm" style="font-size: 12px; padding: 4px 10px;">undefined Copy Code</button>
+            <button type="button" onclick="copyHeadCode()" class="btn btn-outline btn-sm" style="font-size: 12px; padding: 4px 10px;">📋 Copy Code</button>
           </div>
         </div>
 
@@ -1026,12 +1026,30 @@
             <div>
               <h3 class="admin-card-title">Quick IDs Configuration (Optional)</h3>
               <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
-                If you prefer entering only your account IDs instead of raw HTML snippets above, fill these in and the system will automatically compile the official tags for you.
+                If you prefer entering only your account IDs or verification keys instead of raw HTML snippets above, fill these in and the system will automatically compile the official tags for you.
               </p>
             </div>
           </div>
 
           <div class="form-grid">
+            <div class="form-group full-width" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 16px;">
+              <label class="form-label" for="google_site_verification" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span style="font-weight: 700; color: #166534;">🔍 Google Search Console Verification Meta Tag / Token</span>
+                <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700;">Injected in &lt;head&gt;</span>
+              </label>
+              <input
+                type="text"
+                id="google_site_verification"
+                name="google_site_verification"
+                class="form-control"
+                placeholder='e.g. lD_2FaiBl31QnjuTlVOJ0BYDLxp3Z5sOlC-_61dxqQI or &lt;meta name="google-site-verification" content="..." /&gt;'
+                style="border-color: #86efac; background: #fff;"
+              >
+              <small style="color: #166534; font-size: 12px; margin-top: 4px; display: block;">
+                Paste either your raw token or the full <code>&lt;meta name="google-site-verification" content="..."&gt;</code> tag here. The system ensures it is placed inside the <code>&lt;head&gt;</code> section of your site as required by Google Search Console.
+              </small>
+            </div>
+
             <div class="form-group">
               <label class="form-label" for="google_adsense_client">
                 Google AdSense Publisher ID
@@ -1082,6 +1100,7 @@
               <h3 class="admin-card-title">&lt;body&gt; Closing Snippet Code (Bottom of Page)</h3>
               <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
                 Code placed here is injected right before <code>&lt;/body&gt;</code>. Ideal for ad banners, floating widgets, and footer scripts.
+                <span style="display: block; color: #b45309; font-weight: 600; margin-top: 2px;">⚠️ Note: Do NOT put Google Search Console verification meta tags here—verification tags must go in the &lt;head&gt; section above.</span>
               </p>
             </div>
             <div class="toggle-switch-wrapper">

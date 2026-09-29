@@ -36,6 +36,7 @@ class SettingsModel {
       const settings = {
         is_head_code_enabled: '1',
         head_snippets: '',
+        google_site_verification: '',
         google_analytics_id: '',
         google_adsense_client: '',
         adsterra_code: '',
@@ -93,7 +94,20 @@ class SettingsModel {
       };
 
       for (const row of rows) {
-        settings[row.setting_key] = row.setting_value !== null ? row.setting_value : '';
+        let val = row.setting_value !== null ? row.setting_value : '';
+        // If stored with legacy b64: prefix, recursively decode so callers always receive clean string
+        if (typeof val === 'string' && val.startsWith('b64:')) {
+          while (typeof val === 'string' && val.startsWith('b64:')) {
+            try {
+              const decoded = Buffer.from(val.slice(4), 'base64').toString('utf8');
+              if (decoded === val) break;
+              val = decoded;
+            } catch (_) {
+              break;
+            }
+          }
+        }
+        settings[row.setting_key] = val;
       }
 
       _cachedSettings = settings;
@@ -238,6 +252,23 @@ class SettingsModel {
       }
     }
 
+    // Dedicated Google Search Console verification meta tag
+    if (settings.google_site_verification && settings.google_site_verification.trim()) {
+      let gsc = settings.google_site_verification.trim();
+      const contentMatch = gsc.match(/content=["']([^"']+)["']/i);
+      const token = contentMatch ? contentMatch[1] : gsc.replace(/<[^>]+>/g, '').trim();
+      if (token && !rawText.includes(token)) {
+        snippets.unshift(`<!-- Google Search Console Verification -->\n<meta name="google-site-verification" content="${escapeAttr(token)}" />`);
+      }
+    }
+
+    // Auto-detect and hoist Google Search Console verification meta if inadvertently pasted into body_snippets
+    const bodyText = settings.body_snippets || '';
+    const bodyGscMatch = bodyText.match(/<meta\s+[^>]*name=["']google-site-verification["'][^>]*>/i);
+    if (bodyGscMatch && !rawText.includes(bodyGscMatch[0])) {
+      snippets.unshift(`<!-- Google Search Console (Auto-Hoisted from Body to Head) -->\n${bodyGscMatch[0]}`);
+    }
+
     // Primary: Custom Raw Head Snippet Code (Cleaned of render-blocking trackers)
     if (rawText && rawText.trim()) {
       snippets.push(rawText.trim());
@@ -257,7 +288,10 @@ class SettingsModel {
     }
 
     if (settings.body_snippets && settings.body_snippets.trim()) {
-      return settings.body_snippets.trim();
+      let bodyRaw = settings.body_snippets.trim();
+      // Strip any <meta name="google-site-verification"> from body as it is hoisted to <head>
+      bodyRaw = bodyRaw.replace(/<meta\s+[^>]*name=["']google-site-verification["'][^>]*>\s*/gi, '').trim();
+      return bodyRaw;
     }
 
     return '';

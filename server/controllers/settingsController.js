@@ -38,6 +38,7 @@ class SettingsController {
         footer_copyright,
         head_snippets,
         is_head_code_enabled,
+        google_site_verification,
         google_analytics_id,
         google_adsense_client,
         adsterra_code,
@@ -112,21 +113,25 @@ class SettingsController {
 
       // Helper to decode safe base64-encoded snippets to bypass Hostinger ModSecurity false positives
       const decodeSnippet = (val) => {
-        if (typeof val === 'string' && val.startsWith('b64:')) {
+        let cur = typeof val === 'string' ? val.trim() : '';
+        while (typeof cur === 'string' && cur.startsWith('b64:')) {
           try {
-            return Buffer.from(val.slice(4), 'base64').toString('utf8').trim();
+            const decoded = Buffer.from(cur.slice(4), 'base64').toString('utf8').trim();
+            if (decoded === cur) break;
+            cur = decoded;
           } catch (_) {
-            return val.trim();
+            break;
           }
         }
-        return typeof val === 'string' ? val.trim() : '';
+        return cur;
       };
 
       // Snippet & Code fields
       if (head_snippets !== undefined) payload.head_snippets = decodeSnippet(head_snippets);
       if (is_head_code_enabled !== undefined) payload.is_head_code_enabled = is_head_code_enabled ? '1' : '0';
-      if (google_analytics_id !== undefined) payload.google_analytics_id = String(google_analytics_id || '').trim();
-      if (google_adsense_client !== undefined) payload.google_adsense_client = String(google_adsense_client || '').trim();
+      if (google_site_verification !== undefined) payload.google_site_verification = decodeSnippet(google_site_verification);
+      if (google_analytics_id !== undefined) payload.google_analytics_id = decodeSnippet(google_analytics_id);
+      if (google_adsense_client !== undefined) payload.google_adsense_client = decodeSnippet(google_adsense_client);
       if (adsterra_code !== undefined) payload.adsterra_code = decodeSnippet(adsterra_code);
       if (body_snippets !== undefined) payload.body_snippets = decodeSnippet(body_snippets);
       if (is_body_code_enabled !== undefined) payload.is_body_code_enabled = is_body_code_enabled ? '1' : '0';

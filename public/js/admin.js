@@ -2675,9 +2675,23 @@ async function loadSettingsData() {
       const bodyStatusLabel = document.getElementById('bodyStatusLabel');
       const headInput = document.getElementById('head_snippets');
       const bodyInput = document.getElementById('body_snippets');
+      const verificationInput = document.getElementById('google_site_verification');
       const adsenseInput = document.getElementById('google_adsense_client');
       const analyticsInput = document.getElementById('google_analytics_id');
       const adsterraInput = document.getElementById('adsterra_code');
+
+      // Helper to clean any historical b64: prefix if present
+      const cleanB64 = (str) => {
+        let v = str || '';
+        while (typeof v === 'string' && v.startsWith('b64:')) {
+          try {
+            const dec = decodeURIComponent(escape(atob(v.slice(4))));
+            if (dec === v) break;
+            v = dec;
+          } catch (_) { break; }
+        }
+        return v;
+      };
 
       if (headToggle) {
         headToggle.checked = s.is_head_code_enabled !== '0' && s.is_head_code_enabled !== false;
@@ -2695,11 +2709,12 @@ async function loadSettingsData() {
         }
       }
 
-      if (headInput) headInput.value = s.head_snippets || '';
-      if (bodyInput) bodyInput.value = s.body_snippets || '';
-      if (adsenseInput) adsenseInput.value = s.google_adsense_client || '';
-      if (analyticsInput) analyticsInput.value = s.google_analytics_id || '';
-      if (adsterraInput) adsterraInput.value = s.adsterra_code || '';
+      if (headInput) headInput.value = cleanB64(s.head_snippets || '');
+      if (bodyInput) bodyInput.value = cleanB64(s.body_snippets || '');
+      if (verificationInput) verificationInput.value = cleanB64(s.google_site_verification || '');
+      if (adsenseInput) adsenseInput.value = cleanB64(s.google_adsense_client || '');
+      if (analyticsInput) analyticsInput.value = cleanB64(s.google_analytics_id || '');
+      if (adsterraInput) adsterraInput.value = cleanB64(s.adsterra_code || '');
 
       // Load Targeted Ad Placements (Google AdSense Units)
       const adSlots = [
@@ -2787,6 +2802,7 @@ async function submitSettingsForm() {
     // Head & Body Code Snippets (Base64 safe encoded to prevent Hostinger ModSecurity WAF blocks)
     is_head_code_enabled: document.getElementById('is_head_code_enabled') ? document.getElementById('is_head_code_enabled').checked : true,
     head_snippets: safeSnippet(document.getElementById('head_snippets') ? document.getElementById('head_snippets').value.trim() : ''),
+    google_site_verification: safeSnippet(document.getElementById('google_site_verification') ? document.getElementById('google_site_verification').value.trim() : ''),
     google_adsense_client: safeSnippet(document.getElementById('google_adsense_client') ? document.getElementById('google_adsense_client').value.trim() : ''),
     google_analytics_id: safeSnippet(document.getElementById('google_analytics_id') ? document.getElementById('google_analytics_id').value.trim() : ''),
     adsterra_code: safeSnippet(document.getElementById('adsterra_code') ? document.getElementById('adsterra_code').value.trim() : ''),
