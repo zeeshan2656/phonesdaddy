@@ -215,13 +215,22 @@ async function loadPhones() {
   }
 }
 
+function getCardThumb(img) {
+  if (!img) return '/images/placeholder.svg';
+  if (img.endsWith('.webp') && !img.endsWith('-thumb.webp')) return img.replace(/\.webp$/, '-thumb.webp');
+  return img;
+}
+
+const eyeIcon = (typeof ICONS !== 'undefined' && ICONS.eye) || '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const commentIcon = (typeof ICONS !== 'undefined' && ICONS.comment) || '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
+
 function createPhoneCardHtml(phone) {
   return `
     <div class="phone-card" onclick="window.location.href='/phone/${phone.slug}'">
       <div class="phone-card-image-wrap">
         <span class="phone-card-brand-badge">${escapeHtml(phone.brand_name || '')}</span>
         <a href="/phone/${phone.slug}" onclick="event.stopPropagation()">
-          <img src="${phone.image || '/images/placeholder.svg'}" alt="${escapeHtml(phone.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
+          <img src="${escapeHtml(getCardThumb(phone.image))}" alt="${escapeHtml(phone.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
         </a>
       </div>
       <div class="phone-card-body">
@@ -231,10 +240,10 @@ function createPhoneCardHtml(phone) {
         <div class="phone-card-price">${phone.price > 0 ? formatPKR(phone.price) : 'Rumored Price'}</div>
         <div class="phone-card-stats-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px; font-size: 11.5px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
           <span style="display: inline-flex; align-items: center; gap: 4px;" title="${(phone.views || 0).toLocaleString()} views">
-            ${ICONS.eye} <span class="stat-label">${(phone.views || 0).toLocaleString()}</span>
+            ${eyeIcon} <span class="stat-label">${(phone.views || 0).toLocaleString()}</span>
           </span>
           <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: ${phone.review_count > 0 ? '#0d9488' : '#94a3b8'};" title="${(phone.review_count || 0).toLocaleString()} reviews">
-            ${ICONS.comment} <span class="stat-label">${(phone.review_count || 0).toLocaleString()}</span>
+            ${commentIcon} <span class="stat-label">${(phone.review_count || 0).toLocaleString()}</span>
           </span>
         </div>
       </div>

@@ -7,7 +7,7 @@
   <meta name="description" content="{{META_DESCRIPTION}}">
   <link rel="canonical" href="{{CANONICAL_URL}}">
   {{SITE_FAVICON_TAG}}
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.min.css">
   <!-- Instant SSR Hydration Data -->
   <script>window.__INITIAL_BRAND__ = {{BRAND_DATA_JSON}};</script>
 </head>
@@ -141,10 +141,9 @@
       </div>
     </div>
   </footer>
-
   <!-- Scripts (Deferred for non-blocking rendering) -->
-  <script defer src="/js/icons.js"></script>
-  <script defer src="/js/app.js"></script>
+  
+  <script defer src="/js/app.min.js"></script>
   <script defer src="/js/brands.js"></script>
   {{WHATSAPP_BUTTON_HTML}}
 </body>

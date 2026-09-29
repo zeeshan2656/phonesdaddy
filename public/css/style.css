@@ -1122,6 +1122,7 @@ button, input, select, textarea {
   max-height: 112px;
   max-width: 88%;
   width: auto;
+  aspect-ratio: 160 / 212;
   object-fit: contain;
   transition: transform 0.2s ease;
   border-radius: 0 !important;

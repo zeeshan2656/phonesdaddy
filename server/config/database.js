@@ -8,12 +8,12 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'phonesdaddy',
   waitForConnections: true,
-  connectionLimit: 15,
-  maxIdle: 10,
+  connectionLimit: 25,
+  maxIdle: 15,
   idleTimeout: 60000,
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelay: 10000,
+  keepAliveInitialDelay: 0,
   charset: 'utf8mb4'
 });
 

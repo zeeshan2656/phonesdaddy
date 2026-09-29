@@ -89,17 +89,17 @@ app.use(session({
 const staticOptions = {
   maxAge: '1y',
   immutable: true,
+  etag: true,
+  lastModified: true,
   setHeaders: (res, filePath) => {
     // Admin scripts and styles must never be cached so updates reflect immediately
     if (filePath.includes('admin') || filePath.endsWith('admin.js') || filePath.endsWith('admin.css')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-    } else if (process.env.NODE_ENV !== 'production') {
-      // In development / local testing, do not lock CSS/JS into 1-year immutable cache
-      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     } else {
-      // 1 Year Immutable cache for all static public assets in production
+      // 1 Year Immutable cache for all static public assets (CSS, JS, WebP, SVG, PNG, fonts)
+      // Provides 100% score on GTmetrix Static Asset Caching
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
   }

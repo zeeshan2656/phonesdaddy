@@ -8,8 +8,7 @@
   <link rel="canonical" href="{{SITE_URL}}/">
   {{SITE_FAVICON_TAG}}
   {{HOME_LCP_PRELOAD}}
-  <link rel="preload" href="/css/style.css" as="style">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.min.css">
 </head>
 <body>
 
@@ -229,87 +228,13 @@
   </footer>
 
   <!-- Scripts (Deferred for non-blocking rendering) -->
-  <script defer src="/js/icons.js"></script>
-  <script defer src="/js/app.js"></script>
+  <script defer src="/js/app.min.js"></script>
   <script>
-    // Home-specific data handling: Instant SSR cards with fallback
-    document.addEventListener('DOMContentLoaded', async () => {
-      const latestGrid = document.getElementById('latestPhonesGrid');
-      const hasSsr = latestGrid && latestGrid.querySelector('.phone-card');
-
-      if (!hasSsr) {
-        try {
-          const [latestRes, popularRes, upcomingRes, brandsRes, newsRes] = await Promise.all([
-            fetch('/api/phones/latest?limit=16').then(r => r.json()).catch(() => null),
-            fetch('/api/phones/popular?limit=16').then(r => r.json()).catch(() => null),
-            fetch('/api/phones/upcoming?limit=16').then(r => r.json()).catch(() => null),
-            fetch('/api/brands?active=true').then(r => r.json()).catch(() => null),
-            fetch('/api/news/hot?limit=4').then(r => r.json()).catch(() => null)
-          ]);
-
-          if (latestRes && latestRes.success && latestRes.data && latestGrid) {
-            latestGrid.innerHTML = latestRes.data.map(p => renderHomeCard(p)).join('');
-          }
-
-          if (popularRes && popularRes.success && popularRes.data) {
-            const el = document.getElementById('popularPhonesGrid');
-            if (el) el.innerHTML = popularRes.data.map(p => renderHomeCard(p)).join('');
-          }
-
-          if (upcomingRes && upcomingRes.success && upcomingRes.data) {
-            const el = document.getElementById('upcomingPhonesGrid');
-            if (el) el.innerHTML = upcomingRes.data.map(p => renderHomeCard(p)).join('');
-          }
-
-          if (brandsRes && brandsRes.success && brandsRes.data) {
-            const topBrands = brandsRes.data.slice(0, 12);
-            const el = document.getElementById('homeBrandsGrid');
-            if (el) {
-              el.innerHTML = topBrands.map(b => `
-                <a href="/brand/${b.slug}" class="brand-card">
-                  <img src="${b.logo || '/images/placeholder.svg'}" alt="${escapeHtml(b.name)}" class="brand-card-logo" loading="lazy" decoding="async" width="80" height="40">
-                  <div class="brand-card-name">${escapeHtml(b.name)}</div>
-                  <div class="brand-card-count">${b.phone_count} phones</div>
-                </a>
-              `).join('');
-            }
-          }
-
-          const newsGrid = document.getElementById('homeHotNewsGrid');
-          if (newsRes && newsRes.success && newsRes.data && newsRes.data.length > 0 && newsGrid) {
-            newsGrid.innerHTML = newsRes.data.map(a => renderNewsCard(a)).join('');
-          }
-        } catch (e) {
-          console.error('Parallel home load error:', e);
-        }
-      }
-
-      // Populate Quick Compare Dropdowns if not already populated by SSR
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set initial comparison dropdowns if available
       const p1Select = document.getElementById('quickComparePhone1');
       const p2Select = document.getElementById('quickComparePhone2');
-      if (p1Select && p2Select && p1Select.options.length <= 1) {
-        const fetchComparePhones = () => {
-          fetch('/api/phones?limit=50')
-            .then(r => r.json())
-            .then(phonesJson => {
-              if (phonesJson && phonesJson.success && phonesJson.data) {
-                const options = phonesJson.data.map(p => `<option value="${p.slug}">${escapeHtml(p.name)}</option>`).join('');
-                p1Select.innerHTML += options;
-                p2Select.innerHTML += options;
-                if (phonesJson.data.length >= 2) {
-                  p1Select.value = phonesJson.data[0].slug;
-                  p2Select.value = phonesJson.data[1].slug;
-                }
-              }
-            })
-            .catch(console.error);
-        };
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(fetchComparePhones, { timeout: 2000 });
-        } else {
-          setTimeout(fetchComparePhones, 500);
-        }
-      } else if (p1Select && p2Select && p1Select.options.length >= 3 && !p1Select.value) {
+      if (p1Select && p2Select && p1Select.options.length >= 3 && !p1Select.value) {
         p1Select.selectedIndex = 1;
         p2Select.selectedIndex = 2;
       }
@@ -318,8 +243,8 @@
       const compareBtn = document.getElementById('btnLaunchQuickCompare');
       if (compareBtn) {
         compareBtn.addEventListener('click', () => {
-          const p1 = document.getElementById('quickComparePhone1').value;
-          const p2 = document.getElementById('quickComparePhone2').value;
+          const p1 = document.getElementById('quickComparePhone1')?.value;
+          const p2 = document.getElementById('quickComparePhone2')?.value;
           if (!p1 || !p2) {
             alert('Please select two phones to compare.');
             return;
@@ -328,66 +253,22 @@
             alert('Please select two different phones to compare.');
             return;
           }
-          window.location.href = `/compare?phones=${p1},${p2}`;
+          window.location.href = `/compare?phones=${encodeURIComponent(p1)},${encodeURIComponent(p2)}`;
         });
       }
     });
 
-    function renderNewsCard(a) {
-      const thumb = a.image || '/images/placeholder.svg';
-      const dateStr = a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-      return `
-        <article class="news-card" style="box-shadow: var(--shadow-sm); border-radius: 8px;">
-          <a href="/news/${a.slug}" class="news-card-thumb-wrap" style="height: 160px;">
-            <img src="${thumb}" alt="${escapeHtml(a.title)}" class="news-card-thumb" loading="lazy" decoding="async" width="280" height="160">
-            <span class="news-card-badge">${escapeHtml(a.category || 'Hot News')}</span>
-            ${a.is_hot ? '<span class="news-card-hot"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> HOT</span>' : ''}
-          </a>
-          <div class="news-card-body" style="padding: 16px;">
-            <div class="news-card-meta" style="font-size: 11px; margin-bottom: 6px;">
-              <span>${typeof ICONS !== 'undefined' ? ICONS.calendar : '📅'} ${dateStr}</span>
-              <span>•</span>
-              <span>${typeof ICONS !== 'undefined' ? ICONS.penLine : '✍️'} ${escapeHtml(a.author || 'Editorial')}</span>
-            </div>
-            <h3 class="news-card-title" style="font-size: 15px; margin-bottom: 6px;">
-              <a href="/news/${a.slug}">${escapeHtml(a.title)}</a>
-            </h3>
-            <p class="news-card-excerpt" style="font-size: 12.5px; margin-bottom: 10px;">
-              ${escapeHtml(a.summary || '')}
-            </p>
-            <div class="news-card-footer" style="padding-top: 8px;">
-              <a href="/news/${a.slug}" style="text-decoration: none; color: var(--primary);">Read Story &rarr;</a>
-            </div>
-          </div>
-        </article>
-      `;
-    }
-
-    function renderHomeCard(phone) {
-      return `
-        <div class="phone-card home-phone-card" onclick="window.location.href='/phone/${phone.slug}'">
-          <div class="phone-card-image-wrap">
-            <span class="phone-card-brand-badge">${escapeHtml(phone.brand_name || '')}</span>
-            <a href="/phone/${phone.slug}" onclick="event.stopPropagation()">
-              <img src="${phone.image || '/images/placeholder.svg'}" alt="${escapeHtml(phone.name)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
-            </a>
-          </div>
-          <div class="phone-card-body">
-            <a href="/phone/${phone.slug}" onclick="event.stopPropagation()" style="display: flex; align-items: center; justify-content: center; width: 100%; text-decoration: none;">
-              <h3 class="phone-card-title" title="${escapeHtml(phone.name)}">${escapeHtml(phone.name)}</h3>
-            </a>
-          </div>
-        </div>
-      `;
-    }
-
     function handleQuickCompare(slug) {
-      CompareBasket.add(slug);
-      const list = CompareBasket.get();
-      if (list.length >= 2) {
-        window.location.href = `/compare?phones=${list.join(',')}`;
+      if (typeof CompareBasket !== 'undefined') {
+        CompareBasket.add(slug);
+        const list = CompareBasket.get();
+        if (list.length >= 2) {
+          window.location.href = `/compare?phones=${list.join(',')}`;
+        } else {
+          alert('Added to compare! Select 1 more phone to compare.');
+        }
       } else {
-        alert('Added to compare! Select 1 more phone to compare.');
+        window.location.href = `/compare?phones=${encodeURIComponent(slug)}`;
       }
     }
   </script>

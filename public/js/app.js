@@ -149,6 +149,17 @@ const CompareBasket = {
   }
 };
 
+// Standalone SVG icons for core UI navigation (allows app.js to run without icons.js)
+const UI_ICONS = {
+  search: '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+  menu: '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>',
+  close: '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>'
+};
+function getUiIcon(name) {
+  if (typeof ICONS !== 'undefined' && ICONS && ICONS[name]) return ICONS[name];
+  return UI_ICONS[name] || '';
+}
+
 // Mobile navigation toggle & header search setup
 document.addEventListener('DOMContentLoaded', () => {
   const toggleBtn = document.getElementById('mobileToggle');
@@ -163,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchToggleBtn.className = 'mobile-search-toggle';
     searchToggleBtn.id = 'mobileSearchToggle';
     searchToggleBtn.setAttribute('aria-label', 'Toggle Search');
-    searchToggleBtn.innerHTML = ICONS.search;
+    searchToggleBtn.innerHTML = getUiIcon('search');
     toggleBtn.parentNode.insertBefore(searchToggleBtn, toggleBtn);
   }
 
@@ -173,13 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       const isOpen = searchWrapper.classList.toggle('mobile-open');
       searchToggleBtn.classList.toggle('active', isOpen);
-      searchToggleBtn.innerHTML = isOpen ? ICONS.close : ICONS.search;
+      searchToggleBtn.innerHTML = isOpen ? getUiIcon('close') : getUiIcon('search');
 
       // Close mobile navigation drawer if open
       if (isOpen && navLinks && navLinks.classList.contains('show')) {
         navLinks.classList.remove('show');
         if (toggleBtn) {
-          toggleBtn.innerHTML = ICONS.menu;
+          toggleBtn.innerHTML = getUiIcon('menu');
           toggleBtn.setAttribute('aria-expanded', 'false');
         }
       }
@@ -199,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
           !searchToggleBtn.contains(e.target)) {
         searchWrapper.classList.remove('mobile-open');
         searchToggleBtn.classList.remove('active');
-        searchToggleBtn.innerHTML = ICONS.search;
+        searchToggleBtn.innerHTML = getUiIcon('search');
       }
     });
 
@@ -208,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Escape' && searchWrapper.classList.contains('mobile-open')) {
         searchWrapper.classList.remove('mobile-open');
         searchToggleBtn.classList.remove('active');
-        searchToggleBtn.innerHTML = ICONS.search;
+        searchToggleBtn.innerHTML = getUiIcon('search');
       }
     });
   }
@@ -223,12 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
         searchWrapper.classList.remove('mobile-open');
         if (searchToggleBtn) {
           searchToggleBtn.classList.remove('active');
-          searchToggleBtn.innerHTML = ICONS.search;
+          searchToggleBtn.innerHTML = getUiIcon('search');
         }
       }
 
       const isOpen = navLinks.classList.toggle('show');
-      toggleBtn.innerHTML = isOpen ? ICONS.close : ICONS.menu;
+      toggleBtn.innerHTML = isOpen ? getUiIcon('close') : getUiIcon('menu');
       toggleBtn.setAttribute('aria-expanded', String(isOpen));
     });
 
@@ -236,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navLinks.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.classList.remove('show');
-        toggleBtn.innerHTML = ICONS.menu;
+        toggleBtn.innerHTML = getUiIcon('menu');
         toggleBtn.setAttribute('aria-expanded', 'false');
       });
     });
@@ -247,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
           !navLinks.contains(e.target) &&
           !toggleBtn.contains(e.target)) {
         navLinks.classList.remove('show');
-        toggleBtn.innerHTML = ICONS.menu;
+        toggleBtn.innerHTML = getUiIcon('menu');
         toggleBtn.setAttribute('aria-expanded', 'false');
       }
     });
