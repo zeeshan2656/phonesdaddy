@@ -26,18 +26,26 @@ function clearTemplateCache() {
 }
 
 function getTemplateHtml(templateFile) {
-  if (process.env.NODE_ENV === 'production' && templateCache.has(templateFile)) {
+  if (templateCache.has(templateFile)) {
     return templateCache.get(templateFile);
   }
   const filePath = path.join(viewsDir, templateFile);
   const content = fs.readFileSync(filePath, 'utf8');
-  if (process.env.NODE_ENV === 'production') {
-    templateCache.set(templateFile, content);
-  }
+  templateCache.set(templateFile, content);
   return content;
 }
 
 /**
+ * Helper to ensure phone cards load optimized WebP thumbnails (5-15 KB instead of full-size image)
+ */
+function getCardThumbUrl(imgUrl) {
+  if (!imgUrl) return '/images/placeholder.svg';
+  if (imgUrl.endsWith('.webp') && !imgUrl.endsWith('-thumb.webp')) {
+    return imgUrl.replace(/\.webp$/, '-thumb.webp');
+  }
+  return imgUrl;
+}
+
 /**
  * Helper to generate rendered HTML string with custom snippets and branding
  */
@@ -144,29 +152,31 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
  */
 async function renderViewWithSnippets(res, templateFile, replacements = {}, statusCode = 200) {
   const html = await getRenderedViewHtml(templateFile, replacements);
-  res.setHeader('Cache-Control', 'public, max-age=180, stale-while-revalidate=360');
+  res.setHeader('Cache-Control', 'public, max-age=180, stale-while-revalidate=600');
   res.status(statusCode).send(html);
 }
 
 // Cache key & TTL for Homepage SSR
 const HOME_SSR_CACHE_KEY = 'view_home_ssr_replacements';
-const HOME_SSR_TTL_SECONDS = 180; // 3 minutes
+const HOME_SSR_TTL_SECONDS = 600; // 10 minutes
 
 async function getQuickCompareOptions() {
   const cached = cache.get('QUICK_COMPARE_OPTIONS_HTML');
   if (cached) return cached;
 
   try {
+    // Highly optimized: fetch top 20 popular phones for instant SSR compare dropdown
     const [phones] = await pool.query(`
       SELECT p.slug, p.name, b.name AS brand_name 
       FROM phones p 
       JOIN brands b ON p.brand_id = b.id 
-      ORDER BY b.name ASC, p.name ASC
+      ORDER BY p.popular DESC, p.views DESC, p.id DESC
+      LIMIT 20
     `);
 
     const byBrand = {};
     for (const p of phones) {
-      const bName = p.brand_name || 'Other';
+      const bName = p.brand_name || 'Popular';
       if (!byBrand[bName]) byBrand[bName] = [];
       byBrand[bName].push(p);
     }
@@ -183,7 +193,7 @@ async function getQuickCompareOptions() {
       html += `</optgroup>`;
     }
 
-    cache.set('QUICK_COMPARE_OPTIONS_HTML', html, 600, ['phones', 'brands']);
+    cache.set('QUICK_COMPARE_OPTIONS_HTML', html, 1800, ['phones', 'brands']);
     return html;
   } catch (err) {
     console.error('getQuickCompareOptions error:', err);
@@ -198,13 +208,14 @@ async function getHomeSsrReplacements() {
   }
 
   try {
+    // Parallel optimized queries with strict LIMIT to keep TTFB < 50ms & DOM size clean
     const [latestPhones, popularPhones, upcomingPhones, topBrands, articles] = await Promise.all([
       pool.query(`
         SELECT p.id, p.name, p.slug, p.image, b.name AS brand_name
         FROM phones p
         JOIN brands b ON p.brand_id = b.id
         ORDER BY p.id DESC
-        LIMIT 16
+        LIMIT 8
       `).then(([rows]) => rows).catch(() => []),
 
       pool.query(`
@@ -212,7 +223,7 @@ async function getHomeSsrReplacements() {
         FROM phones p
         JOIN brands b ON p.brand_id = b.id
         ORDER BY p.popular DESC, p.views DESC, p.id DESC
-        LIMIT 16
+        LIMIT 8
       `).then(([rows]) => rows).catch(() => []),
 
       pool.query(`
@@ -221,7 +232,7 @@ async function getHomeSsrReplacements() {
         JOIN brands b ON p.brand_id = b.id
         WHERE p.status = 'Upcoming'
         ORDER BY p.id DESC
-        LIMIT 16
+        LIMIT 8
       `).then(([rows]) => rows).catch(() => []),
 
       pool.query(`
@@ -246,17 +257,19 @@ async function getHomeSsrReplacements() {
     const renderCard = (p, isEager = false, isLcp = false) => {
       let loadingAttrs = 'loading="lazy" decoding="async"';
       if (isLcp) {
-        loadingAttrs = 'loading="eager" fetchpriority="high"';
+        loadingAttrs = 'loading="eager" fetchpriority="high" decoding="sync"';
       } else if (isEager) {
-        loadingAttrs = 'loading="eager"';
+        loadingAttrs = 'loading="eager" decoding="async"';
       }
+
+      const cardImg = getCardThumbUrl(p.image);
 
       return `
       <div class="phone-card home-phone-card" onclick="window.location.href='/phone/${escapeAttr(p.slug)}'">
         <div class="phone-card-image-wrap">
           <span class="phone-card-brand-badge">${escapeHtml(p.brand_name || '')}</span>
           <a href="/phone/${escapeAttr(p.slug)}" onclick="event.stopPropagation()">
-            <img src="${escapeAttr(p.image || '/images/placeholder.svg')}" alt="${escapeAttr(p.name)}" class="phone-card-image" ${loadingAttrs} width="160" height="212">
+            <img src="${escapeAttr(cardImg)}" alt="${escapeAttr(p.name)}" class="phone-card-image" ${loadingAttrs} width="160" height="212">
           </a>
         </div>
         <div class="phone-card-body">
@@ -268,15 +281,16 @@ async function getHomeSsrReplacements() {
     `;
     };
 
-    // First row (4 cards) is above the fold: Card 0 is LCP with fetchpriority="high", rest are eager
+    // First row (4 cards) is above the fold: Card 0 is LCP with fetchpriority="high", next 3 are eager
     const latestHtml = (latestPhones || []).map((p, idx) => renderCard(p, idx < 4, idx === 0)).join('');
     const popularHtml = (popularPhones || []).map(p => renderCard(p, false, false)).join('');
     const upcomingHtml = (upcomingPhones || []).map(p => renderCard(p, false, false)).join('');
 
-    // Preload the primary LCP image in <head> for instantaneous paint with WebP MIME
+    // Preload the primary LCP thumbnail image in <head> for instantaneous paint with WebP MIME
     let lcpPreload = '';
     if (latestPhones && latestPhones.length > 0 && latestPhones[0].image) {
-      lcpPreload = `<link rel="preload" href="${escapeAttr(latestPhones[0].image)}" as="image" type="image/webp" fetchpriority="high">`;
+      const lcpImg = getCardThumbUrl(latestPhones[0].image);
+      lcpPreload = `<link rel="preload" href="${escapeAttr(lcpImg)}" as="image" type="image/webp" fetchpriority="high">`;
     }
 
     const brandsHtml = (topBrands || []).map(b => `
@@ -344,7 +358,8 @@ async function getHomeSsrReplacements() {
       '{{UPCOMING_PHONES_HTML}}': '',
       '{{HOME_BRANDS_HTML}}': '',
       '{{HOT_NEWS_HTML}}': '',
-      '{{QUICK_COMPARE_OPTIONS}}': ''
+      '{{QUICK_COMPARE_OPTIONS}}': '',
+      '{{HOME_LCP_PRELOAD}}': ''
     };
   }
 }
@@ -353,14 +368,14 @@ async function getHomeSsrReplacements() {
 router.get('/', async (req, res, next) => {
   try {
     const isAdmin = req.session && req.session.admin;
-    const isDev = process.env.NODE_ENV !== 'production';
+    const noCache = Boolean(req.query.nocache);
     const cacheKey = 'PAGE_FULL_HTML:/';
 
-    if (!isAdmin && !isDev && !req.query.nocache) {
+    if (!isAdmin && !noCache) {
       const cached = cache.get(cacheKey);
       if (cached) {
         res.setHeader('X-Cache', 'HIT');
-        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+        res.setHeader('Cache-Control', 'public, max-age=180, stale-while-revalidate=600');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         return res.send(cached);
       }
@@ -369,12 +384,12 @@ router.get('/', async (req, res, next) => {
     const ssrReplacements = await getHomeSsrReplacements();
     const html = await getRenderedViewHtml('home.html', ssrReplacements);
 
-    if (!isAdmin && !isDev && !req.query.nocache) {
+    if (!isAdmin && !noCache) {
       cache.set(cacheKey, html, 600, ['home', 'phones', 'brands', 'news', 'settings']);
     }
 
     res.setHeader('X-Cache', 'MISS');
-    res.setHeader('Cache-Control', isDev ? 'no-cache, must-revalidate' : 'public, max-age=300, stale-while-revalidate=600');
+    res.setHeader('Cache-Control', 'public, max-age=180, stale-while-revalidate=600');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {
@@ -386,14 +401,14 @@ router.get('/', async (req, res, next) => {
 router.get('/phones', async (req, res, next) => {
   try {
     const isAdmin = req.session && req.session.admin;
-    const isDev = process.env.NODE_ENV !== 'production';
+    const noCache = Boolean(req.query.nocache);
     const cacheKey = 'PAGE_FULL_HTML:/phones';
 
-    if (!isAdmin && !isDev && !req.query.nocache) {
+    if (!isAdmin && !noCache) {
       const cached = cache.get(cacheKey);
       if (cached) {
         res.setHeader('X-Cache', 'HIT');
-        res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+        res.setHeader('Cache-Control', 'public, max-age=180, stale-while-revalidate=600');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         return res.send(cached);
       }
@@ -401,12 +416,12 @@ router.get('/phones', async (req, res, next) => {
 
     const html = await getRenderedViewHtml('phones.html');
 
-    if (!isAdmin && !isDev && !req.query.nocache) {
+    if (!isAdmin && !noCache) {
       cache.set(cacheKey, html, 600, ['phones', 'settings']);
     }
 
     res.setHeader('X-Cache', 'MISS');
-    res.setHeader('Cache-Control', isDev ? 'no-cache, must-revalidate' : 'public, max-age=300, stale-while-revalidate=600');
+    res.setHeader('Cache-Control', 'public, max-age=180, stale-while-revalidate=600');
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {
