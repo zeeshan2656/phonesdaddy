@@ -524,6 +524,50 @@
       font-weight: 800;
       line-height: 1.2;
     }
+
+    /* ── Hero Pakistani Price Badge (below Reviews tag, mobile only) ── */
+    .phone-hero-price-badge {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .phone-hero-price-badge {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-left: 3.5px solid #059669;
+        border-radius: 8px;
+        padding: 5px 9px;
+        margin-top: 1px;
+      }
+      .hero-price-badge-top {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 9.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #047857;
+      }
+      .hero-price-badge-check {
+        margin-left: auto;
+        color: #059669;
+      }
+      .hero-price-badge-val {
+        font-size: 1.05rem;
+        font-weight: 900;
+        color: #0d9488;
+        line-height: 1.2;
+      }
+      .mobile-hide-pk-price {
+        display: none !important;
+      }
+      .pta-price-pill-row {
+        margin-top: 0 !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -914,16 +958,26 @@
                     <span><span id="phoneReviewsVal">0</span> Reviews</span>
                   </span>
                 </div>
+
+                <!-- Pakistani price directly below Reviews tag (no PTA tag) -->
+                <div class="phone-hero-price-badge" id="phoneHeroPriceBadge">
+                  <div class="hero-price-badge-top">
+                    <span>🇵🇰</span>
+                    <span>Price in Pakistan</span>
+                    <span class="hero-price-badge-check">✓</span>
+                  </div>
+                  <div class="hero-price-badge-val" id="phoneHeroPriceVal">{{PHONE_PRICE_DISPLAY}}</div>
+                </div>
               </div>
 
               <!-- Price Box & Multi-Country Mobile Grid -->
               <div class="phone-detail-price-box">
-                <div class="price-header-row">
+                <div class="price-header-row mobile-hide-pk-price">
                   <span class="price-flag"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg></span>
                   <span class="price-label">Official Price in Pakistan</span>
                   <span class="price-verified-badge">✓ Verified</span>
                 </div>
-                <div class="price-val-wrap">
+                <div class="price-val-wrap mobile-hide-pk-price">
                   <span class="price-val" id="phoneDetailPrice">Loading Price...</span>
                 </div>
                 <div class="pta-price-pill-row" id="phoneDetailPtaPill" style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 7px 12px; font-size: 13px;">

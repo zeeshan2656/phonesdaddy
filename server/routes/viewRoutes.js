@@ -605,7 +605,12 @@ router.get('/phone/:slug', async (req, res, next) => {
     const phoneImgUrl = phone.image || '/images/placeholder.svg';
     const lcpPreload = phone.image ? `<link rel="preload" href="${escapeAttr(phone.image)}" as="image" fetchpriority="high">` : '';
 
+    const pricePKRDisplay = (phone.price && parseFloat(phone.price) > 0)
+      ? `Rs. ${Math.round(parseFloat(phone.price)).toLocaleString('en-US')}`
+      : 'Rumored Price';
+
     const replacements = {
+      '{{PHONE_PRICE_DISPLAY}}': escapeHtml(pricePKRDisplay),
       '{{PAGE_TITLE}}': escapeHtml(pageTitle),
       '{{META_DESCRIPTION}}': escapeHtml(pageDescription),
       '{{CANONICAL_URL}}': canonicalUrl,

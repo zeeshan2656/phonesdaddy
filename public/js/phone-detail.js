@@ -114,6 +114,10 @@ function renderPhoneDetail(phone) {
   if (priceEl) {
     priceEl.innerText = phone.price > 0 ? formatPKR(phone.price) : 'Rumored Price';
   }
+  const heroPriceVal = document.getElementById('phoneHeroPriceVal');
+  if (heroPriceVal) {
+    heroPriceVal.innerText = phone.price > 0 ? formatPKR(phone.price) : 'Rumored Price';
+  }
 
   // Views & Total Reviews Meta Counts
   const viewsEl = document.getElementById('phoneViewsVal');
