@@ -567,6 +567,55 @@
       .pta-price-pill-row {
         margin-top: 0 !important;
       }
+
+      /* Hide slider prev/next arrows (swipe still works) */
+      .phone-slider-arrow {
+        display: none !important;
+      }
+      /* Wider photo count pill so full text shows */
+      .gallery-count-pill {
+        width: max-content !important;
+        min-width: 104px !important;
+        justify-content: center !important;
+        padding: 3px 12px !important;
+        font-size: 11px !important;
+      }
+      /* Hide PTA tax tag */
+      #phoneDetailPtaPill {
+        display: none !important;
+      }
+      /* Hide green price card if nothing left inside it */
+      .phone-detail-price-box:has(#mobileMultiPricesWrap[style*="display: none"]) {
+        display: none !important;
+      }
+
+      /* Global prices: cards only (no table), placed after specifications */
+      #globalPricesSection .prices-table {
+        display: none !important;
+      }
+      #desktopPricesCardsGrid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        padding: 12px !important;
+        gap: 8px !important;
+        border-bottom: none !important;
+      }
+      div:has(> #globalPricesSection) {
+        display: flex;
+        flex-direction: column;
+      }
+      #specsBlock { order: 0; }
+      #globalPricesSection { order: 1; margin-top: 0 !important; }
+      #specsBlock ~ *:not(#globalPricesSection) { order: 2; }
+    }
+
+    /* Global prices: cards only on all devices */
+    #globalPricesSection .prices-table {
+      display: none !important;
+    }
+    #desktopPricesCardsGrid {
+      display: grid !important;
+      border-bottom: none !important;
     }
   </style>
 </head>
@@ -1093,9 +1142,9 @@
         </div>
 
         <!-- Complete Specification Sections (12+ Categories) -->
-        <div style="margin-bottom: 30px;">
+        <div id="specsBlock" style="margin-bottom: 30px;">
           <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--dark); margin-bottom: 14px;">
-            Detailed Technical Specifications
+            Specifications
           </h2>
           
           <div class="specs-container" id="specsCardContainer">
