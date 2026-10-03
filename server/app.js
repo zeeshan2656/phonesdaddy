@@ -21,6 +21,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const pageRoutes = require('./routes/pageRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const ptaRoutes = require('./routes/ptaRoutes');
+const pwaRoutes = require('./routes/pwaRoutes');
 const viewRoutes = require('./routes/viewRoutes');
 
 // Middleware
@@ -224,7 +225,8 @@ app.use('/api/admin/pages', pageRoutes);
 app.use('/api/categories', categoryRoutes); // Handles /api/categories, /admin/*
 app.use('/api/admin/categories', categoryRoutes);
 app.use('/api/pta-tax', ptaRoutes); // Handles /api/pta-tax/calculate, /popular, /slabs
-
+app.use('/api/pwa', pwaRoutes); // Handles /api/pwa/track, /stats, /config
+app.use('/api/admin/pwa', pwaRoutes); // Handles admin PWA settings & icon upload
 
 // View & Page Routes (HTML templates & SEO)
 app.use('/', viewRoutes);

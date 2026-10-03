@@ -872,6 +872,10 @@ async function handleDeletePhone(id, name) {
   }
 }
 
+// Fallbacks for gallery helpers in admin phone form
+window.renderAdminGallery = window.renderAdminGallery || function(images, primary) {};
+window.setAdminPrimaryImage = window.setAdminPrimaryImage || function(src) {};
+
 // 5. Admin Phone Form (Add & Edit Phone)
 async function initPhoneForm() {
   const form = document.getElementById('phoneForm');
@@ -1015,6 +1019,10 @@ async function initPhoneForm() {
     });
   }
 
+  // Expose gallery helpers globally so edit loader can populate gallery images
+  window.renderAdminGallery = renderAdminGallery;
+  window.setAdminPrimaryImage = setAdminPrimaryImage;
+
   // Setup Dynamic Spec Row Button
   const addSpecBtn = document.getElementById('btnAddSpecRow');
   if (addSpecBtn) {
@@ -1058,7 +1066,7 @@ async function initPhoneForm() {
     });
   }
 
-  // ── Dynamic External Store Affiliate Deals Builder ─────────────────────────
+  // ── Dynamic External Store Deals & Affiliate Links Builder ─────────────────
   const btnAddAffiliate = document.getElementById('btnAddAffiliateRow');
   if (btnAddAffiliate) {
     btnAddAffiliate.addEventListener('click', () => {
@@ -1066,7 +1074,7 @@ async function initPhoneForm() {
     });
   }
 
-  // Quick preset buttons (+ Amazon, + Daraz, + PriceOye, + AliExpress)
+  // Quick preset buttons (+ Official Site, + Amazon, + Daraz, + PriceOye, + AliExpress, + GSMArena Source)
   document.querySelectorAll('.quick-add-affiliate').forEach(btn => {
     btn.addEventListener('click', () => {
       const store = btn.dataset.store || '';
@@ -1083,45 +1091,173 @@ async function initPhoneForm() {
     });
   });
 
-  // Short Summary / Highlights auto-generation & char counter
+  // ── Section 5: Quill WYSIWYG Rich Text Editor Setup ─────────────────────────
+  let quillSummary = null;
+  const quillEditorEl = document.getElementById('summaryQuillEditor');
   const shortDescField = document.getElementById('phoneShortDesc');
   const summaryCharCount = document.getElementById('summaryCharCount');
   const btnAutoGenerateSummary = document.getElementById('btnAutoGenerateSummary');
+  const btnInsertBrandInternalLinks = document.getElementById('btnInsertBrandInternalLinks');
+
+  if (quillEditorEl && typeof Quill !== 'undefined') {
+    quillSummary = new Quill('#summaryQuillEditor', {
+      modules: {
+        toolbar: '#summaryQuillToolbar'
+      },
+      theme: 'snow',
+      placeholder: 'Write or auto-generate a comprehensive device overview, key highlights, headings, font colors, and internal device links...'
+    });
+    window.quillSummary = quillSummary;
+
+    quillSummary.on('text-change', () => {
+      const text = quillSummary.getText().trim();
+      const html = text.length === 0 ? '' : quillSummary.root.innerHTML;
+      if (shortDescField) shortDescField.value = html;
+      updateSummaryCharCount();
+    });
+  }
 
   function updateSummaryCharCount() {
-    if (shortDescField && summaryCharCount) {
-      const len = shortDescField.value.length;
+    if (summaryCharCount) {
+      let len = 0;
+      if (quillSummary) {
+        len = quillSummary.getText().trim().length;
+      } else if (shortDescField) {
+        len = (shortDescField.value || '').length;
+      }
       summaryCharCount.textContent = `${len} character${len === 1 ? '' : 's'}`;
     }
   }
+
+  function setSummaryContent(htmlOrText) {
+    const content = (htmlOrText || '').trim();
+    if (shortDescField) shortDescField.value = content;
+    if (quillSummary) {
+      if (content.startsWith('<')) {
+        quillSummary.clipboard.dangerouslyPasteHTML(0, content);
+      } else if (content) {
+        const paragraphs = content.split('\n\n').filter(Boolean);
+        const html = paragraphs.map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('');
+        quillSummary.clipboard.dangerouslyPasteHTML(0, html);
+      } else {
+        quillSummary.setText('');
+      }
+    }
+    updateSummaryCharCount();
+  }
+  window.setAdminSummaryContent = setSummaryContent;
 
   if (shortDescField) {
     shortDescField.addEventListener('input', updateSummaryCharCount);
     updateSummaryCharCount();
   }
 
-  if (btnAutoGenerateSummary && shortDescField) {
-    btnAutoGenerateSummary.addEventListener('click', () => {
-      const summary = deriveHighlightsFromSpecRows();
-      if (!summary) {
-        alert('Please ensure specifications are present in the builder below before deriving highlights.');
+  // ── Insert 2 to 5 Related Devices of Same Brand as Internal Links ───────────
+  if (btnInsertBrandInternalLinks) {
+    btnInsertBrandInternalLinks.addEventListener('click', async () => {
+      const brandSelect = document.getElementById('phoneBrandSelect');
+      const brandId = brandSelect ? brandSelect.value : '';
+      if (!brandId) {
+        alert('Please select a Brand for this phone first (Section 1: Basic Information) to discover related devices.');
+        brandSelect?.focus();
         return;
       }
-      shortDescField.value = summary;
-      updateSummaryCharCount();
 
-      // Button feedback animation
-      const origHtml = btnAutoGenerateSummary.innerHTML;
+      const brandName = (brandSelect.options && brandSelect.selectedIndex >= 0)
+        ? brandSelect.options[brandSelect.selectedIndex].text.replace(/-- Select Brand --/i, '').trim()
+        : 'Brand';
+      const currentName = (document.getElementById('phoneNameInput')?.value || '').trim();
+
+      const origBtnHtml = btnInsertBrandInternalLinks.innerHTML;
+      btnInsertBrandInternalLinks.disabled = true;
+      btnInsertBrandInternalLinks.innerHTML = '<span>⏳ Finding related phones...</span>';
+
+      try {
+        const res = await fetch(`/api/phones?brand=${encodeURIComponent(brandId)}&limit=12`);
+        const json = await res.json();
+        const phoneList = (json.data && json.data.phones) ? json.data.phones : (Array.isArray(json.data) ? json.data : []);
+
+        const related = phoneList.filter(p => {
+          if (phoneId && p.id == phoneId) return false;
+          if (currentName && p.name.trim().toLowerCase() === currentName.toLowerCase()) return false;
+          return true;
+        }).slice(0, 5); // 2 to 5 related devices
+
+        if (related.length === 0) {
+          alert(`No other devices found under brand "${brandName}" in the database yet.\n\nAdd more ${brandName} phones to auto-link them here.`);
+          btnInsertBrandInternalLinks.innerHTML = origBtnHtml;
+          btnInsertBrandInternalLinks.disabled = false;
+          return;
+        }
+
+        const linkItemsHtml = related.map(p => {
+          const priceStr = p.price > 0 ? ` — Official Price: PKR ${Number(p.price).toLocaleString()}` : '';
+          return `<li><a href="/phone/${escapeAttr(p.slug)}" title="${escapeAttr(p.name)} Specs & Price in Pakistan">${escapeHtml(p.name)}</a>${priceStr}</li>`;
+        }).join('');
+
+        const internalLinksBlock = `
+          <h3>Related ${escapeHtml(brandName)} Devices to Compare</h3>
+          <p>Explore these related <strong>${escapeHtml(brandName)}</strong> smartphones available in Pakistan:</p>
+          <ul>
+            ${linkItemsHtml}
+          </ul>
+        `;
+
+        if (quillSummary) {
+          const range = quillSummary.getSelection(true);
+          const insertIndex = range ? range.index : quillSummary.getLength();
+          quillSummary.clipboard.dangerouslyPasteHTML(insertIndex, internalLinksBlock);
+        } else if (shortDescField) {
+          shortDescField.value += `\n\nRelated ${brandName} Devices:\n` + related.map(p => `- ${p.name}: /phone/${p.slug}`).join('\n');
+          updateSummaryCharCount();
+        }
+
+        btnInsertBrandInternalLinks.innerHTML = `<span>✅ Inserted ${related.length} Device Links!</span>`;
+        btnInsertBrandInternalLinks.style.borderColor = '#99f6e4';
+        btnInsertBrandInternalLinks.style.background = '#f0fdfa';
+        btnInsertBrandInternalLinks.style.color = '#0d9488';
+
+        setTimeout(() => {
+          btnInsertBrandInternalLinks.innerHTML = origBtnHtml;
+          btnInsertBrandInternalLinks.disabled = false;
+        }, 2200);
+
+      } catch (err) {
+        console.error('Error fetching brand related devices:', err);
+        alert('Could not fetch related brand devices. Check network connection.');
+        btnInsertBrandInternalLinks.innerHTML = origBtnHtml;
+        btnInsertBrandInternalLinks.disabled = false;
+      }
+    });
+  }
+
+  // ── Auto-Generate Rich Summary Button ───────────────────────────────────────
+  if (btnAutoGenerateSummary) {
+    btnAutoGenerateSummary.addEventListener('click', async () => {
+      btnAutoGenerateSummary.disabled = true;
+      btnAutoGenerateSummary.innerHTML = '<span>⚡ Generating Rich Highlights...</span>';
+
+      const summaryHtml = await deriveRichHighlightsFromSpecRowsAsync();
+      if (!summaryHtml) {
+        alert('Please ensure specifications are present in the builder below before deriving highlights.');
+        btnAutoGenerateSummary.disabled = false;
+        btnAutoGenerateSummary.innerHTML = '<span>⚡ Auto-Generate from Specs</span>';
+        return;
+      }
+
+      setSummaryContent(summaryHtml);
+
       btnAutoGenerateSummary.innerHTML = '<span>Summary Generated!</span>';
       btnAutoGenerateSummary.style.borderColor = '#86efac';
       btnAutoGenerateSummary.style.background = '#f0fdf4';
       btnAutoGenerateSummary.style.color = '#16a34a';
 
       setTimeout(() => {
-        btnAutoGenerateSummary.innerHTML = origHtml;
+        btnAutoGenerateSummary.innerHTML = '<span>⚡ Auto-Generate from Specs</span>';
         btnAutoGenerateSummary.style.borderColor = '#bae6fd';
         btnAutoGenerateSummary.style.background = '#f0f9ff';
         btnAutoGenerateSummary.style.color = '#0284c7';
+        btnAutoGenerateSummary.disabled = false;
       }, 2000);
     });
   }
@@ -1333,149 +1469,19 @@ async function initPhoneForm() {
           return;
         }
 
-        const data = json.data;
+        await window.populatePhoneFormWithSpecs(json.data);
 
-        // 1. Populate General Information
-        if (data.name) {
-          const nameField = document.getElementById('phoneNameInput');
-          if (nameField) {
-            nameField.value = data.name;
-            // Trigger slug generation
-            const slugField = document.getElementById('phoneSlugInput');
-            if (slugField && !isEdit) {
-              slugField.value = data.slug || slugify(data.name);
-            }
-          }
-        }
-        if (data.slug) {
-          const slugField = document.getElementById('phoneSlugInput');
-          if (slugField) slugField.value = data.slug;
-        }
-        if (data.price !== undefined && data.price !== null && data.price > 0) {
-          const priceField = document.getElementById('phonePriceInput');
-          if (priceField) priceField.value = data.price;
-        }
-        if (data.status) {
-          const statusField = document.getElementById('phoneStatusSelect');
-          if (statusField) statusField.value = data.status;
-        }
-        if (data.releaseDate) {
-          const relField = document.getElementById('phoneReleaseDate');
-          if (relField) relField.value = data.releaseDate;
-        }
-
-        // 2. Handle Brand Selection / Quick Add
-        const brandSelect = document.getElementById('phoneBrandSelect');
-        let brandStatusHtml = '';
-
-        if (data.brand_found && data.brand_id && brandSelect) {
-          brandSelect.value = data.brand_id;
-          brandStatusHtml = `Brand recognized as <strong>${escapeHtml(data.brand_name)}</strong>.`;
-        } else if (data.brand_name) {
-          brandStatusHtml = `Brand "<strong>${escapeHtml(data.brand_name)}</strong>" not in database. <button type="button" id="btnQuickAddBrand" class="btn btn-outline btn-sm" style="margin-left: 8px; font-size: 11px; padding: 2px 8px; cursor: pointer;">➕ Quick Add "${escapeHtml(data.brand_name)}"</button>`;
-        }
-
-        // 3. Handle Main Image and Gallery
-        if (data.image || (data.images && data.images.length > 0)) {
-          const primaryImg = data.image || (data.images && data.images[0]);
-          const allImgs = (data.images && data.images.length > 0)
-            ? data.images
-            : (primaryImg ? [primaryImg] : []);
-
-          const scrapedImgInput = document.getElementById('phoneScrapedImage');
-          const previewImg = document.getElementById('currentImagePreview');
-          const btnDeletePhoneImage = document.getElementById('btnDeletePhoneImage');
-          const removeImgInput = document.getElementById('phoneRemoveImage');
-
-          if (scrapedImgInput) scrapedImgInput.value = primaryImg;
-          if (removeImgInput) removeImgInput.value = 'false';
-          if (previewImg) {
-            previewImg.src = primaryImg;
-            previewImg.style.display = 'block';
-          }
-          if (btnDeletePhoneImage) {
-            btnDeletePhoneImage.style.display = 'inline-flex';
-          }
-
-          renderAdminGallery(allImgs, primaryImg);
-        }
-
-        // 4. Handle Multi-Country Pricing
-        if (data.prices && Array.isArray(data.prices)) {
-          for (const pr of data.prices) {
-            if (pr.country === 'Pakistan' && pr.amount) document.getElementById('pricePKR').value = pr.amount;
-            if (pr.country === 'USA' && pr.amount) document.getElementById('priceUSD').value = pr.amount;
-            if (pr.country === 'India' && pr.amount) document.getElementById('priceINR').value = pr.amount;
-            if (pr.country === 'UK' && pr.amount) document.getElementById('priceGBP').value = pr.amount;
-          }
-        }
-        // If PKR field is empty but numeric price exists, format it
-        const priceFieldVal = document.getElementById('phonePriceInput')?.value;
-        const pricePKRField = document.getElementById('pricePKR');
-        if (priceFieldVal && pricePKRField && !pricePKRField.value) {
-          pricePKRField.value = 'PKR ' + parseFloat(priceFieldVal).toLocaleString();
-        }
-
-        // 5. Populate Dynamic Specifications (ONLY sections available on target URL)
-        const container = document.getElementById('specRowsContainer');
-        if (container && data.specs && Array.isArray(data.specs) && data.specs.length > 0) {
-          container.innerHTML = '';
-          for (const s of data.specs) {
-            addSpecRow(s.section, s.key, s.value);
-          }
-        }
-
-        // 6. Populate Short Summary / Highlights derived from specs
-        if (shortDescField) {
-          shortDescField.value = data.shortSummary || deriveHighlightsFromSpecRows();
-          updateSummaryCharCount();
-        }
-
-        // 7. Success notification
-        const sectionCount = [...new Set(data.specs.map(s => s.section))].length;
         if (fetchStatus) {
+          const sCount = Array.isArray(json.data.specs) ? [...new Set(json.data.specs.map(s => s.section))].length : 0;
           fetchStatus.style.display = 'block';
           fetchStatus.style.background = '#f0fdf4';
           fetchStatus.style.color = '#166534';
           fetchStatus.style.border = '1px solid #bbf7d0';
           fetchStatus.innerHTML = `
-            <div style="font-weight: 700; margin-bottom: 4px;">Specs Successfully Fetched from ${data.source === 'gsmarena' ? 'GSMArena' : 'WhatMobile'}!</div>
-            <div>Loaded <strong>${data.specs.length}</strong> specifications across <strong>${sectionCount}</strong> sections. ${brandStatusHtml}</div>
+            <div style="font-weight: 700; margin-bottom: 4px;">Specs Successfully Fetched from ${json.data.source === 'gsmarena' ? 'GSMArena' : 'WhatMobile'}!</div>
+            <div>Loaded <strong>${json.data.specs?.length || 0}</strong> specifications across <strong>${sCount}</strong> sections into Builder below.</div>
           `;
-
-          // Wire Quick Add Brand button if present
-          const quickAddBtn = document.getElementById('btnQuickAddBrand');
-          if (quickAddBtn) {
-            quickAddBtn.addEventListener('click', async () => {
-              try {
-                quickAddBtn.disabled = true;
-                quickAddBtn.textContent = 'Adding...';
-                const bRes = await fetch('/api/brands', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    name: data.brand_name,
-                    slug: slugify(data.brand_name),
-                    description: `${data.brand_name} Mobile Phones & Devices`
-                  })
-                });
-                const bJson = await bRes.json();
-                if (bJson.success && bJson.data) {
-                  await populateBrandDropdown(bJson.data.id);
-                  quickAddBtn.parentElement.innerHTML = `Brand <strong>${escapeHtml(data.brand_name)}</strong> added and selected!`;
-                } else {
-                  alert(bJson.message || 'Could not add brand.');
-                  quickAddBtn.disabled = false;
-                  quickAddBtn.textContent = `➕ Quick Add "${escapeHtml(data.brand_name)}"`;
-                }
-              } catch (err) {
-                console.error(err);
-                quickAddBtn.disabled = false;
-              }
-            });
-          }
         }
-
       } catch (err) {
         console.error('Fetch specs error:', err);
         if (fetchStatus) {
@@ -1493,6 +1499,193 @@ async function initPhoneForm() {
     });
   }
 
+  // ── Global Specifications & Form Population Handler ───────────────────────
+  window.populatePhoneFormWithSpecs = async function(data) {
+    if (!data) return;
+
+    // 1. Populate General Information
+    if (data.name) {
+      const nameField = document.getElementById('phoneNameInput');
+      if (nameField) {
+        nameField.value = data.name;
+        const slugField = document.getElementById('phoneSlugInput');
+        if (slugField && !isEdit) {
+          slugField.value = data.slug || slugify(data.name);
+        }
+      }
+    }
+    if (data.slug) {
+      const slugField = document.getElementById('phoneSlugInput');
+      if (slugField) slugField.value = data.slug;
+    }
+    if (data.price !== undefined && data.price !== null && data.price > 0) {
+      const priceField = document.getElementById('phonePriceInput');
+      if (priceField) priceField.value = data.price;
+    }
+    if (data.status) {
+      const statusField = document.getElementById('phoneStatusSelect');
+      if (statusField) statusField.value = data.status;
+    }
+    if (data.releaseDate || data.release_date) {
+      const relField = document.getElementById('phoneReleaseDate');
+      if (relField) relField.value = data.releaseDate || data.release_date;
+    }
+
+    // 2. Handle Brand Selection / Quick Add
+    const brandSelect = document.getElementById('phoneBrandSelect');
+    if (data.brand_found && data.brand_id && brandSelect) {
+      brandSelect.value = data.brand_id;
+    } else if (data.brand_name && brandSelect && brandSelect.options) {
+      let foundOption = false;
+      for (let i = 0; i < brandSelect.options.length; i++) {
+        if (brandSelect.options[i].text.toLowerCase().trim() === data.brand_name.toLowerCase().trim()) {
+          brandSelect.selectedIndex = i;
+          foundOption = true;
+          break;
+        }
+      }
+      if (!foundOption) {
+        const fetchStatus = document.getElementById('fetchSpecsStatus');
+        if (fetchStatus) {
+          const quickBtnHtml = ` <button type="button" id="btnQuickAddBrand" class="btn btn-outline btn-sm" style="margin-left: 8px; font-size: 11px; padding: 2px 8px; cursor: pointer;">➕ Quick Add "${escapeHtml(data.brand_name)}"</button>`;
+          fetchStatus.innerHTML += `<div style="margin-top: 6px;">Brand "<strong>${escapeHtml(data.brand_name)}</strong>" not found in database.${quickBtnHtml}</div>`;
+        }
+      }
+    }
+
+    // 3. Handle Main Image and Gallery
+    if (data.image || (data.images && data.images.length > 0)) {
+      const primaryImg = data.image || (data.images && data.images[0]);
+      const allImgs = (data.images && data.images.length > 0)
+        ? data.images
+        : (primaryImg ? [primaryImg] : []);
+
+      const scrapedImgInput = document.getElementById('phoneScrapedImage');
+      const previewImg = document.getElementById('currentImagePreview');
+      const btnDeletePhoneImage = document.getElementById('btnDeletePhoneImage');
+      const removeImgInput = document.getElementById('phoneRemoveImage');
+
+      if (scrapedImgInput) scrapedImgInput.value = primaryImg;
+      if (removeImgInput) removeImgInput.value = 'false';
+      if (previewImg) {
+        previewImg.src = primaryImg;
+        previewImg.style.display = 'block';
+      }
+      if (btnDeletePhoneImage) {
+        btnDeletePhoneImage.style.display = 'inline-flex';
+      }
+
+      renderAdminGallery(allImgs, primaryImg);
+    }
+
+    // 4. Handle Multi-Country Pricing
+    if (data.prices && Array.isArray(data.prices)) {
+      for (const pr of data.prices) {
+        if (pr.country === 'Pakistan' && pr.amount) document.getElementById('pricePKR').value = pr.amount;
+        if (pr.country === 'USA' && pr.amount) document.getElementById('priceUSD').value = pr.amount;
+        if (pr.country === 'UAE' && pr.amount) document.getElementById('priceAED').value = pr.amount;
+        if (pr.country === 'India' && pr.amount) document.getElementById('priceINR').value = pr.amount;
+        if (pr.country === 'UK' && pr.amount) document.getElementById('priceGBP').value = pr.amount;
+      }
+    }
+    const priceFieldVal = document.getElementById('phonePriceInput')?.value;
+    const pricePKRField = document.getElementById('pricePKR');
+    if (priceFieldVal && pricePKRField && !pricePKRField.value) {
+      pricePKRField.value = 'PKR ' + parseFloat(priceFieldVal).toLocaleString();
+    }
+
+    // 5. Handle Post External Links & Store Deals (Section 3)
+    const sourceUrl = data.sourceUrl || data.url;
+    if (sourceUrl) {
+      const sourceStore = data.source === 'gsmarena' ? 'GSMArena Source' : (data.source === 'whatmobile' ? 'WhatMobile Source' : 'External Source');
+      const existingUrls = Array.from(document.querySelectorAll('.aff-url-input')).map(i => i.value.trim());
+      if (!existingUrls.includes(sourceUrl)) {
+        addAffiliateRow(sourceStore, 'Source', sourceUrl);
+      }
+    }
+    if (Array.isArray(data.affiliate_links) && data.affiliate_links.length > 0) {
+      for (const aff of data.affiliate_links) {
+        if (aff && aff.store) {
+          addAffiliateRow(aff.store, aff.price || '', aff.url || aff.link || '');
+        }
+      }
+    }
+
+    // 6. Populate Detailed Technical Specifications Builder (Section 6)
+    const specContainer = document.getElementById('specRowsContainer');
+    if (specContainer) {
+      specContainer.innerHTML = '';
+      const specsList = [];
+      if (Array.isArray(data.specs) && data.specs.length > 0) {
+        for (const s of data.specs) {
+          specsList.push({ section: s.section, key: s.key || s.spec_key || '', value: s.value || s.spec_value || '' });
+        }
+      } else if (Array.isArray(data.raw_specs) && data.raw_specs.length > 0) {
+        for (const s of data.raw_specs) {
+          specsList.push({ section: s.section, key: s.spec_key || s.key || '', value: s.spec_value || s.value || '' });
+        }
+      } else if (data.specs && typeof data.specs === 'object') {
+        for (const [sec, items] of Object.entries(data.specs)) {
+          if (Array.isArray(items)) {
+            for (const item of items) {
+              specsList.push({ section: sec, key: item.key || item.spec_key || '', value: item.value || item.spec_value || '' });
+            }
+          }
+        }
+      }
+
+      if (specsList.length > 0) {
+        for (const s of specsList) {
+          addSpecRow(s.section, s.key, s.value);
+        }
+      } else {
+        populateDefaultSpecTemplate();
+      }
+    }
+
+    // 7. Populate Short Summary / Key Highlights in Quill (Section 5)
+    if (data.shortSummary || data.short_description) {
+      setSummaryContent(data.shortSummary || data.short_description);
+    } else {
+      const generatedHtml = await deriveRichHighlightsFromSpecRowsAsync();
+      if (generatedHtml) {
+        setSummaryContent(generatedHtml);
+      }
+    }
+
+    // 8. Wire Quick Add Brand button if rendered
+    const quickAddBtn = document.getElementById('btnQuickAddBrand');
+    if (quickAddBtn && data.brand_name) {
+      quickAddBtn.addEventListener('click', async () => {
+        try {
+          quickAddBtn.disabled = true;
+          quickAddBtn.textContent = 'Adding...';
+          const bRes = await fetch('/api/brands', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: data.brand_name,
+              slug: slugify(data.brand_name),
+              description: `${data.brand_name} Mobile Phones & Devices`
+            })
+          });
+          const bJson = await bRes.json();
+          if (bJson.success && bJson.data) {
+            await populateBrandDropdown(bJson.data.id);
+            quickAddBtn.parentElement.innerHTML = `Brand <strong>${escapeHtml(data.brand_name)}</strong> added and selected!`;
+          } else {
+            alert(bJson.message || 'Could not add brand.');
+            quickAddBtn.disabled = false;
+            quickAddBtn.textContent = `➕ Quick Add "${escapeHtml(data.brand_name)}"`;
+          }
+        } catch (err) {
+          console.error(err);
+          quickAddBtn.disabled = false;
+        }
+      });
+    }
+  };
+
   if (isEdit && phoneId) {
     document.getElementById('phoneFormTitle').innerText = 'Edit Mobile Phone';
     loadPhoneDataForEdit(phoneId);
@@ -1505,7 +1698,17 @@ async function initPhoneForm() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Sync Quill Editor HTML before FormData creation
+    if (window.quillSummary) {
+      const text = window.quillSummary.getText().trim();
+      const html = text.length === 0 ? '' : window.quillSummary.root.innerHTML;
+      if (shortDescField) shortDescField.value = html;
+    }
+
     const formData = new FormData(form);
+    if (shortDescField) {
+      formData.set('short_description', shortDescField.value);
+    }
 
     // Clean up empty image input so multer does not process empty file
     const fileInput = document.getElementById('phoneImageFile');
@@ -1628,7 +1831,7 @@ function updateVideoPreview() {
   }
 }
 
-// ── Shared External Store Affiliate Deals Row Builder ─────────────────────────
+// ── Shared External Store Deals & Post External Links Row Builder ───────────
 function addAffiliateRow(store = '', price = '', url = '') {
   const affiliateContainer = document.getElementById('affiliateRowsContainer');
   if (!affiliateContainer) return;
@@ -1638,25 +1841,28 @@ function addAffiliateRow(store = '', price = '', url = '') {
 
   row.innerHTML = `
     <div>
-      <input type="text" class="form-control aff-store-input" placeholder="e.g. Amazon, Daraz" value="${escapeHtml(store)}" list="storePresetsList">
+      <input type="text" class="form-control aff-store-input" placeholder="e.g. Official Site, Amazon, Daraz" value="${escapeHtml(store)}" list="storePresetsList">
       <datalist id="storePresetsList">
+        <option value="Official Store">
+        <option value="Official Website">
         <option value="Amazon">
         <option value="Daraz">
         <option value="PriceOye">
         <option value="AliExpress">
         <option value="Telemart">
         <option value="Shophive">
-        <option value="Official Store">
+        <option value="GSMArena Source">
+        <option value="WhatMobile Source">
       </datalist>
     </div>
     <div>
-      <input type="text" class="form-control aff-price-input" placeholder="e.g. Rs. 289,999 or $1,199" value="${escapeHtml(price)}">
+      <input type="text" class="form-control aff-price-input" placeholder="e.g. Rs. 289,999 or Official Page" value="${escapeHtml(price)}">
     </div>
     <div>
       <input type="url" class="form-control aff-url-input" placeholder="https://..." value="${escapeHtml(url)}">
     </div>
     <div>
-      <button type="button" class="btn-remove-row btn-remove-aff-row" title="Remove store deal">&times;</button>
+      <button type="button" class="btn-remove-row btn-remove-aff-row" title="Remove external link">&times;</button>
     </div>
   `;
 
@@ -1706,12 +1912,21 @@ async function loadPhoneDataForEdit(id) {
     form.price.value = p.price;
     form.status.value = p.status || 'Available';
     form.release_date.value = p.release_date || '';
-    form.short_description.value = p.short_description || '';
-    const charCountEl = document.getElementById('summaryCharCount');
-    if (charCountEl) {
-      const len = (p.short_description || '').length;
-      charCountEl.textContent = `${len} character${len === 1 ? '' : 's'}`;
+
+    // Load Short Summary / Key Highlights into Quill & textarea
+    if (typeof window.setAdminSummaryContent === 'function') {
+      window.setAdminSummaryContent(p.short_description || '');
+    } else {
+      form.short_description.value = p.short_description || '';
+      if (window.quillSummary) {
+        if ((p.short_description || '').startsWith('<')) {
+          window.quillSummary.clipboard.dangerouslyPasteHTML(0, p.short_description);
+        } else {
+          window.quillSummary.setText(p.short_description || '');
+        }
+      }
     }
+
     form.featured.checked = !!p.featured;
     form.popular.checked = !!p.popular;
 
@@ -1728,56 +1943,99 @@ async function loadPhoneDataForEdit(id) {
     }
 
     // Populate Gallery Images in Edit Mode
-    if (p.images && p.images.length > 0) {
-      renderAdminGallery(p.images, p.image);
-    } else if (p.image && p.image !== '/images/placeholder.svg') {
-      renderAdminGallery([p.image], p.image);
+    try {
+      if (typeof window.renderAdminGallery === 'function') {
+        if (p.images && p.images.length > 0) {
+          window.renderAdminGallery(p.images, p.image);
+        } else if (p.image && p.image !== '/images/placeholder.svg') {
+          window.renderAdminGallery([p.image], p.image);
+        }
+      }
+    } catch (errGal) {
+      console.warn('Gallery populate warning in edit mode:', errGal);
     }
 
     // Populate Multi-Currency Prices
-    if (p.prices && Array.isArray(p.prices)) {
-      for (const pr of p.prices) {
-        if (pr.country === 'Pakistan') document.getElementById('pricePKR').value = pr.amount;
-        if (pr.country === 'USA') document.getElementById('priceUSD').value = pr.amount;
-        if (pr.country === 'UAE') document.getElementById('priceAED').value = pr.amount;
-        if (pr.country === 'India') document.getElementById('priceINR').value = pr.amount;
-        if (pr.country === 'UK') document.getElementById('priceGBP').value = pr.amount;
+    try {
+      if (p.prices && Array.isArray(p.prices)) {
+        for (const pr of p.prices) {
+          if (pr.country === 'Pakistan') { const el = document.getElementById('pricePKR'); if (el) el.value = pr.amount; }
+          if (pr.country === 'USA') { const el = document.getElementById('priceUSD'); if (el) el.value = pr.amount; }
+          if (pr.country === 'UAE') { const el = document.getElementById('priceAED'); if (el) el.value = pr.amount; }
+          if (pr.country === 'India') { const el = document.getElementById('priceINR'); if (el) el.value = pr.amount; }
+          if (pr.country === 'UK') { const el = document.getElementById('priceGBP'); if (el) el.value = pr.amount; }
+        }
       }
+    } catch (errPrice) {
+      console.warn('Price populate warning in edit mode:', errPrice);
     }
 
     // Populate YouTube Video URL
-    const vInput = document.getElementById('phoneVideoUrl');
-    if (vInput) {
-      vInput.value = p.video_url || '';
-      updateVideoPreview();
+    try {
+      const vInput = document.getElementById('phoneVideoUrl');
+      if (vInput) {
+        vInput.value = p.video_url || '';
+        if (typeof updateVideoPreview === 'function') updateVideoPreview();
+      }
+    } catch (errVid) {
+      console.warn('Video preview warning in edit mode:', errVid);
     }
 
-    // Populate External Store Affiliate Deals
-    const affContainer = document.getElementById('affiliateRowsContainer');
-    if (affContainer) {
-      affContainer.innerHTML = '';
-      let affLinks = p.affiliate_links;
-      if (typeof affLinks === 'string') {
-        try { affLinks = JSON.parse(affLinks); } catch (_) { affLinks = []; }
-      }
-      if (Array.isArray(affLinks) && affLinks.length > 0) {
-        for (const item of affLinks) {
-          if (item) {
-            addAffiliateRow(item.store || '', item.price || '', item.url || item.link || '');
+    // Populate Post External Links & Store Deals
+    try {
+      const affContainer = document.getElementById('affiliateRowsContainer');
+      if (affContainer) {
+        affContainer.innerHTML = '';
+        let affLinks = p.affiliate_links;
+        if (typeof affLinks === 'string') {
+          try { affLinks = JSON.parse(affLinks); } catch (_) { affLinks = []; }
+        }
+        if (Array.isArray(affLinks) && affLinks.length > 0) {
+          for (const item of affLinks) {
+            if (item && item.store) {
+              addAffiliateRow(item.store || '', item.price || '', item.url || item.link || '');
+            }
           }
         }
       }
+    } catch (errAff) {
+      console.warn('Affiliate rows populate warning in edit mode:', errAff);
     }
 
-    // Populate Dynamic Specs Rows
-    const container = document.getElementById('specRowsContainer');
-    container.innerHTML = '';
-    if (p.raw_specs && p.raw_specs.length > 0) {
-      for (const s of p.raw_specs) {
-        addSpecRow(s.section, s.spec_key, s.spec_value);
+    // Populate ALL Fetched Technical Specifications Builder Rows (Section 6)
+    try {
+      const container = document.getElementById('specRowsContainer');
+      if (container) {
+        container.innerHTML = '';
+        const specsList = [];
+        if (Array.isArray(p.raw_specs) && p.raw_specs.length > 0) {
+          for (const s of p.raw_specs) {
+            specsList.push({ section: s.section, key: s.spec_key || s.key || '', value: s.spec_value || s.value || '' });
+          }
+        } else if (Array.isArray(p.specs) && p.specs.length > 0) {
+          for (const s of p.specs) {
+            specsList.push({ section: s.section, key: s.key || s.spec_key || '', value: s.value || s.spec_value || '' });
+          }
+        } else if (p.specs && typeof p.specs === 'object') {
+          for (const [sec, items] of Object.entries(p.specs)) {
+            if (Array.isArray(items)) {
+              for (const item of items) {
+                specsList.push({ section: sec, key: item.key || item.spec_key || '', value: item.value || item.spec_value || '' });
+              }
+            }
+          }
+        }
+
+        if (specsList.length > 0) {
+          for (const s of specsList) {
+            addSpecRow(s.section, s.key, s.value);
+          }
+        } else {
+          populateDefaultSpecTemplate();
+        }
       }
-    } else {
-      populateDefaultSpecTemplate();
+    } catch (errSpec) {
+      console.error('Specs rows populate error in edit mode:', errSpec);
     }
   } catch (err) {
     console.error('Error loading phone for edit:', err);
@@ -1788,17 +2046,24 @@ function addSpecRow(section = 'Display', key = '', value = '') {
   const container = document.getElementById('specRowsContainer');
   if (!container) return;
 
+  const trimmedSec = (section || 'Display').trim();
+  const allSections = [...STANDARD_SECTIONS];
+  if (trimmedSec && !allSections.some(s => s.toLowerCase() === trimmedSec.toLowerCase())) {
+    allSections.push(trimmedSec);
+  }
+
+  const sectionOptions = allSections.map(s => {
+    const isSelected = s.toLowerCase() === trimmedSec.toLowerCase();
+    return `<option value="${escapeHtml(s)}" ${isSelected ? 'selected' : ''}>${escapeHtml(s)}</option>`;
+  }).join('');
+
   const row = document.createElement('div');
   row.className = 'spec-row-item';
 
-  const sectionOptions = STANDARD_SECTIONS.map(s => `
-    <option value="${s}" ${s === section ? 'selected' : ''}>${s}</option>
-  `).join('');
-
   row.innerHTML = `
     <select class="form-control spec-section-select">${sectionOptions}</select>
-    <input type="text" class="form-control spec-key-input" placeholder="Field (e.g. Size)" value="${escapeQuote(key)}">
-    <input type="text" class="form-control spec-val-input" placeholder="Value (e.g. 6.8 inches)" value="${escapeQuote(value)}">
+    <input type="text" class="form-control spec-key-input" placeholder="Field (e.g. Size)" value="${escapeHtml(key)}">
+    <input type="text" class="form-control spec-val-input" placeholder="Value (e.g. 6.8 inches)" value="${escapeHtml(value)}">
     <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" title="Delete row">&times;</button>
   `;
 
@@ -1806,9 +2071,165 @@ function addSpecRow(section = 'Display', key = '', value = '') {
 }
 
 /**
- * Derive Short Summary / Key Highlights as a full editorial narrative paragraph
- * from current form values and specification rows in the DOM
+ * Derive Rich Highlights with headings, font colors, and 2 to 5 internal brand device links
  */
+async function deriveRichHighlightsFromSpecRowsAsync() {
+  const rows = document.querySelectorAll('.spec-row-item');
+  const specs = [];
+  rows.forEach(row => {
+    const sec = row.querySelector('.spec-section-select')?.value || '';
+    const k = row.querySelector('.spec-key-input')?.value || '';
+    const v = row.querySelector('.spec-val-input')?.value || '';
+    if (k && v) {
+      specs.push({ section: sec, key: k, value: v });
+    }
+  });
+
+  if (specs.length === 0) return '';
+
+  const name = (document.getElementById('phoneNameInput')?.value || '').trim();
+  const brandSelect = document.getElementById('phoneBrandSelect');
+  const brandId = brandSelect ? brandSelect.value : '';
+  const brand = (brandSelect && brandSelect.selectedIndex >= 0)
+    ? brandSelect.options[brandSelect.selectedIndex].text.replace(/-- Select Brand --/i, '').trim()
+    : '';
+  const pricePKR = document.getElementById('pricePKR')?.value 
+    || (document.getElementById('phonePriceInput')?.value ? 'Rs. ' + parseFloat(document.getElementById('phonePriceInput').value).toLocaleString() : '');
+  const priceUSD = document.getElementById('priceUSD')?.value || '';
+  const releaseDate = document.getElementById('phoneReleaseDate')?.value || '';
+
+  const safeName = name || '';
+  const safeBrand = brand || '';
+  const fullName = safeBrand && !safeName.toLowerCase().startsWith(safeBrand.toLowerCase()) 
+    ? `${safeBrand} ${safeName}`.trim() 
+    : (safeName || safeBrand || 'Mobile Device');
+
+  function findSpec(secRegex, keyRegex) {
+    const item = specs.find(s => secRegex.test(s.section || '') && keyRegex.test(s.key || ''));
+    return item ? item.value : '';
+  }
+
+  const displaySizeVal = findSpec(/display/i, /size/i);
+  const displayTypeVal = findSpec(/display/i, /type|technology/i);
+  const displayResVal = findSpec(/display/i, /resolution/i);
+  const displayExtra = findSpec(/display/i, /extra|refresh/i);
+
+  const chipsetVal = findSpec(/platform|processor/i, /chipset|cpu|processor/i);
+  const osVal = findSpec(/platform/i, /os/i);
+  const gpuVal = findSpec(/platform/i, /gpu/i);
+
+  const memoryVal = findSpec(/memory/i, /internal|built-in|storage/i);
+  const ramVal = findSpec(/memory/i, /ram/i);
+  const romVal = findSpec(/memory/i, /internal storage|rom/i);
+
+  const mainCamVal = findSpec(/camera|main camera/i, /triple|dual|single|quad|main/i);
+  const selfieVal = findSpec(/selfie|camera/i, /single|front|selfie/i);
+
+  const batteryVal = findSpec(/battery/i, /capacity|type/i);
+  const chargingVal = findSpec(/battery/i, /charging|fast charging/i);
+  const fingerprintVal = findSpec(/features/i, /fingerprint|sensors/i);
+
+  let priceStr = pricePKR ? (pricePKR.startsWith('PKR') || pricePKR.startsWith('Rs') ? pricePKR : `Rs. ${pricePKR}`) : '';
+  if (!priceStr) priceStr = 'is expected to be announced soon';
+  else priceStr = `is expected to be ${priceStr}`;
+
+  let releaseStr = releaseDate ? ` ${fullName} is expected to be launched on ${releaseDate}.` : '';
+
+  let memVariant = '';
+  if (ramVal && romVal) {
+    memVariant = ` This is the ${ramVal} / ${romVal} variant of ${safeBrand || fullName}.`;
+  } else if (memoryVal) {
+    const cleanMem = memoryVal.split(';')[0].replace(/\(.*?\)/g, '').trim();
+    if (cleanMem) memVariant = ` This is the ${cleanMem} variant of ${safeBrand || fullName}.`;
+  }
+
+  const formattedPKR = pricePKR ? (pricePKR.startsWith('PKR') ? pricePKR.replace('PKR', 'Rs.') : (pricePKR.startsWith('Rs') ? pricePKR : `Rs. ${pricePKR}`)) : '';
+  const cleanUSD = priceUSD ? priceUSD.replace(/USD|\$/gi, '').trim() : '';
+
+  let tagline = `${fullName} — Powerful &amp; Modern Flagship`;
+  if (batteryVal && /\b(6000|7000|6500|5500)\s*mAh/i.test(batteryVal)) {
+    tagline = `${fullName} — Exceptional Long-Lasting Battery Smartphone`;
+  } else if (mainCamVal && /\b(108|200|50)\s*MP/i.test(mainCamVal)) {
+    tagline = `${fullName} — Ultra High-Resolution Camera Phone`;
+  }
+
+  let story = `${fullName} is officially introduced with cutting-edge mobile hardware. `;
+  if (chipsetVal) {
+    story += `The smartphone is powered by the capable <strong>${chipsetVal.replace(/\(.*?\)/g, '').trim()}</strong> processor, delivering seamless multitasking and snappy responsiveness. `;
+  }
+  if (gpuVal) {
+    story += `Graphical rendering and immersive gaming are handled by the <strong>${gpuVal.replace(/\(.*?\)/g, '').trim()}</strong> GPU. `;
+  }
+
+  if (displaySizeVal || displayTypeVal) {
+    let dispDesc = [];
+    if (displaySizeVal) dispDesc.push(displaySizeVal.match(/[\d.]+\s*(?:inches|inch|")/i)?.[0] || displaySizeVal.split(',')[0]);
+    if (displayTypeVal) dispDesc.push(displayTypeVal.split(',')[0]);
+    if (displayExtra && /\d+Hz/i.test(displayExtra)) dispDesc.push(displayExtra.match(/\d+Hz/i)?.[0]);
+    if (displayResVal) dispDesc.push(`with a crisp resolution of ${displayResVal.split(',')[0].trim()}`);
+    story += `On the front, the phone features a stunning <strong>${dispDesc.join(' ')}</strong> display, delivering vivid colors and sharp viewing angles. `;
+  }
+
+  if (mainCamVal) {
+    story += `In optics, the device is equipped with a <strong>${mainCamVal.split('\n')[0].replace(/\(.*?\)/g, '').trim()}</strong> main camera setup for sharp photography and high-definition video recording. `;
+  }
+  if (selfieVal) {
+    story += `The front camera features a <strong>${selfieVal.split('\n')[0].replace(/\(.*?\)/g, '').trim()}</strong> shooter for selfies and video calls. `;
+  }
+
+  if (batteryVal) {
+    const mahMatch = batteryVal.match(/\d{3,5}\s*mAh/i)?.[0] || batteryVal.split(',')[0];
+    const chargingStr = chargingVal ? ` backed by ${chargingVal.split(',')[0].trim()}` : '';
+    story += `The phone is powered by a generous <strong>${mahMatch}</strong> battery${chargingStr}, ensuring reliable all-day endurance. `;
+  }
+
+  if (osVal) {
+    story += `The handset runs on <strong>${osVal.split(',')[0].trim()}</strong> out of the box with the latest software security features. `;
+  }
+
+  // Fetch 2 to 5 related brand devices for internal linking
+  let relatedHtml = '';
+  if (brandId) {
+    try {
+      const res = await fetch(`/api/phones?brand=${encodeURIComponent(brandId)}&limit=10`);
+      const json = await res.json();
+      const list = (json.data && json.data.phones) ? json.data.phones : (Array.isArray(json.data) ? json.data : []);
+      const pathParts = window.location.pathname.split('/');
+      const currentPhoneId = pathParts.includes('edit') ? pathParts[pathParts.length - 1] : null;
+
+      const related = list.filter(p => {
+        if (currentPhoneId && p.id == currentPhoneId) return false;
+        if (name && p.name.trim().toLowerCase() === name.trim().toLowerCase()) return false;
+        return true;
+      }).slice(0, 5);
+
+      if (related.length >= 2) {
+        relatedHtml = `
+          <h3>Related ${escapeHtml(brand)} Devices to Compare</h3>
+          <p>Explore other popular <strong>${escapeHtml(brand)}</strong> smartphones available in Pakistan:</p>
+          <ul>
+            ${related.map(p => {
+              const pPrice = p.price > 0 ? ` — PKR ${Number(p.price).toLocaleString()}` : '';
+              return `<li><a href="/phone/${escapeAttr(p.slug)}" title="${escapeAttr(p.name)} Specs & Price in Pakistan">${escapeHtml(p.name)}</a>${pPrice}</li>`;
+            }).join('')}
+          </ul>
+        `;
+      }
+    } catch (_) {}
+  }
+
+  const html = `
+    <h2>${escapeHtml(fullName)} Price in Pakistan &amp; Overview</h2>
+    <p><strong>${escapeHtml(fullName)} price in Pakistan</strong> ${priceStr}.${releaseStr}${memVariant}</p>
+    ${formattedPKR ? `<p>Expected Price of <strong>${escapeHtml(fullName)}</strong> in Pakistan is <span style="color: rgb(13, 148, 136); font-weight: 700;">${formattedPKR}</span>${cleanUSD ? ` ($${cleanUSD} USD)` : ''}.</p>` : ''}
+    <h3>${tagline}</h3>
+    <p>${story}</p>
+    ${relatedHtml}
+  `;
+
+  return html.trim();
+}
+
 function deriveHighlightsFromSpecRows() {
   const rows = document.querySelectorAll('.spec-row-item');
   const specs = [];
@@ -5498,6 +5919,25 @@ window.toggleUserPwVisibility = toggleUserPwVisibility;
 window.loadTeamUsers = loadTeamUsers;
 window.initRoleAccessUI = initRoleAccessUI;
 
+// ── PWA Active Installations Sidebar Badge Synchronizer ───────────────────────
+async function initPwaSidebarBadge() {
+  const badges = document.querySelectorAll('.pwa-installs-badge, #sidebarPwaInstallBadge');
+  if (badges.length === 0) return;
+  try {
+    const res = await fetch('/api/pwa/stats');
+    const json = await res.json();
+    if (json.success && json.data) {
+      const activeCount = json.data.active_installations || 0;
+      badges.forEach(b => {
+        b.textContent = activeCount;
+      });
+    }
+  } catch (err) {
+    // Non-blocking
+  }
+}
+window.initPwaSidebarBadge = initPwaSidebarBadge;
+
 document.addEventListener('DOMContentLoaded', () => {
   initMobileNavigation();
   initSettingsDropdown();
@@ -5510,7 +5950,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initSettings();
   initAdminBranding();
   initBulkImportModalListener();
+  initPwaSidebarBadge();
 });
+
 
 
 

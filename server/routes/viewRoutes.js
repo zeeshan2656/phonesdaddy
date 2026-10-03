@@ -955,6 +955,11 @@ router.get('/admin/reviews', requireAdminAuth, (req, res) => {
   res.sendFile(path.join(adminDir, 'reviews.html'));
 });
 
+// Progressive Web App (PWA) Management & Installation Tracking
+router.get('/admin/pwa', requireAdminAuth, (req, res) => {
+  res.sendFile(path.join(adminDir, 'pwa.html'));
+});
+
 // Site Settings & Team/User Management (Master Admin only)
 router.get('/admin/settings', requireMasterAdmin, (req, res) => {
   res.sendFile(path.join(adminDir, 'settings.html'));

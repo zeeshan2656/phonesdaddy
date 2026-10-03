@@ -24,6 +24,73 @@
     if (document.body) document.body.classList.add('pwa-standalone');
   }
 
+  // PWA Device Identifier & Installation / Launch Tracker
+  function getPwaDeviceId() {
+    try {
+      var id = localStorage.getItem('phonesdaddy_pwa_device_id');
+      if (!id) {
+        id = 'pwa-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('phonesdaddy_pwa_device_id', id);
+      }
+      return id;
+    } catch (_) {
+      return 'pwa-anon-' + Math.random().toString(36).substring(2, 9);
+    }
+  }
+
+  function detectClientPlatform() {
+    var ua = navigator.userAgent || '';
+    if (/android/i.test(ua)) return 'Android';
+    if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'iOS';
+    if (/Windows/i.test(ua)) return 'Windows';
+    if (/Macintosh|Mac OS X/i.test(ua)) return 'macOS';
+    if (/Linux/i.test(ua)) return 'Linux';
+    return 'Unknown';
+  }
+
+  function detectClientBrowser() {
+    var ua = navigator.userAgent || '';
+    if (/samsung/i.test(ua)) return 'Samsung Internet';
+    if (/edg/i.test(ua)) return 'Microsoft Edge';
+    if (/opr|opera/i.test(ua)) return 'Opera';
+    if (/chrome|crios/i.test(ua)) return 'Google Chrome';
+    if (/firefox|fxios/i.test(ua)) return 'Firefox';
+    if (/safari/i.test(ua)) return 'Safari';
+    return 'Browser';
+  }
+
+  function trackPwaEvent(action) {
+    try {
+      var deviceId = getPwaDeviceId();
+      var platform = detectClientPlatform();
+      var browser = detectClientBrowser();
+      var mode = isStandalone ? 'standalone' : (window.location.search.includes('source=pwa') ? 'standalone' : 'browser');
+
+      fetch('/api/pwa/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          action: action,
+          device_uuid: deviceId,
+          platform: platform,
+          browser: browser,
+          display_mode: mode
+        })
+      }).catch(function() {});
+    } catch (_) {}
+  }
+
+  // Record active PWA launch once per session if running in standalone mode or ?source=pwa
+  try {
+    if (isStandalone || window.location.search.includes('source=pwa')) {
+      if (!sessionStorage.getItem('pwa_session_tracked')) {
+        sessionStorage.setItem('pwa_session_tracked', '1');
+        trackPwaEvent('launch');
+      }
+    }
+  } catch (_) {}
+
   // Inject PWA Banner & Toast CSS
   function injectPwaStyles() {
     if (document.getElementById('pwa-styles')) return;
@@ -395,6 +462,7 @@
     var banner = document.getElementById('pwa-install-banner');
     if (banner) banner.remove();
     showToast('PhonesDaddy installed successfully!', 'online', 3500);
+    trackPwaEvent('install');
   });
 
   // 4. Online & Offline Connectivity Listeners

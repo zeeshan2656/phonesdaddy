@@ -6,6 +6,33 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Phone Form — PhonesDaddy Admin</title>
   <link rel="stylesheet" href="/css/admin.css?v=2026.5">
+  <!-- Quill Snow CSS for Rich Summary Editor -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+  <style>
+    .ql-toolbar.ql-snow {
+      border-color: #cbd5e1;
+      border-radius: 8px 8px 0 0;
+      background: #f8fafc;
+      padding: 8px 12px;
+    }
+    .ql-container.ql-snow {
+      border-color: #cbd5e1;
+      border-radius: 0 0 8px 8px;
+      font-size: 14px;
+      font-family: inherit;
+      min-height: 200px;
+      background: #ffffff;
+    }
+    .ql-editor {
+      min-height: 180px;
+      line-height: 1.7;
+    }
+    .ql-editor h2 { font-size: 1.45rem; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 700; color: #0f172a; }
+    .ql-editor h3 { font-size: 1.25rem; margin-top: 0.8rem; margin-bottom: 0.4rem; font-weight: 700; color: #0f172a; }
+    .ql-editor h4 { font-size: 1.1rem; margin-top: 0.6rem; margin-bottom: 0.3rem; font-weight: 600; color: #0f172a; }
+    .ql-editor p { margin-bottom: 0.75rem; }
+    .ql-editor a { color: #0d9488; text-decoration: underline; font-weight: 600; }
+  </style>
 </head>
 <body class="admin-body">
 
@@ -27,6 +54,13 @@
       <li><a href="/admin/categories" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Article Categories</a></li>
       <li><a href="/admin/pages" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Pages</a></li>
       <li><a href="/admin/reviews" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Reviews &amp; Comments</a></li>
+      <li>
+        <a href="/admin/pwa" class="admin-nav-link" id="navPwaLink">
+          <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/><path d="m9 6 3-3 3 3"/><path d="M12 3v8"/></svg>
+          <span>Application (PWA)</span>
+          <span class="admin-nav-badge pwa-installs-badge" id="sidebarPwaInstallBadge" style="margin-left: auto; background: #0d9488; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">0</span>
+        </a>
+      </li>
       <li class="admin-nav-item-dropdown collapsed" id="navSettingsDropdown">
         <div class="admin-nav-link admin-nav-dropdown-toggle" onclick="toggleSettingsDropdown(event)" style="cursor: pointer; user-select: none;">
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -317,37 +351,39 @@
           </div>
         </div>
 
-        <!-- External Store Affiliate Deals (Where to Buy) -->
+        <!-- Post External Links & Store Affiliate Deals -->
         <div class="admin-card">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 class="admin-card-title" style="margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
-                <span>3. External Store Deals &amp; Affiliate Links</span>
-                <span class="badge" style="background: #ecfdf5; color: #065f46; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">Where to Buy</span>
+                <span>3. Post External Links &amp; Store Deals</span>
+                <span class="badge" style="background: #ecfdf5; color: #065f46; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">Post External Links</span>
               </h3>
               <p style="color: #64748b; font-size: 13px;">
-                Add affiliate buy links and store-specific prices (e.g. Amazon, Daraz, PriceOye, AliExpress). Displayed directly below the prices table on the public phone details page.
+                Manage official external links, brand product pages, specifications sources, and partner store deals (e.g. Official Site, Amazon, Daraz, PriceOye, AliExpress). Displayed as verified post external links and where-to-buy offers on the public phone page.
               </p>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button type="button" id="btnAddAffiliateRow" class="btn btn-primary btn-sm">+ Add Store Deal</button>
+              <button type="button" id="btnAddAffiliateRow" class="btn btn-primary btn-sm">+ Add External Link</button>
             </div>
           </div>
 
           <!-- Quick presets strip -->
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; font-size: 12px; color: #64748b;">
-            <span>⚡ Quick Add:</span>
+            <span>⚡ Quick Add External Link:</span>
+            <button type="button" class="btn btn-outline btn-sm quick-add-affiliate" data-store="Official Store" data-price="Official Page" style="padding: 3px 10px; font-size: 12px; border-radius: 9999px;">+ Official Site</button>
             <button type="button" class="btn btn-outline btn-sm quick-add-affiliate" data-store="Amazon" data-price="$1,199" style="padding: 3px 10px; font-size: 12px; border-radius: 9999px;">+ Amazon</button>
             <button type="button" class="btn btn-outline btn-sm quick-add-affiliate" data-store="Daraz" data-price="Rs. 289,999" style="padding: 3px 10px; font-size: 12px; border-radius: 9999px;">+ Daraz</button>
             <button type="button" class="btn btn-outline btn-sm quick-add-affiliate" data-store="PriceOye" data-price="Rs. 284,999" style="padding: 3px 10px; font-size: 12px; border-radius: 9999px;">+ PriceOye</button>
             <button type="button" class="btn btn-outline btn-sm quick-add-affiliate" data-store="AliExpress" data-price="$1,099" style="padding: 3px 10px; font-size: 12px; border-radius: 9999px;">+ AliExpress</button>
+            <button type="button" class="btn btn-outline btn-sm quick-add-affiliate" data-store="GSMArena Source" data-price="Source" style="padding: 3px 10px; font-size: 12px; border-radius: 9999px;">+ GSMArena Source</button>
           </div>
 
           <div class="affiliate-builder-box">
             <div style="display: grid; grid-template-columns: 200px 180px 1fr 40px; gap: 12px; margin-bottom: 8px; font-weight: 700; font-size: 12px; color: #64748b; text-transform: uppercase;">
-              <div>Store Name</div>
-              <div>Deal / Store Price</div>
-              <div>Affiliate / Product URL</div>
+              <div>Link Label / Store</div>
+              <div>Price / Note (Optional)</div>
+              <div>External URL (https://...)</div>
               <div></div>
             </div>
 
@@ -391,26 +427,61 @@
           </div>
         </div>
 
-        <!-- Short Summary / Key Highlights Card -->
+        <!-- Short Summary / Key Highlights Card (Rich Text WYSIWYG Editor) -->
         <div class="admin-card summary-highlights-card">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 class="admin-card-title" style="margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                 <span>5. Short Summary / Key Highlights</span>
-                <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">Derived from Specs</span>
+                <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px;">Rich Text Editor</span>
               </h3>
-              <p style="color: #64748b; font-size: 13px;">Auto-generated or custom key highlights summarizing display, processor, camera, battery & memory.</p>
+              <p style="color: #64748b; font-size: 13px;">Format overview with custom headings, font colors, bold text, lists, and internal device links.</p>
             </div>
-            <button type="button" id="btnAutoGenerateSummary" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 6px; color: #0284c7; border-color: #bae6fd; background: #f0f9ff; font-weight: 600; cursor: pointer;" title="Derive summary from current specifications table">
-              <span>⚡</span>
-              <span>Auto-Generate from Specs</span>
-            </button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <button type="button" id="btnInsertBrandInternalLinks" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 6px; color: #0d9488; border-color: #99f6e4; background: #f0fdfa; font-weight: 700; cursor: pointer;" title="Insert internal links to 2-5 related devices of the same brand">
+                <span>🔗</span>
+                <span>+ Related Brand Devices (Internal Links)</span>
+              </button>
+              <button type="button" id="btnAutoGenerateSummary" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 6px; color: #0284c7; border-color: #bae6fd; background: #f0f9ff; font-weight: 600; cursor: pointer;" title="Derive summary from current specifications table and brand">
+                <span>⚡</span>
+                <span>Auto-Generate from Specs</span>
+              </button>
+            </div>
           </div>
 
           <div class="form-group full-width" style="margin-bottom: 0;">
-            <textarea id="phoneShortDesc" name="short_description" class="form-control" rows="8" placeholder="Mobile phone overview paragraph (e.g. Vivo S60 price in Pakistan is expected to be Rs. 184,999...&#10;&#10;Vivo S60 - Powerful &amp; Stylish Device!&#10;Powered by Snapdragon 8s Gen 3 with 6.59&quot; AMOLED 144Hz display, 50MP triple camera, and 6500mAh battery with 90W fast charging...)" style="font-family: inherit; font-size: 13.5px; line-height: 1.6;"></textarea>
+            <div id="summaryQuillToolbar">
+              <span class="ql-formats">
+                <select class="ql-header">
+                  <option value="" selected>Normal Text</option>
+                  <option value="2">Heading 2 (H2)</option>
+                  <option value="3">Heading 3 (H3)</option>
+                  <option value="4">Heading 4 (H4)</option>
+                </select>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-bold"></button>
+                <button class="ql-italic"></button>
+                <button class="ql-underline"></button>
+                <button class="ql-strike"></button>
+              </span>
+              <span class="ql-formats">
+                <select class="ql-color"></select>
+                <select class="ql-background"></select>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-list" value="ordered"></button>
+                <button class="ql-list" value="bullet"></button>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-link"></button>
+                <button class="ql-clean"></button>
+              </span>
+            </div>
+            <div id="summaryQuillEditor"></div>
+            <textarea id="phoneShortDesc" name="short_description" style="display: none;"></textarea>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px; color: #64748b;">
-              <span>💡 Displayed as the official Device Overview paragraph between Global Prices and Detailed Technical Specifications on the public site.</span>
+              <span>💡 Official Device Overview rendered with full HTML formatting and internal links between Global Prices and Technical Specs.</span>
               <span id="summaryCharCount">0 characters</span>
             </div>
           </div>
@@ -569,6 +640,8 @@
   </main>
 
   <script src="/js/icons.js"></script>
+  <!-- Quill Rich Text Editor Library -->
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
   <script src="/js/admin.js?v=2.7.0"></script>
   <script>
     (function() {

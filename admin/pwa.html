@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application (PWA) Management — PhonesDaddy Admin</title>
+  <link rel="stylesheet" href="/css/admin.css?v=2026.5">
+  <style>
+    .pwa-stat-card {
+      background: #ffffff;
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      position: relative;
+      overflow: hidden;
+    }
+    .pwa-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--admin-primary);
+    }
+    .pwa-stat-card.accent-green::before { background: #10b981; }
+    .pwa-stat-card.accent-blue::before { background: #3b82f6; }
+    .pwa-stat-card.accent-purple::before { background: #8b5cf6; }
+    .pwa-stat-card.accent-amber::before { background: #f59e0b; }
+    
+    .pwa-stat-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--admin-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pwa-stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--admin-dark);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .pwa-stat-sub {
+      font-size: 12px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pwaPulse 2s infinite;
+    }
+    @keyframes pwaPulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Mockup phone container */
+    .pwa-preview-wrapper {
+      background: #0f172a;
+      border-radius: 28px;
+      padding: 16px;
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.1);
+      width: 270px;
+      margin: 0 auto;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .pwa-mockup-screen {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: 20px;
+      padding: 18px 14px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .mockup-notch {
+      width: 90px;
+      height: 18px;
+      background: #090d16;
+      border-radius: 0 0 12px 12px;
+      margin: -18px auto 14px auto;
+    }
+    .mockup-status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+    .mockup-app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      text-align: center;
+    }
+    .mockup-app-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .mockup-app-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .mockup-app-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .mockup-app-title {
+      font-size: 11px;
+      color: #f1f5f9;
+      font-weight: 500;
+      max-width: 64px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mockup-dock {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-around;
+      margin-top: auto;
+    }
+    .dock-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* Icon selector cards */
+    .icon-choice-card {
+      border: 2px solid var(--admin-border);
+      border-radius: 12px;
+      padding: 18px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .icon-choice-card:hover {
+      border-color: #99f6e4;
+      background: #f0fdfa;
+    }
+    .icon-choice-card.active {
+      border-color: var(--admin-primary);
+      background: #f0fdfa;
+      box-shadow: 0 0 0 1px var(--admin-primary);
+    }
+    .icon-choice-preview {
+      width: 68px;
+      height: 68px;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      flex-shrink: 0;
+    }
+    .icon-choice-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .platform-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .platform-bar-track {
+      flex: 1;
+      height: 9px;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .platform-bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #0d9488, #10b981);
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="brand-icon" style="width: 28px; height: 28px; font-size: 16px;">P</div>
+        <span>PhonesDaddy</span>
+      </div>
+      <button class="admin-sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="Close Navigation"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    </div>
+
+    <ul class="admin-nav">
+      <li><a href="/admin/dashboard" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a></li>
+      <li><a href="/admin/phones" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg> Phones</a></li>
+      <li><a href="/admin/brands" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg> Brands</a></li>
+      <li><a href="/admin/news" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg> Blog &amp; News</a></li>
+      <li><a href="/admin/categories" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> Article Categories</a></li>
+      <li><a href="/admin/pages" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Pages</a></li>
+      <li><a href="/admin/reviews" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Reviews &amp; Comments</a></li>
+      <li>
+        <a href="/admin/pwa" class="admin-nav-link active" id="navPwaLink">
+          <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/><path d="m9 6 3-3 3 3"/><path d="M12 3v8"/></svg>
+          <span>Application (PWA)</span>
+          <span class="admin-nav-badge pwa-installs-badge" id="sidebarPwaInstallBadge" style="margin-left: auto; background: #0d9488; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 9999px;">0</span>
+        </a>
+      </li>
+      <li class="admin-nav-item-dropdown collapsed" id="navSettingsDropdown">
+        <div class="admin-nav-link admin-nav-dropdown-toggle" onclick="toggleSettingsDropdown(event)" style="cursor: pointer; user-select: none;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</span>
+          </div>
+          <span class="dropdown-arrow">▼</span>
+        </div>
+        <ul class="admin-nav-submenu" id="settingsSubmenu">
+          <li>
+            <a href="/admin/settings#branding" class="admin-nav-sublink">
+              <span>🎨 Site Identity &amp; Branding</span>
+            </a>
+          </li>
+          <li>
+            <a href="/admin/settings#general" class="admin-nav-sublink">
+              <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> General &amp; Snippets</span>
+            </a>
+          </li>
+          <li>
+            <a href="/admin/settings#ad-placements" class="admin-nav-sublink">
+              <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Ad Placements</span>
+              <span class="admin-nav-badge">9 Slots</span>
+            </a>
+          </li>
+          <li>
+            <a href="/admin/settings#profile" class="admin-nav-sublink">
+              <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Admin Profile</span>
+            </a>
+          </li>
+          <li>
+            <a href="/admin/settings#users" class="admin-nav-sublink">
+              <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Team &amp; User Access</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li><a href="/" target="_blank" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> Public Site</a></li>
+    </ul>
+
+    <div class="admin-sidebar-footer">
+      <span>Logged in as <strong>Admin</strong></span>
+      <button onclick="handleLogout()" style="background: none; border: none; color: #ef4444; font-weight: 700; cursor: pointer;">Logout</button>
+    </div>
+  </aside>
+
+  <div class="admin-sidebar-backdrop" onclick="closeAdminSidebar()"></div>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar-title-wrap">
+        <button type="button" class="admin-hamburger-btn" onclick="toggleAdminSidebar()" aria-label="Toggle Navigation Menu"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
+        <h2>📱 Application (PWA) Management &amp; Installations</h2>
+      </div>
+      <div class="admin-topbar-actions" style="display: flex; gap: 8px;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="simulateTestInstall()" title="Record a test device installation">⚡ Simulate Install</button>
+        <a href="/?source=pwa" target="_blank" class="btn btn-primary btn-sm" title="Launch PhonesDaddy in PWA mode">↗ Open PWA Preview</a>
+      </div>
+    </header>
+
+    <div class="admin-content">
+
+      <!-- 1. Real-time Live Installations Tracker Stats Grid -->
+      <div class="admin-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        
+        <div class="pwa-stat-card accent-green">
+          <div class="pwa-stat-label">
+            <span>Active Installations</span>
+            <span class="pulse-dot" title="Live Active Tracker"></span>
+          </div>
+          <div class="pwa-stat-value" id="statActiveInstalls">0</div>
+          <div class="pwa-stat-sub">
+            <span>Devices active in last 30 days</span>
+          </div>
+        </div>
+
+        <div class="pwa-stat-card accent-blue">
+          <div class="pwa-stat-label">
+            <span>Total Installed Devices</span>
+            <span style="font-size: 14px;">📲</span>
+          </div>
+          <div class="pwa-stat-value" id="statTotalInstalls">0</div>
+          <div class="pwa-stat-sub">
+            <span>All-time PWA app installations</span>
+          </div>
+        </div>
+
+        <div class="pwa-stat-card accent-purple">
+          <div class="pwa-stat-label">
+            <span>Total App Launches</span>
+            <span style="font-size: 14px;">🚀</span>
+          </div>
+          <div class="pwa-stat-value" id="statTotalLaunches">0</div>
+          <div class="pwa-stat-sub">
+            <span>Standalone PWA sessions opened</span>
+          </div>
+        </div>
+
+        <div class="pwa-stat-card accent-amber">
+          <div class="pwa-stat-label">
+            <span>7-Day Active Users</span>
+            <span style="font-size: 14px;">🔥</span>
+          </div>
+          <div class="pwa-stat-value" id="statActive7d">0</div>
+          <div class="pwa-stat-sub">
+            <span>Active devices this week</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Main 2-Column Layout: Left Settings & Icon, Right Live Preview & Breakdown -->
+      <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start;">
+        
+        <!-- Left Column: Settings and Icon Configuration -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          
+          <!-- Section A: App Icon Management Card -->
+          <div class="admin-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h3 class="admin-card-title" style="margin-bottom: 4px;">🖼️ App Icon Management</h3>
+                <p style="font-size: 13px; color: var(--admin-text-muted); margin: 0;">
+                  By default, the PWA uses your <strong>Site Brand Icon / Logo</strong>. You can upload a custom icon just for the mobile &amp; desktop app.
+                </p>
+              </div>
+              <span id="currentIconSourceBadge" class="badge" style="background: #e0f2fe; color: #0284c7; font-weight: 700; font-size: 12px; padding: 4px 10px; border-radius: 9999px;">Using Site Icon</span>
+            </div>
+
+            <!-- Icon Choice Switcher -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 20px;">
+              
+              <!-- Option 1: Default to Site Brand Icon / Logo -->
+              <div class="icon-choice-card" id="cardSiteIcon" onclick="handleSelectSiteIcon()">
+                <div class="icon-choice-preview" id="previewSiteIconBox">
+                  <img id="imgSiteIcon" src="/icon-512x512.png" alt="Site Brand Icon">
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 700; font-size: 14px; color: var(--admin-dark); margin-bottom: 2px;">Site Brand Icon / Logo</div>
+                  <div style="font-size: 12px; color: var(--admin-text-muted);">Synced automatically with Site Identity &amp; Branding logo.</div>
+                  <div style="margin-top: 8px;">
+                    <span id="badgeSiteActive" class="badge" style="display: none; background: #ecfdf5; color: #059669; font-size: 11px;">Active Icon</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Option 2: Custom PWA App Icon -->
+              <div class="icon-choice-card" id="cardCustomIcon">
+                <div class="icon-choice-preview" id="previewCustomIconBox">
+                  <img id="imgCustomIcon" src="/icon-512x512.png" alt="Custom PWA Icon">
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 700; font-size: 14px; color: var(--admin-dark); margin-bottom: 2px;">Custom App Icon</div>
+                  <div style="font-size: 12px; color: var(--admin-text-muted);">Upload a dedicated square icon for the phone home screen.</div>
+                  <div style="margin-top: 8px;">
+                    <span id="badgeCustomActive" class="badge" style="display: none; background: #ecfdf5; color: #059669; font-size: 11px;">Active Icon</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Upload Custom Icon Box -->
+            <div style="background: #f8fafc; border: 1px dashed var(--admin-border); border-radius: 10px; padding: 18px; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                <div>
+                  <label style="font-size: 13px; font-weight: 700; color: var(--admin-dark); display: block; margin-bottom: 4px;">Upload New Custom App Icon (PNG, JPG, WebP, SVG)</label>
+                  <p style="font-size: 12px; color: var(--admin-text-muted); margin: 0;">Recommended size: 512 &times; 512 px (Square). We automatically generate 192x192, 512x512, maskable, and apple-touch icons.</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <input type="file" id="pwaIconFileInput" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display: none;" onchange="handlePwaIconUpload(event)">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('pwaIconFileInput').click()" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span>📁 Choose Icon File</span>
+                  </button>
+                  <button type="button" id="btnResetToSiteIcon" class="btn btn-outline btn-sm" onclick="handleResetToSiteIcon()" style="display: none; color: #64748b;">
+                    ↺ Revert to Site Icon
+                  </button>
+                </div>
+              </div>
+              <div id="iconUploadStatus" style="display: none; margin-top: 12px; font-size: 12.5px; padding: 8px 12px; border-radius: 6px;"></div>
+            </div>
+
+          </div>
+
+          <!-- Section B: PWA Application Details Form -->
+          <div class="admin-card">
+            <h3 class="admin-card-title" style="margin-bottom: 16px;">⚙️ Application Details &amp; Manifest Configuration</h3>
+            
+            <form id="pwaConfigForm" onsubmit="handleSavePwaConfig(event)">
+              <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                
+                <div class="form-group" style="grid-column: span 2;">
+                  <label class="form-label" for="pwaAppName">Application Name *</label>
+                  <input type="text" id="pwaAppName" name="app_name" class="form-control" placeholder="PhonesDaddy - Mobile Phone Prices & Specifications" required oninput="updateLiveMockup()">
+                  <div style="font-size: 11.5px; color: var(--admin-text-muted); margin-top: 4px;">Displayed in browser install prompts, splash screens, and app stores.</div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="pwaShortName">Short Name (App Launcher Label) *</label>
+                  <input type="text" id="pwaShortName" name="short_name" class="form-control" placeholder="PhonesDaddy" maxlength="30" required oninput="updateLiveMockup()">
+                  <div style="font-size: 11.5px; color: var(--admin-text-muted); margin-top: 4px;">Shown beneath the icon on user home screens &amp; desktop shortcuts.</div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="pwaStartUrl">Start URL *</label>
+                  <input type="text" id="pwaStartUrl" name="start_url" class="form-control" placeholder="/?source=pwa" required>
+                  <div style="font-size: 11.5px; color: var(--admin-text-muted); margin-top: 4px;">Page loaded when the app is launched from home screen.</div>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                  <label class="form-label" for="pwaDescription">Application Description</label>
+                  <textarea id="pwaDescription" name="description" rows="2" class="form-control" placeholder="Discover latest mobile phone prices in Pakistan, full technical specifications..."></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="pwaDisplayMode">Display Mode</label>
+                  <select id="pwaDisplayMode" name="display_mode" class="form-control">
+                    <option value="standalone">Standalone (Native App Window - No browser UI)</option>
+                    <option value="minimal-ui">Minimal UI (Clean titlebar with back/refresh)</option>
+                    <option value="fullscreen">Fullscreen (Immersive games / kiosk)</option>
+                    <option value="browser">Browser Tab</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="pwaOrientation">Preferred Orientation</label>
+                  <select id="pwaOrientation" name="orientation" class="form-control">
+                    <option value="portrait-primary">Portrait Primary (Phones default)</option>
+                    <option value="any">Any Orientation (Auto-rotate)</option>
+                    <option value="landscape">Landscape</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="pwaThemeColor">Theme Color (Status Bar / Topbar)</label>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="color" id="pwaThemeColorPicker" value="#0d9488" style="width: 44px; height: 38px; border: 1px solid var(--admin-border); border-radius: 6px; padding: 2px; cursor: pointer;" oninput="document.getElementById('pwaThemeColor').value = this.value; updateLiveMockup();">
+                    <input type="text" id="pwaThemeColor" name="theme_color" class="form-control" value="#0d9488" oninput="document.getElementById('pwaThemeColorPicker').value = this.value; updateLiveMockup();">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="pwaBgColor">Background Color (Splash Screen)</label>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="color" id="pwaBgColorPicker" value="#0f172a" style="width: 44px; height: 38px; border: 1px solid var(--admin-border); border-radius: 6px; padding: 2px; cursor: pointer;" oninput="document.getElementById('pwaBgColor').value = this.value; updateLiveMockup();">
+                    <input type="text" id="pwaBgColor" name="background_color" class="form-control" value="#0f172a" oninput="document.getElementById('pwaBgColorPicker').value = this.value; updateLiveMockup();">
+                  </div>
+                </div>
+
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary" id="btnSaveConfig" style="padding: 10px 24px; font-weight: 700;">
+                  💾 Save PWA Settings
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Section C: Recent Device Installations Activity Log -->
+          <div class="admin-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <h3 class="admin-card-title" style="margin: 0;">📋 Recent Installed Devices Log</h3>
+              <button type="button" class="btn btn-outline btn-sm" onclick="loadPwaStatsAndConfig()">↻ Refresh Log</button>
+            </div>
+            
+            <div style="overflow-x: auto; border: 1px solid var(--admin-border); border-radius: 8px;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead style="background: #f8fafc; border-bottom: 1px solid var(--admin-border); color: #64748b; font-weight: 700;">
+                  <tr>
+                    <th style="padding: 10px 14px;">Platform / OS</th>
+                    <th style="padding: 10px 14px;">Browser</th>
+                    <th style="padding: 10px 14px;">Mode</th>
+                    <th style="padding: 10px 14px;">Launches</th>
+                    <th style="padding: 10px 14px;">Installed</th>
+                    <th style="padding: 10px 14px;">Last Active</th>
+                  </tr>
+                </thead>
+                <tbody id="recentInstallsTableBody">
+                  <tr>
+                    <td colspan="6" style="padding: 24px; text-align: center; color: var(--admin-text-muted);">Loading installations data...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Live Mockup & Platform Breakdown -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          
+          <!-- Live Mobile Screen Preview -->
+          <div class="admin-card" style="text-align: center; padding: 20px 16px;">
+            <h4 style="margin: 0 0 14px 0; font-size: 14px; font-weight: 700; color: var(--admin-dark);">📱 Live Mobile Home Screen Preview</h4>
+            
+            <div class="pwa-preview-wrapper">
+              <div class="pwa-mockup-screen" id="mockupScreen">
+                <div>
+                  <div class="mockup-notch"></div>
+                  <div class="mockup-status-bar">
+                    <span>9:41</span>
+                    <span>5G • 100%</span>
+                  </div>
+
+                  <!-- Apps Grid -->
+                  <div class="mockup-app-grid">
+                    <div class="mockup-app-item">
+                      <div class="mockup-app-icon" id="mockupAppIconBox">
+                        <img id="mockupAppIconImg" src="/icon-512x512.png" alt="App Icon">
+                      </div>
+                      <div class="mockup-app-title" id="mockupAppLabel">PhonesDaddy</div>
+                    </div>
+
+                    <div class="mockup-app-item" style="opacity: 0.35;">
+                      <div class="mockup-app-icon" style="background: #3b82f6; color: #fff; font-size: 20px;">📷</div>
+                      <div class="mockup-app-title">Camera</div>
+                    </div>
+
+                    <div class="mockup-app-item" style="opacity: 0.35;">
+                      <div class="mockup-app-icon" style="background: #10b981; color: #fff; font-size: 20px;">💬</div>
+                      <div class="mockup-app-title">Messages</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bottom Dock -->
+                <div class="mockup-dock">
+                  <div class="dock-icon">📞</div>
+                  <div class="dock-icon">🌐</div>
+                  <div class="dock-icon">⚙️</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 12px; color: var(--admin-text-muted); margin-top: 14px;">
+              Live rendering of your PWA icon and label as users will see it on Android &amp; iOS devices.
+            </div>
+          </div>
+
+          <!-- Platforms Breakdown Card -->
+          <div class="admin-card">
+            <h4 style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; color: var(--admin-dark);">📊 Platform Breakdown</h4>
+            <div id="platformBreakdownList">
+              <div style="color: var(--admin-text-muted); font-size: 13px; text-align: center; padding: 10px 0;">Calculating platform metrics...</div>
+            </div>
+          </div>
+
+          <!-- PWA Installation Instructions Info Box -->
+          <div class="admin-card" style="background: #f0fdfa; border-color: #99f6e4;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <span style="font-size: 20px;">💡</span>
+              <div style="font-size: 12.5px; color: #0f766e; line-height: 1.5;">
+                <strong>How Users Install Your App:</strong>
+                <ul style="margin: 6px 0 0 0; padding-left: 18px;">
+                  <li><strong>Android &amp; Chrome:</strong> Automatic install banner pops up on visit.</li>
+                  <li><strong>Desktop (Chrome/Edge):</strong> Install icon appears right in the URL address bar.</li>
+                  <li><strong>iOS (Safari):</strong> Tap <em>Share</em> &rarr; select <em>"Add to Home Screen"</em>.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/icons.js"></script>
+  <script src="/js/admin.js?v=2.7.0"></script>
+  <script>
+    let pwaCurrentConfig = {};
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function loadPwaStatsAndConfig() {
+      try {
+        const res = await fetch('/api/pwa/stats');
+        const json = await res.json();
+        if (json.success && json.data) {
+          const stats = json.data;
+          pwaCurrentConfig = stats.config || {};
+
+          // Update Top Stat Badges
+          document.getElementById('statActiveInstalls').textContent = stats.active_installations || 0;
+          document.getElementById('statTotalInstalls').textContent = stats.total_installations || 0;
+          document.getElementById('statTotalLaunches').textContent = stats.total_launches || 0;
+          document.getElementById('statActive7d').textContent = stats.active_7d || 0;
+
+          // Update sidebar badges across the panel
+          const sidebarBadges = document.querySelectorAll('.pwa-installs-badge');
+          sidebarBadges.forEach(b => {
+            b.textContent = stats.active_installations || 0;
+          });
+
+          // Render Platform Breakdown
+          renderPlatformBreakdown(stats.platform_breakdown, stats.total_installations);
+
+          // Render Recent Installs Table
+          renderRecentInstalls(stats.recent_installations);
+
+          // Populate Settings Form
+          populateConfigForm(pwaCurrentConfig);
+
+          // Update Icon Views
+          updateIconCards(pwaCurrentConfig);
+          updateLiveMockup();
+        }
+      } catch (err) {
+        console.error('Error fetching PWA stats:', err);
+      }
+    }
+
+    function populateConfigForm(cfg) {
+      if (!cfg) return;
+      document.getElementById('pwaAppName').value = cfg.app_name || '';
+      document.getElementById('pwaShortName').value = cfg.short_name || '';
+      document.getElementById('pwaDescription').value = cfg.description || '';
+      document.getElementById('pwaStartUrl').value = cfg.start_url || '/?source=pwa';
+      document.getElementById('pwaDisplayMode').value = cfg.display_mode || 'standalone';
+      document.getElementById('pwaOrientation').value = cfg.orientation || 'portrait-primary';
+
+      const themeCol = cfg.theme_color || '#0d9488';
+      document.getElementById('pwaThemeColor').value = themeCol;
+      document.getElementById('pwaThemeColorPicker').value = themeCol;
+
+      const bgCol = cfg.background_color || '#0f172a';
+      document.getElementById('pwaBgColor').value = bgCol;
+      document.getElementById('pwaBgColorPicker').value = bgCol;
+    }
+
+    function updateIconCards(cfg) {
+      const isCustom = cfg.icon_source === 'custom';
+      const cardSite = document.getElementById('cardSiteIcon');
+      const cardCustom = document.getElementById('cardCustomIcon');
+      const badgeSite = document.getElementById('badgeSiteActive');
+      const badgeCustom = document.getElementById('badgeCustomActive');
+      const btnReset = document.getElementById('btnResetToSiteIcon');
+      const statusBadge = document.getElementById('currentIconSourceBadge');
+
+      if (cfg.site_icon) {
+        document.getElementById('imgSiteIcon').src = cfg.site_icon + '?v=' + Date.now();
+      }
+      if (cfg.custom_icon) {
+        document.getElementById('imgCustomIcon').src = cfg.custom_icon + '?v=' + Date.now();
+      }
+
+      if (isCustom) {
+        cardCustom.classList.add('active');
+        cardSite.classList.remove('active');
+        badgeCustom.style.display = 'inline-block';
+        badgeSite.style.display = 'none';
+        btnReset.style.display = 'inline-flex';
+        statusBadge.textContent = 'Using Custom PWA Icon';
+        statusBadge.style.background = '#ecfdf5';
+        statusBadge.style.color = '#059669';
+      } else {
+        cardSite.classList.add('active');
+        cardCustom.classList.remove('active');
+        badgeSite.style.display = 'inline-block';
+        badgeCustom.style.display = 'none';
+        btnReset.style.display = 'none';
+        statusBadge.textContent = 'Using Site Brand Icon / Logo';
+        statusBadge.style.background = '#e0f2fe';
+        statusBadge.style.color = '#0284c7';
+      }
+
+      // Update mockup icon
+      const effIcon = cfg.effective_icon || '/icon-512x512.png';
+      document.getElementById('mockupAppIconImg').src = effIcon + '?v=' + Date.now();
+    }
+
+    function updateLiveMockup() {
+      const label = document.getElementById('pwaShortName')?.value || 'PhonesDaddy';
+      const mockupLabel = document.getElementById('mockupAppLabel');
+      if (mockupLabel) mockupLabel.textContent = label;
+
+      const bgCol = document.getElementById('pwaBgColor')?.value;
+      const screen = document.getElementById('mockupScreen');
+      if (screen && bgCol) {
+        screen.style.background = `linear-gradient(135deg, ${bgCol}, #0f172a)`;
+      }
+    }
+
+    function renderPlatformBreakdown(platforms, total) {
+      const container = document.getElementById('platformBreakdownList');
+      if (!container) return;
+
+      if (!platforms || platforms.length === 0) {
+        container.innerHTML = '<div style="font-size: 13px; color: var(--admin-text-muted); text-align: center; padding: 8px 0;">No installation platform records yet.</div>';
+        return;
+      }
+
+      container.innerHTML = platforms.map(p => `
+        <div class="platform-bar-row">
+          <span style="width: 100px; font-weight: 600; color: var(--admin-dark); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(p.platform)}</span>
+          <div class="platform-bar-track">
+            <div class="platform-bar-fill" style="width: ${p.percentage}%;"></div>
+          </div>
+          <span style="width: 45px; text-align: right; font-weight: 700; color: var(--admin-primary);">${p.percentage}%</span>
+          <span style="font-size: 11px; color: #64748b;">(${p.count})</span>
+        </div>
+      `).join('');
+    }
+
+    function renderRecentInstalls(installs) {
+      const tbody = document.getElementById('recentInstallsTableBody');
+      if (!tbody) return;
+
+      if (!installs || installs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--admin-text-muted);">No installations logged yet. Click "⚡ Simulate Install" above to test tracking!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = installs.map(i => {
+        const instDate = i.installed_at ? new Date(i.installed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+        const activeDate = i.last_active_at ? new Date(i.last_active_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+        return `
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px 14px; font-weight: 600; color: var(--admin-dark);">
+              <span style="display: inline-flex; align-items: center; gap: 6px;">
+                <span>${escapeHtml(i.platform)}</span>
+              </span>
+            </td>
+            <td style="padding: 10px 14px; color: #475569;">${escapeHtml(i.browser)}</td>
+            <td style="padding: 10px 14px;">
+              <span class="badge" style="font-size: 11px; background: ${i.display_mode === 'standalone' ? '#ecfdf5' : '#f1f5f9'}; color: ${i.display_mode === 'standalone' ? '#047857' : '#475569'};">
+                ${escapeHtml(i.display_mode)}
+              </span>
+            </td>
+            <td style="padding: 10px 14px; font-weight: 700; color: var(--admin-primary);">${i.launches_count || 1}</td>
+            <td style="padding: 10px 14px; font-size: 12px; color: #64748b;">${instDate}</td>
+            <td style="padding: 10px 14px; font-size: 12px; color: #047857; font-weight: 600;">${activeDate}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function handleSavePwaConfig(e) {
+      e.preventDefault();
+      const form = document.getElementById('pwaConfigForm');
+      const btn = document.getElementById('btnSaveConfig');
+      const origText = btn.textContent;
+
+      btn.disabled = true;
+      btn.textContent = 'Saving Settings...';
+
+      const payload = {
+        app_name: form.app_name.value.trim(),
+        short_name: form.short_name.value.trim(),
+        description: form.description.value.trim(),
+        start_url: form.start_url.value.trim(),
+        display_mode: form.display_mode.value,
+        orientation: form.orientation.value,
+        theme_color: form.theme_color.value.trim(),
+        background_color: form.background_color.value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/admin/pwa/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('PWA configuration and manifest updated successfully!');
+          await loadPwaStatsAndConfig();
+        } else {
+          alert(json.message || 'Failed to save configuration');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error saving PWA configuration.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = origText;
+      }
+    }
+
+    async function handlePwaIconUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const statusBox = document.getElementById('iconUploadStatus');
+      statusBox.style.display = 'block';
+      statusBox.style.background = '#f1f5f9';
+      statusBox.style.color = '#334155';
+      statusBox.innerHTML = 'Uploading and generating PWA icons (192x192, 512x512, maskable)...';
+
+      const formData = new FormData();
+      formData.append('pwa_icon', file);
+
+      try {
+        const res = await fetch('/api/admin/pwa/icon', {
+          method: 'POST',
+          body: formData
+        });
+        const json = await res.json();
+        if (json.success) {
+          statusBox.style.background = '#ecfdf5';
+          statusBox.style.color = '#047857';
+          statusBox.innerHTML = '✅ Custom PWA icon uploaded successfully!';
+          await loadPwaStatsAndConfig();
+        } else {
+          statusBox.style.background = '#fef2f2';
+          statusBox.style.color = '#991b1b';
+          statusBox.innerHTML = '⚠️ ' + escapeHtml(json.message || 'Failed to upload icon');
+        }
+      } catch (err) {
+        statusBox.style.background = '#fef2f2';
+        statusBox.style.color = '#991b1b';
+        statusBox.innerHTML = '⚠️ Error uploading icon: ' + err.message;
+      }
+    }
+
+    async function handleResetToSiteIcon() {
+      if (!confirm('Revert PWA icon to use the Site Brand Icon / Logo?')) return;
+      try {
+        const res = await fetch('/api/admin/pwa/reset-icon', { method: 'POST' });
+        const json = await res.json();
+        if (json.success) {
+          alert('PWA app icon successfully reverted to Site Brand Icon / Logo!');
+          await loadPwaStatsAndConfig();
+        } else {
+          alert(json.message || 'Could not reset icon.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error resetting icon.');
+      }
+    }
+
+    function handleSelectSiteIcon() {
+      if (pwaCurrentConfig.icon_source === 'custom') {
+        handleResetToSiteIcon();
+      }
+    }
+
+    async function simulateTestInstall() {
+      try {
+        const res = await fetch('/api/admin/pwa/simulate-install', { method: 'POST' });
+        const json = await res.json();
+        if (json.success) {
+          await loadPwaStatsAndConfig();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPwaStatsAndConfig();
+    });
+  </script>
+</body>
+</html>

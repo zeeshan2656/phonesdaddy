@@ -120,14 +120,21 @@ function renderPhoneDetail(phone) {
   const fullSummary = phone.short_description || `${phone.name} full mobile phone specifications and features.`;
 
   if (descEl) {
-    const firstLine = fullSummary.split('\n')[0].trim();
-    descEl.innerText = firstLine || `${phone.name} specifications and prices.`;
+    const clean = fullSummary.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const firstLine = clean.split('\n')[0].trim();
+    descEl.innerText = firstLine.length > 200 ? firstLine.substring(0, 197) + '...' : (firstLine || `${phone.name} specifications and prices.`);
   }
 
   if (overviewEl) {
     const summaryText = (phone.short_description || '').trim();
     if (summaryText.length > 0) {
-      overviewEl.innerText = summaryText;
+      if (summaryText.includes('<') && summaryText.includes('>')) {
+        overviewEl.style.whiteSpace = 'normal';
+        overviewEl.innerHTML = summaryText;
+      } else {
+        overviewEl.style.whiteSpace = 'pre-line';
+        overviewEl.innerText = summaryText;
+      }
       if (overviewTitle) overviewTitle.innerText = `${phone.name} — Device Overview & Key Highlights`;
       if (overviewCard) overviewCard.style.display = 'block';
 
@@ -762,6 +769,42 @@ function renderPricesTable(prices = [], defaultPrice = 0) {
 
 function getStoreMeta(storeName = '') {
   const s = (storeName || '').trim().toLowerCase();
+  if (s.includes('official') || s.includes('brand') || s.includes('manufacturer')) {
+    return {
+      name: storeName || 'Official Website',
+      badgeBg: '#ecfdf5',
+      badgeColor: '#047857',
+      badgeBorder: '#a7f3d0',
+      btnBg: '#059669',
+      btnText: '#ffffff',
+      tag: 'Official Website',
+      isOfficial: true
+    };
+  }
+  if (s.includes('gsmarena')) {
+    return {
+      name: 'GSMArena',
+      badgeBg: '#eff6ff',
+      badgeColor: '#1d4ed8',
+      badgeBorder: '#bfdbfe',
+      btnBg: '#2563eb',
+      btnText: '#ffffff',
+      tag: 'Specs Source',
+      isSource: true
+    };
+  }
+  if (s.includes('whatmobile')) {
+    return {
+      name: 'WhatMobile',
+      badgeBg: '#ecfdf5',
+      badgeColor: '#065f46',
+      badgeBorder: '#a7f3d0',
+      btnBg: '#059669',
+      btnText: '#ffffff',
+      tag: 'Specs Source',
+      isSource: true
+    };
+  }
   if (s.includes('amazon')) {
     return {
       name: 'Amazon',
@@ -864,12 +907,17 @@ function renderAffiliateDeals(links = [], phoneName = '') {
 
   container.innerHTML = validLinks.map((item, idx) => {
     const store = item.store || 'Store';
-    const price = item.price && item.price.trim() ? item.price.trim() : 'View Live Price';
+    const rawPrice = (item.price || '').trim();
+    const price = rawPrice ? rawPrice : 'View Details';
     let targetUrl = (item.url || item.link || '#').trim();
     if (targetUrl !== '#' && !/^https?:\/\//i.test(targetUrl)) {
       targetUrl = 'https://' + targetUrl;
     }
     const meta = getStoreMeta(store);
+
+    const isExternalSource = meta.isOfficial || meta.isSource || /source|official|reference/i.test(price) || /source|official/i.test(store);
+    const relAttr = isExternalSource ? 'noopener external nofollow' : 'nofollow sponsored noopener external';
+    const btnLabel = meta.isOfficial ? 'Official Page' : (meta.isSource || /source/i.test(price) ? 'View Source' : 'Buy Now');
 
     return `
       <div class="affiliate-deal-item" id="dealRow-${idx}">
@@ -882,13 +930,13 @@ function renderAffiliateDeals(links = [], phoneName = '') {
         </div>
 
         <div class="deal-price-col">
-          <span class="deal-price-label">Store Price:</span>
+          <span class="deal-price-label">${isExternalSource ? 'Link Info:' : 'Store Price:'}</span>
           <span class="deal-price-val">${escapeHtml(price)}</span>
         </div>
 
         <div class="deal-action-col">
-          <a href="${escapeAttr(targetUrl)}" target="_blank" rel="nofollow sponsored noopener" class="deal-buy-btn" style="background:${meta.btnBg}; color:${meta.btnText};">
-            <span>Buy Now</span>
+          <a href="${escapeAttr(targetUrl)}" target="_blank" rel="${relAttr}" class="deal-buy-btn" style="background:${meta.btnBg}; color:${meta.btnText};">
+            <span>${btnLabel}</span>
             <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
         </div>
