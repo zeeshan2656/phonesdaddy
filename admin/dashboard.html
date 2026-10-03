@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard — PhonesDaddy</title>
-  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/admin.css?v=2026.5">
 </head>
 <body class="admin-body">
 
   <!-- Sidebar -->
   <aside class="admin-sidebar">
     <div class="admin-sidebar-brand">
-      <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px;" id="adminSidebarBrand">
         <div class="brand-icon" style="width: 28px; height: 28px; font-size: 16px;">P</div>
         <span>PhonesDaddy</span>
       </div>
@@ -271,8 +271,8 @@
               <div style="display: flex; gap: 4px; align-items: center;">
                 <button type="button" onclick="insertAdminReplyFormat('b')" style="padding: 2px 7px; font-size: 11px; font-weight: bold; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">B</button>
                 <button type="button" onclick="insertAdminReplyFormat('i')" style="padding: 2px 7px; font-size: 11px; font-style: italic; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">I</button>
-                <button type="button" onclick="insertAdminReplyLink()" style="padding: 2px 7px; font-size: 11px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">undefined Link</button>
-                <button type="button" onclick="insertAdminReplyImage()" style="padding: 2px 7px; font-size: 11px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">undefined Add Photo</button>
+                <button type="button" onclick="insertAdminReplyLink()" style="padding: 2px 7px; font-size: 11px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">🔗 Link</button>
+                <button type="button" onclick="insertAdminReplyImage()" style="padding: 2px 7px; font-size: 11px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">📷 Photo</button>
                 <input type="file" id="adminReplyImgInput" accept="image/*" style="display: none;" onchange="handleAdminReplyImageUpload(this)">
               </div>
             </div>

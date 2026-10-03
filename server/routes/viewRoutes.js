@@ -158,6 +158,18 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
     }
   }
 
+  // Inject PWA Controller Script before </body>
+  if (!html.includes('/js/pwa.js')) {
+    const pwaScript = `  <script defer src="/js/pwa.js?v=1.0.0"></script>`;
+    if (html.includes('</body>')) {
+      html = html.replace('</body>', `\n${pwaScript}\n</body>`);
+    } else if (html.includes('</BODY>')) {
+      html = html.replace('</BODY>', `\n${pwaScript}\n</BODY>`);
+    } else {
+      html += `\n${pwaScript}\n`;
+    }
+  }
+
   // Inject Custom Head & Body Snippets
   if (bundle.headCode) {
     if (html.includes('</head>')) {
@@ -955,6 +967,11 @@ router.get('/admin/users', requireMasterAdmin, (req, res) => {
 // Staff / Admin Profile
 router.get('/admin/profile', requireAdminAuth, (req, res) => {
   res.sendFile(path.join(adminDir, 'profile.html'));
+});
+
+// PWA Offline Fallback View
+router.get('/offline', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../public/offline.html'));
 });
 
 function escapeAttr(str) {

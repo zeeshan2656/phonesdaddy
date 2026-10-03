@@ -376,3 +376,16 @@ async function loadDynamicFooterPages() {
     syncSocialDock();
   }
 })();
+
+// ==========================================================================
+//  PhonesDaddy PWA Loader (Guarantees PWA service worker on every page)
+// ==========================================================================
+(function initPwaLoader() {
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) return;
+  if ('serviceWorker' in navigator && !window.PhonesDaddyPWA && !document.querySelector('script[src*="pwa.js"]')) {
+    var s = document.createElement('script');
+    s.src = '/js/pwa.js?v=1.0.1';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+})();

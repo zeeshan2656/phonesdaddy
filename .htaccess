@@ -78,6 +78,20 @@
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
 
+  # Service Worker & PWA Manifest: Zero Cache & Allowed Scope
+  <FilesMatch "^(sw\.js|service-worker\.js)$">
+    Header always set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header always set Service-Worker-Allowed "/"
+    Header set Service-Worker-Allowed "/"
+  </FilesMatch>
+  <FilesMatch "^(manifest\.json|manifest\.webmanifest)$">
+    Header always set Cache-Control "public, max-age=3600"
+    Header set Cache-Control "public, max-age=3600"
+    Header always set Content-Type "application/manifest+json; charset=utf-8"
+    Header set Content-Type "application/manifest+json; charset=utf-8"
+  </FilesMatch>
+
   # HTML documents: must-revalidate with ETag
   <FilesMatch "\.(html|htm)$">
     Header always set Cache-Control "public, max-age=180, stale-while-revalidate=600"

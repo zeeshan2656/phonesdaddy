@@ -139,6 +139,19 @@ const staticOptions = {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+    } else if (filePath.endsWith('sw.js') || filePath.endsWith('service-worker.js')) {
+      // Service worker: Zero-caching & full origin scope authorization
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Service-Worker-Allowed', '/');
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    } else if (filePath.endsWith('manifest.json') || filePath.endsWith('manifest.webmanifest')) {
+      // PWA Manifest: Standard revalidation & proper MIME type
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8');
+    } else if (filePath.endsWith('offline.html')) {
+      res.setHeader('Cache-Control', 'public, max-age=3600');
     } else {
       // 1 Year Immutable cache for all static public assets (CSS, JS, WebP, SVG, PNG, fonts)
       // Provides 100% score on GTmetrix Static Asset Caching
@@ -147,7 +160,22 @@ const staticOptions = {
   }
 };
 
-// Static Folders with optimized HTTP Cache-Control headers (1 Year Immutable for 100% GTmetrix Score)
+// Explicit PWA Endpoints (Guarantees correct headers regardless of reverse proxy or rewrite rules)
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  res.sendFile(path.join(__dirname, '../public/sw.js'));
+});
+
+app.get(['/manifest.json', '/manifest.webmanifest'], (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8');
+  res.sendFile(path.join(__dirname, '../public/manifest.json'));
+});
+
 // 1. Persistent External Media & Scraped Webfiles (Priority 1)
 app.use('/uploads', express.static(UPLOADS_BASE, staticOptions));
 const localUploads = path.join(__dirname, 'uploads');

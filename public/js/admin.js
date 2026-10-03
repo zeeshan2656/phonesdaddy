@@ -5022,7 +5022,10 @@ function initSettingsDropdown() {
   if (!dropdown) return;
 
   // By default settings is collapsed; it only gets opened on user action
-  const stored = localStorage.getItem('admin_nav_settings_collapsed');
+  let stored = null;
+  try {
+    stored = typeof localStorage !== 'undefined' ? localStorage.getItem('admin_nav_settings_collapsed') : null;
+  } catch (e) {}
   if (stored === '0') {
     dropdown.classList.remove('collapsed');
   } else {
