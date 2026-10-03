@@ -9,7 +9,7 @@
   <link rel="canonical" href="{{CANONICAL_URL}}">
   {{SITE_FAVICON_TAG}}
   {{PHONE_IMAGE_PRELOAD}}
-  <link rel="stylesheet" href="/css/style.css?v=2026.15">
+  <link rel="stylesheet" href="/css/style.css?v=2026.20">
   <!-- Quill Snow CSS for Rich Reviews (Non-render-blocking) -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css"></noscript>
@@ -219,31 +219,60 @@
       cursor: pointer;
     }
 
-    /* ── Mobile Phone Heading Below Breadcrumbs ── */
-    .phone-mobile-title-container {
-      display: none;
+    /* ── Breadcrumbs & Ad Spacing ── */
+    .phone-breadcrumbs-wrap {
+      background: #fff;
+      border-bottom: 1px solid var(--border-color, #e2e8f0);
+      padding: 10px 0;
+      font-size: 13px;
     }
+    .phone-top-ad-slot:empty {
+      display: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    /* ── Brand & Model Name Row (Side-by-Side) ── */
+    .phone-brand-model-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .phone-model-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--dark, #0f172a);
+      line-height: 1.2;
+      margin: 0;
+      letter-spacing: -0.4px;
+      word-break: break-word;
+    }
+
     @media (max-width: 768px) {
-      .phone-mobile-title-container {
-        display: block !important;
-        padding-top: 12px;
-        padding-bottom: 4px;
+      /* Tight spacing: Zero dead space between breadcrumbs and card */
+      .phone-breadcrumbs-wrap {
+        padding: 6px 0 !important;
+        font-size: 12px !important;
+        margin-bottom: 0 !important;
       }
-      .phone-mobile-main-title {
-        font-size: 1.45rem;
-        font-weight: 800;
-        color: var(--dark, #0f172a);
-        line-height: 1.25;
-        margin: 0;
-        letter-spacing: -0.4px;
-      }
-      .phone-desktop-only-heading {
+      .phone-top-ad-slot:empty {
         display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      #phoneDetailContainer {
+        padding-top: 6px !important;
+        padding-bottom: 40px !important;
       }
       .phone-detail-header {
-        padding: 12px;
+        margin-top: 0 !important;
+        padding: 10px !important;
         border-radius: 12px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
       /* 2-Column Split Hero Layout: Left Image Slider (145px), Right Meta Stack (1fr) */
       .phone-detail-top-grid {
@@ -338,28 +367,51 @@
       .phone-info-col {
         display: contents !important;
       }
+      /* Right Meta Column Beside Image */
       .phone-hero-meta-box {
         grid-area: meta;
         display: flex !important;
         flex-direction: column !important;
         justify-content: flex-start !important;
-        gap: 5px !important;
-        padding-top: 2px !important;
+        gap: 4px !important;
+        padding-top: 1px !important;
         min-width: 0 !important;
       }
+
+      /* Model Name NEXT TO Brand Name */
+      .phone-brand-model-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px 8px !important;
+        flex-wrap: wrap !important;
+        margin-bottom: 4px !important;
+        width: 100% !important;
+      }
       .phone-hero-meta-box .phone-brand-tag {
-        font-size: 11px;
-        font-weight: 800;
-        padding: 3px 8px;
-        align-self: flex-start;
-        margin-bottom: 2px;
-        text-transform: uppercase;
-        border-radius: 6px;
-        background: #f0fdfa;
-        color: #0d9488;
-        border: 1px solid #ccfbf1;
-        text-decoration: none;
-        display: inline-flex;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        padding: 2.5px 7.5px !important;
+        text-transform: uppercase !important;
+        border-radius: 6px !important;
+        background: #f0fdfa !important;
+        color: #0d9488 !important;
+        border: 1px solid #ccfbf1 !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        margin-bottom: 0 !important;
+        letter-spacing: 0.4px !important;
+      }
+      .phone-model-title {
+        font-size: 1.18rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        letter-spacing: -0.3px !important;
+        word-break: break-word !important;
+        display: inline-block !important;
       }
       .phone-hero-meta-box .phone-meta-row {
         display: flex !important;
@@ -516,8 +568,8 @@
   </header>
 
 
-  <!-- Breadcrumbs -->
-  <div style="background: #fff; border-bottom: 1px solid var(--border-color); padding: 12px 0; font-size: 13px;">
+  <!-- Breadcrumbs (Clean & tight spacing) -->
+  <div class="phone-breadcrumbs-wrap">
     <div class="container" style="display: flex; gap: 8px; color: #64748b; align-items: center;">
       <a href="/" style="color: var(--primary);">Home</a>
       <span>&gt;</span>
@@ -527,18 +579,11 @@
     </div>
   </div>
 
-  <!-- Mobile Phone Heading (Placed directly below Breadcrumbs where filter was) -->
-  <div class="container phone-mobile-title-container">
-    <h1 class="phone-mobile-main-title" id="phoneMobileMainTitle">{{PHONE_NAME}}</h1>
-  </div>
-
-  <!-- Top Phone Post Ad Placement (e.g. 728x90 Leaderboard / 320x100 Mobile) -->
-  <div class="container" style="padding-top: 14px;">
-    {{AD_PHONE_TOP}}
-  </div>
+  <!-- Top Phone Post Ad Placement (Zero space when empty) -->
+  <div class="container phone-top-ad-slot">{{AD_PHONE_TOP}}</div>
 
   <!-- Phone Detail Content with GSMArena 2-Column Layout -->
-  <main class="container" id="phoneDetailContainer" style="padding-top: 16px; padding-bottom: 60px;">
+  <main class="container" id="phoneDetailContainer" style="padding-top: 12px; padding-bottom: 60px;">
 
     <div class="gsm-page-wrapper phone-page-wrapper">
 
@@ -843,10 +888,12 @@
 
             <!-- Phone Info Column -->
             <div class="phone-info-col">
-              <!-- Meta Header Box: Brand, Title (Desktop), and Badges Stacked -->
+              <!-- Meta Header Box: Brand & Model Title Side-by-Side, and Badges Stacked -->
               <div class="phone-hero-meta-box">
-                <a href="/brands" id="phoneDetailBrand" class="phone-brand-tag">Loading Brand...</a>
-                <h1 id="phoneDetailName" class="phone-desktop-only-heading">{{PHONE_NAME}}</h1>
+                <div class="phone-brand-model-row">
+                  <a href="/brands" id="phoneDetailBrand" class="phone-brand-tag">Loading Brand...</a>
+                  <h1 id="phoneDetailName" class="phone-model-title">{{PHONE_NAME}}</h1>
+                </div>
 
                 <div class="phone-meta-row" id="phoneMetaRow">
                   <span id="phoneDetailStatus" style="display:none;"></span>
@@ -1287,11 +1334,11 @@
     syncMobileFilterPosition();
     window.addEventListener('resize', syncMobileFilterPosition);
   </script>
-  <script defer src="/js/icons.js?v=2026.15"></script>
-  <script defer src="/js/app.js?v=2026.15"></script>
+  <script defer src="/js/icons.js?v=2026.20"></script>
+  <script defer src="/js/app.js?v=2026.20"></script>
   <!-- Quill Rich Text Editor -->
   <script defer src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-  <script defer src="/js/phone-detail.js?v=2026.15"></script>
+  <script defer src="/js/phone-detail.js?v=2026.20"></script>
 
   <!-- Mobile Filter Popup Drawer / Modal (Only on Mobile) -->
   <div class="mobile-filter-drawer-overlay" id="mobileFilterDrawerOverlay" style="display: none;" onclick="closeMobileFilterPopup()">

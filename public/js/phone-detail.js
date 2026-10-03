@@ -71,16 +71,24 @@ async function initPhoneDetail() {
 function renderPhoneDetail(phone) {
   // Update Title & Badge (unescape any &amp; to &)
   const cleanName = (phone.name || '').replace(/&amp;/g, '&');
+  const brandName = (phone.brand_name || '').replace(/&amp;/g, '&').trim();
+
+  // Show clean model name next to brand badge (avoids "NOKIA Nokia G300")
+  let modelDisplayName = cleanName;
+  if (brandName && modelDisplayName.toLowerCase().startsWith(brandName.toLowerCase() + ' ')) {
+    modelDisplayName = modelDisplayName.substring(brandName.length).trim();
+  }
+
   const detailNameEl = document.getElementById('phoneDetailName');
-  if (detailNameEl) detailNameEl.innerText = cleanName;
+  if (detailNameEl) detailNameEl.innerText = modelDisplayName;
   const mobileTitleEl = document.getElementById('phoneMobileMainTitle');
-  if (mobileTitleEl) mobileTitleEl.innerText = cleanName;
+  if (mobileTitleEl) mobileTitleEl.innerText = modelDisplayName;
   const breadcrumbEl = document.getElementById('breadcrumbPhoneName');
   if (breadcrumbEl) breadcrumbEl.innerText = cleanName;
 
   const brandEl = document.getElementById('phoneDetailBrand');
   if (brandEl) {
-    brandEl.innerText = (phone.brand_name || '').replace(/&amp;/g, '&');
+    brandEl.innerText = brandName || 'Brand';
     brandEl.href = `/brand/${phone.brand_slug}`;
   }
 
