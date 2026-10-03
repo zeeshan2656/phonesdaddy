@@ -259,13 +259,14 @@ button, input, select, textarea {
   pointer-events: none;
 }
 
-/* Mobile Header Actions (Search Icon + Hamburger) */
+/* Mobile Header Actions (Filter Icon + Search Icon + Hamburger) */
 .header-mobile-actions {
   display: none;
   align-items: center;
   gap: 6px;
 }
 
+.mobile-filter-btn,
 .mobile-search-toggle {
   display: none;
   background: none;
@@ -280,6 +281,8 @@ button, input, select, textarea {
   transition: all 0.2s ease;
 }
 
+.mobile-filter-btn:hover,
+.mobile-filter-btn.active,
 .mobile-search-toggle:hover,
 .mobile-search-toggle.active {
   color: var(--primary);
@@ -1634,29 +1637,85 @@ button, input, select, textarea {
   transform: scale(1.03);
 }
 
-.gallery-count-pill {
+.phone-slider-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.phone-slider-arrow {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
-  background: rgba(15, 23, 42, 0.78);
-  backdrop-filter: blur(6px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  display: none; /* Shown via JS when multiple photos exist */
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.slider-arrow-prev {
+  left: 6px;
+}
+
+.slider-arrow-next {
+  right: 6px;
+}
+
+.phone-slider-arrow:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4);
+}
+
+.phone-slider-arrow:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.gallery-count-pill {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 20px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
-  z-index: 2;
+  z-index: 4;
+  white-space: nowrap;
 }
 
 .gallery-count-pill:hover {
-  background: rgba(13, 148, 136, 0.9);
-  transform: scale(1.04);
+  background: rgba(13, 148, 136, 0.95);
+  transform: translateX(-50%) scale(1.04);
 }
 
 .phone-gallery-thumbs {
@@ -2145,6 +2204,210 @@ button, input, select, textarea {
   padding: 12px 18px;
   border-bottom: 1px solid var(--border-light);
   font-size: 14px;
+}
+
+/* Desktop Global Prices Section & Modern Colorful Cards */
+.desktop-prices-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.desktop-price-country-card {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.desktop-price-country-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.desktop-price-country-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.desktop-price-country-val {
+  font-size: 15.5px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+/* Mobile Multi-Country Prices Styles (Under / Next to Pakistan Price) */
+.mobile-multi-prices-wrap {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(13, 148, 136, 0.25);
+  width: 100%;
+}
+
+@media (min-width: 769px) {
+  .mobile-multi-prices-wrap {
+    display: none !important;
+  }
+}
+
+.mobile-multi-prices-header {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #0f766e;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-intl-prices-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+  width: 100%;
+}
+
+.mobile-price-chip {
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.mobile-price-chip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.mobile-price-chip-val {
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* Mobile Filter Drawer Popup Overlay */
+.mobile-filter-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-filter-drawer-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-filter-drawer-sheet {
+  background: #ffffff;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.mobile-filter-drawer-overlay.active .mobile-filter-drawer-sheet {
+  transform: translateY(0);
+}
+
+.mobile-filter-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.mobile-filter-drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.mobile-filter-drawer-title svg {
+  color: var(--primary);
+}
+
+.mobile-filter-drawer-close {
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.15s ease;
+}
+
+.mobile-filter-drawer-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.mobile-filter-drawer-body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+.mobile-filter-drawer-body .adv-filter-card {
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.mobile-filter-drawer-body .adv-filter-header {
+  display: none !important;
+}
+
+.phone-mobile-title-container {
+  display: none;
 }
 
 /* ==========================================================================
@@ -3023,6 +3286,7 @@ button, input, select, textarea {
     gap: 8px;
   }
 
+  .mobile-filter-btn,
   .mobile-search-toggle {
     display: inline-flex;
   }
@@ -3388,57 +3652,127 @@ button, input, select, textarea {
   }
 
   /* ── Phone Detail Page Mobile Responsiveness ── */
+  .phone-mobile-title-container {
+    display: block !important;
+    padding-top: 14px;
+    padding-bottom: 4px;
+  }
+
+  .phone-mobile-main-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--dark);
+    line-height: 1.25;
+    margin: 0;
+    letter-spacing: -0.4px;
+  }
+
+  .phone-desktop-only-heading {
+    display: none !important;
+  }
+
   .phone-detail-header {
-    padding: 16px;
+    padding: 12px;
     border-radius: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   }
 
+  /* 2-Column Split: Left Image Slider, Right Tags */
   .phone-detail-top-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: grid !important;
+    grid-template-columns: 145px 1fr !important;
+    grid-template-areas:
+      "visual meta"
+      "price  price"
+      "desc   desc"
+      "action action" !important;
+    gap: 12px !important;
+    align-items: stretch;
   }
 
-  .phone-main-card,
-  .phone-main-image-wrap {
-    min-height: 240px;
-    padding: 16px 12px;
+  .phone-visual-col {
+    grid-area: visual;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+  }
+
+  .phone-main-card {
+    min-height: 200px;
+    max-height: 215px;
+    padding: 10px 4px 26px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
   }
 
   .phone-main-image {
-    max-height: 220px;
+    max-height: 165px;
+    max-width: 100%;
+    object-fit: contain;
   }
 
-  .phone-info-col h1 {
-    font-size: 1.55rem;
-    line-height: 1.22;
-    margin-top: 4px;
-    margin-bottom: 10px;
+  /* Hide thumbnail gallery row on mobile per user instruction */
+  .phone-gallery-thumbs {
+    display: none !important;
   }
 
-  .phone-brand-tag {
-    font-size: 11.5px;
+  .phone-info-col {
+    display: contents !important;
+  }
+
+  /* Right column meta box beside image */
+  .phone-hero-meta-box {
+    grid-area: meta;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 5px;
+    padding-top: 2px;
+    min-width: 0;
+  }
+
+  .phone-hero-meta-box .phone-brand-tag {
+    font-size: 11px;
+    font-weight: 800;
     padding: 3px 8px;
-    margin-bottom: 6px;
+    align-self: flex-start;
+    margin-bottom: 2px;
+    text-transform: uppercase;
   }
 
-  .phone-meta-row {
-    gap: 6px;
-    margin-bottom: 14px;
+  .phone-hero-meta-box .phone-meta-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    margin-bottom: 0;
+    width: 100%;
   }
 
-  .phone-meta-chip {
+  .phone-hero-meta-box .phone-meta-chip {
+    width: 100%;
     padding: 4px 8px;
-    font-size: 11.5px;
+    font-size: 11px;
     border-radius: 6px;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .phone-detail-price-box {
-    width: 100%;
-    padding: 12px 14px;
-    margin-bottom: 16px;
-    border-radius: 8px;
+    grid-area: price;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+    padding: 12px 14px !important;
+    border-radius: 8px !important;
     box-sizing: border-box;
   }
 
@@ -3460,13 +3794,15 @@ button, input, select, textarea {
   }
 
   .phone-short-desc {
-    font-size: 13.5px;
-    line-height: 1.55;
-    margin-bottom: 16px;
+    grid-area: desc;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 12px !important;
   }
 
   .phone-action-buttons {
-    display: grid;
+    grid-area: action;
+    display: grid !important;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     width: 100%;
@@ -3479,6 +3815,10 @@ button, input, select, textarea {
     font-size: 12.5px;
     text-align: center;
     box-sizing: border-box;
+  }
+
+  .desktop-prices-cards-grid {
+    display: none !important;
   }
 
   /* ── Quick Action Tab Bar: 100% Inside Screen, No Scrollbar ── */

@@ -520,8 +520,18 @@ router.get('/phone/:slug', async (req, res, next) => {
     const siteName = branding.site_name || 'PhonesDaddy';
     const siteUrl = branding.site_url || `${req.protocol}://${req.get('host')}`;
 
-    let pageTitle = phone.meta_title || `${phone.name} Price in Pakistan & Specifications | ${siteName}`;
-    let pageDescription = phone.meta_description || `${phone.name} price in Pakistan, specifications, display, camera, battery, processor, RAM, storage and other details.`;
+    function unescapeHtmlEntities(str) {
+      if (!str || typeof str !== 'string') return '';
+      return str.replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>');
+    }
+
+    const cleanPhoneName = unescapeHtmlEntities(phone.name);
+    let pageTitle = phone.meta_title ? unescapeHtmlEntities(phone.meta_title) : `${cleanPhoneName} Price in Pakistan & Specifications | ${siteName}`;
+    let pageDescription = phone.meta_description ? unescapeHtmlEntities(phone.meta_description) : `${cleanPhoneName} price in Pakistan, specifications, display, camera, battery, processor, RAM, storage and other details.`;
     if (branding.site_name && branding.site_name !== 'PhonesDaddy') {
       pageTitle = pageTitle.replace(/PhonesDaddy/gi, branding.site_name);
       pageDescription = pageDescription.replace(/PhonesDaddy/gi, branding.site_name);
@@ -533,9 +543,9 @@ router.get('/phone/:slug', async (req, res, next) => {
     const schemaData = {
       "@context": "https://schema.org/",
       "@type": "Product",
-      "name": phone.name,
+      "name": cleanPhoneName,
       "image": fullImageUrl,
-      "description": phone.short_description || pageDescription,
+      "description": phone.short_description ? unescapeHtmlEntities(phone.short_description) : pageDescription,
       "brand": {
         "@type": "Brand",
         "name": phone.brand_name
@@ -583,7 +593,7 @@ router.get('/phone/:slug', async (req, res, next) => {
 
     if (validGalleryImages.length > 1) {
       galleryCountBadgeStyle = 'display: inline-flex;';
-      galleryCountText = `${validGalleryImages.length} Photos`;
+      galleryCountText = `1 / ${validGalleryImages.length} Photos`;
       galleryStripStyle = 'display: flex;';
       galleryThumbsHtml = validGalleryImages.map((src, idx) => `
         <div class="phone-thumb-item ${idx === 0 ? 'active' : ''}" onclick="selectPreviewImage(${idx})" ondblclick="openGallery(${idx})" title="Click to preview photo ${idx + 1}">
@@ -599,8 +609,8 @@ router.get('/phone/:slug', async (req, res, next) => {
       '{{PAGE_TITLE}}': escapeHtml(pageTitle),
       '{{META_DESCRIPTION}}': escapeHtml(pageDescription),
       '{{CANONICAL_URL}}': canonicalUrl,
-      '{{PHONE_NAME}}': escapeHtml(phone.name),
-      '{{PHONE_SLUG}}': escapeHtml(phone.slug),
+      '{{PHONE_NAME}}': escapeHtml(cleanPhoneName),
+      '{{PHONE_SLUG}}': escapeAttr(phone.slug),
       '{{SCHEMA_JSON}}': JSON.stringify(schemaData, null, 2),
       '{{PHONE_DATA_JSON}}': JSON.stringify(phone).replace(/</g, '\\u003c'),
       '{{PHONE_IMAGE}}': escapeAttr(phoneImgUrl),

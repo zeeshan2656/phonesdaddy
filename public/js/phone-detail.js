@@ -69,10 +69,20 @@ async function initPhoneDetail() {
 }
 
 function renderPhoneDetail(phone) {
-  // Update Title & Badge
-  document.getElementById('phoneDetailName').innerText = phone.name;
-  document.getElementById('phoneDetailBrand').innerText = phone.brand_name;
-  document.getElementById('phoneDetailBrand').href = `/brand/${phone.brand_slug}`;
+  // Update Title & Badge (unescape any &amp; to &)
+  const cleanName = (phone.name || '').replace(/&amp;/g, '&');
+  const detailNameEl = document.getElementById('phoneDetailName');
+  if (detailNameEl) detailNameEl.innerText = cleanName;
+  const mobileTitleEl = document.getElementById('phoneMobileMainTitle');
+  if (mobileTitleEl) mobileTitleEl.innerText = cleanName;
+  const breadcrumbEl = document.getElementById('breadcrumbPhoneName');
+  if (breadcrumbEl) breadcrumbEl.innerText = cleanName;
+
+  const brandEl = document.getElementById('phoneDetailBrand');
+  if (brandEl) {
+    brandEl.innerText = (phone.brand_name || '').replace(/&amp;/g, '&');
+    brandEl.href = `/brand/${phone.brand_slug}`;
+  }
 
   const statusBadge = document.getElementById('phoneDetailStatus');
   if (statusBadge) {
@@ -117,16 +127,16 @@ function renderPhoneDetail(phone) {
   const overviewToggleText = document.getElementById('overviewToggleText');
   const overviewToggleIcon = document.getElementById('overviewToggleIcon');
 
-  const fullSummary = phone.short_description || `${phone.name} full mobile phone specifications and features.`;
+  const fullSummary = (phone.short_description || `${cleanName} full mobile phone specifications and features.`).replace(/&amp;/g, '&');
 
   if (descEl) {
     const clean = fullSummary.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const firstLine = clean.split('\n')[0].trim();
-    descEl.innerText = firstLine.length > 200 ? firstLine.substring(0, 197) + '...' : (firstLine || `${phone.name} specifications and prices.`);
+    descEl.innerText = firstLine.length > 200 ? firstLine.substring(0, 197) + '...' : (firstLine || `${cleanName} specifications and prices.`);
   }
 
   if (overviewEl) {
-    const summaryText = (phone.short_description || '').trim();
+    const summaryText = (phone.short_description || '').trim().replace(/&amp;/g, '&');
     if (summaryText.length > 0) {
       if (summaryText.includes('<') && summaryText.includes('>')) {
         overviewEl.style.whiteSpace = 'normal';
@@ -135,7 +145,7 @@ function renderPhoneDetail(phone) {
         overviewEl.style.whiteSpace = 'pre-line';
         overviewEl.innerText = summaryText;
       }
-      if (overviewTitle) overviewTitle.innerText = `${phone.name} — Device Overview & Key Highlights`;
+      if (overviewTitle) overviewTitle.innerText = `${cleanName} — Device Overview & Key Highlights`;
       if (overviewCard) overviewCard.style.display = 'block';
 
       // Check if overview has substantial data to collapse
@@ -164,11 +174,12 @@ function renderPhoneDetail(phone) {
   const imgEl = document.getElementById('phoneDetailImage');
   if (imgEl) {
     imgEl.src = phone.image || '/images/placeholder.svg';
-    imgEl.alt = phone.name;
+    imgEl.alt = cleanName;
   }
 
-  // Render gallery strip if multiple images exist
+  // Render gallery strip if multiple images exist & init touch slider
   renderGalleryStrip(phone.images || [], phone.image);
+  initSliderTouchEvents();
 
   // Add to Compare Button
   const compareBtn = document.getElementById('btnAddToCompare');
@@ -179,7 +190,7 @@ function renderPhoneDetail(phone) {
       if (basket.length >= 2) {
         window.location.href = `/compare?phones=${basket.join(',')}`;
       } else {
-        alert(`"${phone.name}" added to comparison. Select one more phone to view comparison!`);
+        alert(`"${cleanName}" added to comparison. Select one more phone to view comparison!`);
       }
     });
   }
@@ -190,11 +201,12 @@ function renderPhoneDetail(phone) {
     tabReviewsCount.innerText = (phone.review_count || 0).toLocaleString();
   }
 
-  // Render Multi-Country Price Table
+  // Render Multi-Country Price Table & Mobile Prices Grid
   renderPricesTable(phone.prices, phone.price);
+  renderMobileIntlPrices(phone.prices, phone.price);
 
   // Render External Store Deals & Affiliate Purchase Links (Where to Buy)
-  renderAffiliateDeals(phone.affiliate_links, phone.name);
+  renderAffiliateDeals(phone.affiliate_links, cleanName);
 
   // Render Video Review & Unboxing (YouTube Responsive Player)
   renderVideoReview(phone.video_url, phone.name);
@@ -602,11 +614,11 @@ function escapeAttr(str) {
   return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// Gallery Strip
+// Gallery Strip & Slider
 let _galleryImages = [];
 let _currentPreviewIndex = 0;
 
-function selectPreviewImage(idx) {
+function updatePhoneSliderImage(idx) {
   if (!_galleryImages || _galleryImages.length === 0) return;
   _currentPreviewIndex = Math.max(0, Math.min(idx, _galleryImages.length - 1));
 
@@ -615,7 +627,13 @@ function selectPreviewImage(idx) {
     mainImg.src = _galleryImages[_currentPreviewIndex];
   }
 
-  // Update active thumbnail border
+  // Update bottom image count badge: "X / Y Photos"
+  const countText = document.getElementById('galleryCountText');
+  if (countText) {
+    countText.textContent = `${_currentPreviewIndex + 1} / ${_galleryImages.length} Photos`;
+  }
+
+  // Update active thumbnail border on desktop
   const thumbs = document.querySelectorAll('.phone-thumb-item');
   thumbs.forEach((t, i) => {
     if (i === _currentPreviewIndex) {
@@ -625,10 +643,57 @@ function selectPreviewImage(idx) {
     }
   });
 }
+window.updatePhoneSliderImage = updatePhoneSliderImage;
+
+function slidePhoneImage(dir) {
+  if (!_galleryImages || _galleryImages.length <= 1) return;
+  const newIdx = (_currentPreviewIndex + dir + _galleryImages.length) % _galleryImages.length;
+  updatePhoneSliderImage(newIdx);
+}
+window.slidePhoneImage = slidePhoneImage;
+
+function selectPreviewImage(idx) {
+  updatePhoneSliderImage(idx);
+}
+window.selectPreviewImage = selectPreviewImage;
 
 function openCurrentInGallery() {
   openGallery(_currentPreviewIndex);
 }
+window.openCurrentInGallery = openCurrentInGallery;
+
+// Mobile Touch Swipe Handling
+let _touchStartX = 0;
+let _touchStartY = 0;
+function initSliderTouchEvents() {
+  const frame = document.getElementById('phoneMainCardFrame');
+  if (!frame || frame._sliderTouchBound) return;
+  frame._sliderTouchBound = true;
+
+  frame.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length === 1) {
+      _touchStartX = e.touches[0].clientX;
+      _touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  frame.addEventListener('touchend', (e) => {
+    if (e.changedTouches && e.changedTouches.length === 1) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - _touchStartX;
+      const diffY = endY - _touchStartY;
+      if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX < 0) {
+          slidePhoneImage(1); // Swipe left -> Next
+        } else {
+          slidePhoneImage(-1); // Swipe right -> Prev
+        }
+      }
+    }
+  }, { passive: true });
+}
+window.initSliderTouchEvents = initSliderTouchEvents;
 
 function renderGalleryStrip(images, primaryImage) {
   // Build deduped list with primary first
@@ -642,15 +707,22 @@ function renderGalleryStrip(images, primaryImage) {
   const strip = document.getElementById('phoneGalleryStrip');
   const countBadge = document.getElementById('btnGalleryCountBadge');
   const countText = document.getElementById('galleryCountText');
+  const prevBtn = document.getElementById('btnSliderPrev');
+  const nextBtn = document.getElementById('btnSliderNext');
 
-  if (_galleryImages.length <= 1) {
+  const hasMultiple = _galleryImages.length > 1;
+
+  if (prevBtn) prevBtn.style.display = hasMultiple ? 'flex' : 'none';
+  if (nextBtn) nextBtn.style.display = hasMultiple ? 'flex' : 'none';
+
+  if (!hasMultiple) {
     if (strip) strip.style.display = 'none';
     if (countBadge) countBadge.style.display = 'none';
     return;
   }
 
   if (countBadge && countText) {
-    countText.textContent = `${_galleryImages.length} Photos`;
+    countText.textContent = `1 / ${_galleryImages.length} Photos`;
     countBadge.style.display = 'inline-flex';
   }
 
@@ -738,30 +810,268 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Price Table
+// Multi-Country Pricing Themes & Renderers
 // ─────────────────────────────────────────────────────────────────────────────
 
-function renderPricesTable(prices = [], defaultPrice = 0) {
-  const container = document.getElementById('phonePricesContainer');
-  if (!container) return;
+const COUNTRY_PRICE_THEMES = {
+  pakistan: {
+    flag: '🇵🇰',
+    name: 'Pakistan',
+    currency: 'PKR',
+    bg: '#f0fdf4',
+    border: '#bbf7d0',
+    color: '#047857',
+    tagBg: '#dcfce7',
+    tagColor: '#15803d'
+  },
+  usa: {
+    flag: '🇺🇸',
+    name: 'USA',
+    currency: 'USD',
+    bg: '#eff6ff',
+    border: '#bfdbfe',
+    color: '#1d4ed8',
+    tagBg: '#dbeafe',
+    tagColor: '#1e40af'
+  },
+  unitedstates: {
+    flag: '🇺🇸',
+    name: 'USA',
+    currency: 'USD',
+    bg: '#eff6ff',
+    border: '#bfdbfe',
+    color: '#1d4ed8',
+    tagBg: '#dbeafe',
+    tagColor: '#1e40af'
+  },
+  uae: {
+    flag: '🇦🇪',
+    name: 'UAE',
+    currency: 'AED',
+    bg: '#fffbeb',
+    border: '#fde68a',
+    color: '#b45309',
+    tagBg: '#fef3c7',
+    tagColor: '#92400e'
+  },
+  dubai: {
+    flag: '🇦🇪',
+    name: 'UAE',
+    currency: 'AED',
+    bg: '#fffbeb',
+    border: '#fde68a',
+    color: '#b45309',
+    tagBg: '#fef3c7',
+    tagColor: '#92400e'
+  },
+  india: {
+    flag: '🇮🇳',
+    name: 'India',
+    currency: 'INR',
+    bg: '#fff7ed',
+    border: '#fed7aa',
+    color: '#c2410c',
+    tagBg: '#ffedd5',
+    tagColor: '#9a3412'
+  },
+  uk: {
+    flag: '🇬🇧',
+    name: 'UK',
+    currency: 'GBP',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
+    color: '#6d28d9',
+    tagBg: '#ede9fe',
+    tagColor: '#5b21b6'
+  },
+  unitedkingdom: {
+    flag: '🇬🇧',
+    name: 'UK',
+    currency: 'GBP',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
+    color: '#6d28d9',
+    tagBg: '#ede9fe',
+    tagColor: '#5b21b6'
+  },
+  saudiarabia: {
+    flag: '🇸🇦',
+    name: 'Saudi Arabia',
+    currency: 'SAR',
+    bg: '#f0fdfa',
+    border: '#99f6e4',
+    color: '#0f766e',
+    tagBg: '#ccfbf1',
+    tagColor: '#115e59'
+  },
+  canada: {
+    flag: '🇨🇦',
+    name: 'Canada',
+    currency: 'CAD',
+    bg: '#fff1f2',
+    border: '#fecdd3',
+    color: '#be123c',
+    tagBg: '#ffe4e6',
+    tagColor: '#9f1239'
+  },
+  australia: {
+    flag: '🇦🇺',
+    name: 'Australia',
+    currency: 'AUD',
+    bg: '#f0f9ff',
+    border: '#bae6fd',
+    color: '#0369a1',
+    tagBg: '#e0f2fe',
+    tagColor: '#075985'
+  },
+  china: {
+    flag: '🇨🇳',
+    name: 'China',
+    currency: 'CNY',
+    bg: '#fef2f2',
+    border: '#fecaca',
+    color: '#b91c1c',
+    tagBg: '#fee2e2',
+    tagColor: '#991b1b'
+  },
+  europe: {
+    flag: '🇪🇺',
+    name: 'Europe',
+    currency: 'EUR',
+    bg: '#f8fafc',
+    border: '#cbd5e1',
+    color: '#334155',
+    tagBg: '#e2e8f0',
+    tagColor: '#1e293b'
+  }
+};
 
-  if (!prices || prices.length === 0) {
-    container.innerHTML = `
-      <tr>
-        <td><strong>Pakistan</strong></td>
-        <td>PKR</td>
-        <td><strong>${formatPKR(defaultPrice)}</strong></td>
-      </tr>`;
+function getCountryPriceTheme(country = '', currency = '') {
+  const cKey = (country || '').toLowerCase().replace(/[^a-z]/g, '');
+  const curKey = (currency || '').toLowerCase();
+
+  if (cKey.includes('pakistan') || curKey === 'pkr') return COUNTRY_PRICE_THEMES.pakistan;
+  if (cKey.includes('usa') || cKey.includes('unitedstates') || curKey === 'usd') return COUNTRY_PRICE_THEMES.usa;
+  if (cKey.includes('uae') || cKey.includes('dubai') || curKey === 'aed') return COUNTRY_PRICE_THEMES.uae;
+  if (cKey.includes('india') || curKey === 'inr') return COUNTRY_PRICE_THEMES.india;
+  if (cKey.includes('uk') || cKey.includes('unitedkingdom') || curKey === 'gbp') return COUNTRY_PRICE_THEMES.uk;
+  if (cKey.includes('saudi') || curKey === 'sar') return COUNTRY_PRICE_THEMES.saudiarabia;
+  if (cKey.includes('canada') || curKey === 'cad') return COUNTRY_PRICE_THEMES.canada;
+  if (cKey.includes('australia') || curKey === 'aud') return COUNTRY_PRICE_THEMES.australia;
+  if (cKey.includes('china') || curKey === 'cny') return COUNTRY_PRICE_THEMES.china;
+  if (cKey.includes('euro') || curKey === 'eur') return COUNTRY_PRICE_THEMES.europe;
+
+  const palette = [
+    { flag: '🌐', bg: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8', tagBg: '#dbeafe', tagColor: '#1e40af' },
+    { flag: '🌐', bg: '#f5f3ff', border: '#ddd6fe', color: '#6d28d9', tagBg: '#ede9fe', tagColor: '#5b21b6' },
+    { flag: '🌐', bg: '#fff7ed', border: '#fed7aa', color: '#c2410c', tagBg: '#ffedd5', tagColor: '#9a3412' },
+    { flag: '🌐', bg: '#fffbeb', border: '#fde68a', color: '#b45309', tagBg: '#fef3c7', tagColor: '#92400e' },
+    { flag: '🌐', bg: '#f0fdf4', border: '#bbf7d0', color: '#047857', tagBg: '#dcfce7', tagColor: '#15803d' },
+    { flag: '🌐', bg: '#fff1f2', border: '#fecdd3', color: '#be123c', tagBg: '#ffe4e6', tagColor: '#9f1239' }
+  ];
+  let hash = 0;
+  for (let i = 0; i < (country || '').length; i++) hash += country.charCodeAt(i);
+  const selected = palette[Math.abs(hash) % palette.length];
+  return {
+    flag: '🌐',
+    name: country || 'Global',
+    currency: currency || '',
+    ...selected
+  };
+}
+
+// Mobile International Prices Grid (Placed under / beside official Pakistan price in hero box)
+function renderMobileIntlPrices(prices = [], defaultPrice = 0) {
+  const wrap = document.getElementById('mobileMultiPricesWrap');
+  const grid = document.getElementById('mobileIntlPricesGrid');
+  if (!wrap || !grid) return;
+
+  // Filter out empty amounts and exclude Pakistan (already shown in primary price box)
+  const intlPrices = (prices || []).filter(p => {
+    if (!p || !p.amount || !String(p.amount).trim()) return false;
+    const c = (p.country || '').toLowerCase();
+    return !c.includes('pakistan');
+  });
+
+  if (intlPrices.length === 0) {
+    wrap.style.display = 'none';
     return;
   }
 
-  container.innerHTML = prices.map(pr => `
-    <tr>
-      <td><strong>${pr.country}</strong></td>
-      <td><span style="color:#64748b;font-weight:600;">${pr.currency}</span></td>
-      <td><strong style="color:#0d9488;">${pr.amount}</strong></td>
-    </tr>`).join('');
+  wrap.style.display = 'block';
+  grid.innerHTML = intlPrices.map(pr => {
+    const theme = getCountryPriceTheme(pr.country, pr.currency);
+    const displayName = pr.country || theme.name;
+    const displayCur = pr.currency || theme.currency;
+    return `
+      <div class="mobile-price-chip" style="background: ${theme.bg}; border-color: ${theme.border};">
+        <div class="mobile-price-chip-header">
+          <span style="display:flex; align-items:center; gap:4px; color:${theme.color};">
+            <span>${theme.flag}</span>
+            <span>${displayName}</span>
+          </span>
+          <span style="font-size:9.5px; font-weight:700; background:${theme.tagBg}; color:${theme.tagColor}; padding:1px 5px; border-radius:4px;">
+            ${displayCur}
+          </span>
+        </div>
+        <div class="mobile-price-chip-val" style="color: ${theme.color};">
+          ${pr.amount}
+        </div>
+      </div>`;
+  }).join('');
 }
+window.renderMobileIntlPrices = renderMobileIntlPrices;
+
+// Full Price Table & Desktop Global Prices Cards Grid (Placed before Device Overview on desktop)
+function renderPricesTable(prices = [], defaultPrice = 0) {
+  const tableBody = document.getElementById('phonePricesContainer');
+  const cardsGrid = document.getElementById('desktopPricesCardsGrid');
+
+  // Build combined list of prices: ensure Pakistan is included
+  let list = Array.isArray(prices) ? prices.filter(p => p && p.amount && String(p.amount).trim()) : [];
+  const hasPakistan = list.some(p => (p.country || '').toLowerCase().includes('pakistan'));
+  if (!hasPakistan && defaultPrice > 0) {
+    list = [{ country: 'Pakistan', currency: 'PKR', amount: formatPKR(defaultPrice) }, ...list];
+  } else if (list.length === 0) {
+    list = [{ country: 'Pakistan', currency: 'PKR', amount: defaultPrice > 0 ? formatPKR(defaultPrice) : 'Rumored Price' }];
+  }
+
+  // Render Specifications Price Table
+  if (tableBody) {
+    tableBody.innerHTML = list.map(pr => {
+      const theme = getCountryPriceTheme(pr.country, pr.currency);
+      return `
+        <tr>
+          <td><strong style="display:inline-flex; align-items:center; gap:6px;"><span>${theme.flag}</span> <span>${pr.country}</span></strong></td>
+          <td><span style="color:#64748b;font-weight:600;">${pr.currency || theme.currency}</span></td>
+          <td><strong style="color:${theme.color};">${pr.amount}</strong></td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Render Desktop Modern Colorful Cards Grid
+  if (cardsGrid) {
+    cardsGrid.innerHTML = list.map(pr => {
+      const theme = getCountryPriceTheme(pr.country, pr.currency);
+      return `
+        <div class="desktop-price-country-card" style="background:${theme.bg}; border-color:${theme.border};">
+          <div class="desktop-price-country-header">
+            <span style="display:flex; align-items:center; gap:6px; color:${theme.color};">
+              <span>${theme.flag}</span>
+              <span>${pr.country}</span>
+            </span>
+            <span style="font-size:10px; font-weight:700; background:${theme.tagBg}; color:${theme.tagColor}; padding:1px 6px; border-radius:4px;">
+              ${pr.currency || theme.currency}
+            </span>
+          </div>
+          <div class="desktop-price-country-val" style="color:${theme.color};">
+            ${pr.amount}
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+window.renderPricesTable = renderPricesTable;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // External Store Deals & Affiliate Purchase Links (Where to Buy)
