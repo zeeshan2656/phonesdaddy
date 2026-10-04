@@ -609,6 +609,17 @@
       #specsBlock ~ *:not(#globalPricesSection) { order: 2; }
     }
 
+    /* Photo counter: no background */
+    .gallery-count-pill,
+    .gallery-count-pill:hover {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      color: #334155 !important;
+    }
+
     /* Global prices: cards only on all devices */
     #globalPricesSection .prices-table {
       display: none !important;
