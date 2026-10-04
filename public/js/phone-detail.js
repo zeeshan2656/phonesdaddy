@@ -724,8 +724,9 @@ function renderGalleryStrip(images, primaryImage) {
 
   const hasMultiple = _galleryImages.length > 1;
 
-  if (prevBtn) prevBtn.style.display = hasMultiple ? 'flex' : 'none';
-  if (nextBtn) nextBtn.style.display = hasMultiple ? 'flex' : 'none';
+  // Arrows permanently hidden - navigation via swipe/thumbnails only
+  if (prevBtn) prevBtn.style.display = 'none';
+  if (nextBtn) nextBtn.style.display = 'none';
 
   if (!hasMultiple) {
     if (strip) strip.style.display = 'none';
@@ -1061,9 +1062,10 @@ function renderPricesTable(prices = [], defaultPrice = 0) {
     }).join('');
   }
 
-  // Render Desktop Modern Colorful Cards Grid
+  // Render Desktop Modern Colorful Cards Grid (exclude Pakistan - shown in main price box)
   if (cardsGrid) {
-    cardsGrid.innerHTML = list.map(pr => {
+    const cardsListNoPN = list.filter(pr => !(pr.country || '').toLowerCase().includes('pakistan'));
+    cardsGrid.innerHTML = cardsListNoPN.map(pr => {
       const theme = getCountryPriceTheme(pr.country, pr.currency);
       return `
         <div class="desktop-price-country-card" style="background:${theme.bg}; border-color:${theme.border};">

@@ -497,7 +497,7 @@
       var navLi = document.createElement('li');
       navLi.id = 'pwa-nav-install-link';
       navLi.className = 'mobile-only-link';
-      navLi.innerHTML = '<a href="javascript:void(0)" class="nav-link" style="color: #14b8a6; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg> Install App</a>';
+      navLi.innerHTML = '<a href="javascript:void(0)" class="nav-link" style="white-space: nowrap;"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg> Install App</a>';
       navLi.addEventListener('click', function (e) {
         e.preventDefault();
         window.PhonesDaddyPWA.install();
