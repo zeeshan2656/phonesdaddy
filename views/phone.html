@@ -124,7 +124,8 @@
       background: #ffffff;
       width: 100%;
       max-width: 520px;
-      max-height: 85vh;
+      height: 80vh;
+      max-height: 88vh;
       border-radius: 20px 20px 0 0;
       display: flex;
       flex-direction: column;
@@ -186,6 +187,9 @@
       border: none !important;
       padding: 0 !important;
       margin: 0 !important;
+      max-height: none !important;
+      background: transparent !important;
+      display: block !important;
     }
     .mobile-filter-drawer-body .adv-filter-header {
       display: none !important;
@@ -611,6 +615,22 @@
       #specsBlock { order: 0; }
       #globalPricesSection { order: 1; margin-top: 0 !important; }
       #specsBlock ~ *:not(#globalPricesSection) { order: 2; }
+
+      /* Mobile sidebar: hide all widgets except Related Devices */
+      .gsm-sidebar-col #desktopFilterSlot,
+      .gsm-sidebar-col #widgetSidebarPrices,
+      .gsm-sidebar-col #widgetSidebarPTA,
+      .gsm-sidebar-col #widgetSidebarNews,
+      .gsm-sidebar-col #widgetSidebarReviews,
+      .gsm-sidebar-col #sidebarAdTopBox,
+      .gsm-sidebar-col .gsm-sticky-sidebar,
+      .gsm-sidebar-col #widgetSidebarPopular {
+        display: none !important;
+      }
+      /* Keep Related Devices visible */
+      .gsm-sidebar-col #widgetSidebarRelated {
+        display: block !important;
+      }
     }
 
     /* Photo counter: no background */
@@ -700,134 +720,8 @@
            ==================================================================== -->
       <aside class="gsm-sidebar-col" id="gsmSidebarCol">
 
-        <!-- Advanced Filter Card (Desktop Slot - Sits directly above Prices with normal gap) -->
-        <div id="desktopFilterSlot">
-          <div class="adv-filter-card" id="advFilterCard">
-          
-          <!-- Header -->
-          <div class="adv-filter-header">
-            <div class="adv-filter-title">
-              <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-              </svg>
-              <span>Advanced Filters</span>
-            </div>
-            <button type="button" class="adv-filter-reset" id="btnResetDetailFilters" title="Clear all filters">Reset</button>
-          </div>
-
-          <!-- Section 1: 5G Network Quick Toggle -->
-          <div class="adv-filter-section" style="padding-bottom: 12px;">
-            <label class="adv-toggle-row">
-              <div class="adv-toggle-title">
-                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-                  <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-                  <line x1="12" y1="20" x2="12.01" y2="20"/>
-                </svg>
-                <span>5G Network Only</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="adv-toggle-badge">5G FAST</span>
-                <label class="adv-switch" onclick="event.stopPropagation()">
-                  <input type="checkbox" id="detail5GToggle">
-                  <span class="adv-slider"></span>
-                </label>
-              </div>
-            </label>
-          </div>
-
-          <!-- Section 2: Brands with Live Search & Multi-Select Checkboxes -->
-          <div class="adv-filter-section">
-            <div class="adv-section-title-wrap">
-              <span class="adv-section-title">Brand</span>
-              <span class="adv-badge-count" id="detailBrandBadgeCount">All Brands</span>
-            </div>
-            
-            <div class="adv-search-box">
-              <svg class="adv-search-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.3-4.3"/>
-              </svg>
-              <input type="text" id="detailBrandSearchInput" placeholder="Search brand..." class="adv-search-input" autocomplete="off" aria-label="Search brand">
-            </div>
-
-            <div class="adv-brands-list" id="detailBrandsList">
-              <div style="color: #94a3b8; font-size: 13px; padding: 8px;">Loading brands...</div>
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
-              <span style="font-size: 11px; color: #94a3b8;">Select 1 or more</span>
-              <a href="/brands" style="font-size: 11.5px; font-weight: 700; color: var(--primary); text-decoration: none;">All Brands Directory &rarr;</a>
-            </div>
-          </div>
-
-          <!-- Section 3: Price Range (PKR) with Dual Inputs & Quick Chips -->
-          <div class="adv-filter-section">
-            <div class="adv-section-title-wrap">
-              <span class="adv-section-title">Price Range (PKR)</span>
-            </div>
-
-            <div class="adv-price-inputs">
-              <div class="adv-price-field">
-                <span>Rs</span>
-                <input type="number" id="detailMinPrice" placeholder="Min" min="0" step="5000" class="adv-price-input">
-              </div>
-              <span class="adv-price-sep">–</span>
-              <div class="adv-price-field">
-                <span>Rs</span>
-                <input type="number" id="detailMaxPrice" placeholder="Max" min="0" step="5000" class="adv-price-input">
-              </div>
-            </div>
-
-            <!-- Quick Price Range Preset Chips -->
-            <div class="adv-chips-grid" id="detailPriceChips">
-              <button type="button" class="adv-chip" data-min="" data-max="30000">&lt; 30K</button>
-              <button type="button" class="adv-chip" data-min="30000" data-max="60000">30K–60K</button>
-              <button type="button" class="adv-chip" data-min="60000" data-max="100000">60K–100K</button>
-              <button type="button" class="adv-chip" data-min="100000" data-max="">100K+</button>
-            </div>
-          </div>
-
-          <!-- Section 4: RAM Selection -->
-          <div class="adv-filter-section">
-            <div class="adv-section-title-wrap">
-              <span class="adv-section-title">RAM</span>
-            </div>
-            <div class="adv-chips-grid" id="detailRamChips">
-              <button type="button" class="adv-chip active" data-val="">Any</button>
-              <button type="button" class="adv-chip" data-val="4GB">4 GB</button>
-              <button type="button" class="adv-chip" data-val="6GB">6 GB</button>
-              <button type="button" class="adv-chip" data-val="8GB">8 GB</button>
-              <button type="button" class="adv-chip" data-val="12GB">12 GB+</button>
-            </div>
-          </div>
-
-          <!-- Section 5: Internal Storage -->
-          <div class="adv-filter-section">
-            <div class="adv-section-title-wrap">
-              <span class="adv-section-title">Storage</span>
-            </div>
-            <div class="adv-chips-grid" id="detailStorageChips">
-              <button type="button" class="adv-chip active" data-val="">Any</button>
-              <button type="button" class="adv-chip" data-val="64GB">64 GB</button>
-              <button type="button" class="adv-chip" data-val="128GB">128 GB</button>
-              <button type="button" class="adv-chip" data-val="256GB">256 GB</button>
-              <button type="button" class="adv-chip" data-val="512GB">512 GB+</button>
-            </div>
-          </div>
-
-          <!-- Primary Apply Button -->
-          <button type="button" id="btnApplyDetailFilters" class="adv-apply-btn">
-            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.3-4.3"/>
-            </svg>
-            <span>Show Matching Phones</span>
-          </button>
-
-        </div>
-      </div>
+        <!-- Advanced Filter Card (Desktop Slot placeholder - card lives in mobile drawer by default) -->
+        <div id="desktopFilterSlot"></div>
 
       <!-- 2. PRICES Widget -->
       <div class="gsm-widget-card" id="widgetSidebarPrices">
@@ -1394,35 +1288,42 @@
 
   <!-- Scripts (Deferred for non-blocking rendering) -->
   <script>
-    window.__INITIAL_PHONE__ = {{PHONE_DATA_JSON}};
-
+    // ── Filter positioning: card lives in mobile drawer by default.
+    // On wide screens, move it to desktop sidebar slot.
     function syncMobileFilterPosition() {
-      const filterCard = document.getElementById('advFilterCard');
-      const mobileDrawerBody = document.getElementById('mobileFilterDrawerBody');
-      const desktopSlot = document.getElementById('desktopFilterSlot');
-      if (!filterCard || !desktopSlot) return;
+      var filterCard = document.getElementById('advFilterCard');
+      var desktopSlot = document.getElementById('desktopFilterSlot');
+      var mobileDrawerBody = document.getElementById('mobileFilterDrawerBody');
+      var applyBtn = document.getElementById('btnApplyDetailFilters');
+      if (!filterCard || !desktopSlot || !mobileDrawerBody) return;
 
-      if (window.innerWidth <= 991) {
-        if (mobileDrawerBody && filterCard.parentElement !== mobileDrawerBody) {
-          mobileDrawerBody.appendChild(filterCard);
-        }
-      } else {
+      if (window.innerWidth > 991) {
         if (filterCard.parentElement !== desktopSlot) {
           desktopSlot.appendChild(filterCard);
         }
+        if (applyBtn) applyBtn.style.display = '';
         closeMobileFilterPopup();
+      } else {
+        if (filterCard.parentElement !== mobileDrawerBody) {
+          mobileDrawerBody.appendChild(filterCard);
+        }
+        if (applyBtn) applyBtn.style.display = 'none';
       }
     }
 
     function toggleMobileFilterPopup() {
-      const overlay = document.getElementById('mobileFilterDrawerOverlay');
+      var filterCard = document.getElementById('advFilterCard');
+      var mobileDrawerBody = document.getElementById('mobileFilterDrawerBody');
+      if (filterCard && mobileDrawerBody && filterCard.parentElement !== mobileDrawerBody) {
+        mobileDrawerBody.appendChild(filterCard);
+      }
+      var overlay = document.getElementById('mobileFilterDrawerOverlay');
       if (!overlay) return;
-      syncMobileFilterPosition();
       if (overlay.classList.contains('active')) {
         closeMobileFilterPopup();
       } else {
         overlay.style.display = 'flex';
-        requestAnimationFrame(() => {
+        requestAnimationFrame(function() {
           overlay.classList.add('active');
         });
         document.body.style.overflow = 'hidden';
@@ -1430,11 +1331,11 @@
     }
 
     function closeMobileFilterPopup() {
-      const overlay = document.getElementById('mobileFilterDrawerOverlay');
+      var overlay = document.getElementById('mobileFilterDrawerOverlay');
       if (overlay) {
         overlay.classList.remove('active');
         document.body.style.overflow = '';
-        setTimeout(() => {
+        setTimeout(function() {
           if (!overlay.classList.contains('active')) {
             overlay.style.display = 'none';
           }
@@ -1442,12 +1343,28 @@
       }
     }
 
+    function applyDetailMobileFilters() {
+      var btn = document.getElementById('btnApplyDetailFilters');
+      if (btn) {
+        btn.click();
+      }
+    }
+
+    function resetDetailMobileFilters() {
+      var btn = document.getElementById('btnResetDetailFilters');
+      if (btn) {
+        btn.click();
+      }
+    }
+
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeMobileFilterPopup();
     });
 
-    syncMobileFilterPosition();
     window.addEventListener('resize', syncMobileFilterPosition);
+    document.addEventListener('DOMContentLoaded', syncMobileFilterPosition);
+    window.addEventListener('load', syncMobileFilterPosition);
+    syncMobileFilterPosition();
   </script>
   <script defer src="/js/icons.js?v=2026.20"></script>
   <script defer src="/js/app.js?v=2026.20"></script>
@@ -1468,11 +1385,131 @@
         <button type="button" class="mobile-filter-drawer-close" onclick="closeMobileFilterPopup()" aria-label="Close filters">&times;</button>
       </div>
       <div class="mobile-filter-drawer-body" id="mobileFilterDrawerBody">
-        <!-- #advFilterCard is moved in here when mobile screen <= 991px -->
+
+        <!-- ── Filter Card (lives here by default; JS moves to sidebar on desktop) ── -->
+        <div class="adv-filter-card" id="advFilterCard">
+
+          <!-- Desktop filter header (hidden in mobile drawer via CSS) -->
+          <div class="adv-filter-header">
+            <div class="adv-filter-title">
+              <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              <span>Advanced Filters</span>
+            </div>
+            <button type="button" class="adv-filter-reset" id="btnResetDetailFilters" title="Clear all filters">Reset</button>
+          </div>
+
+          <!-- Section 1: 5G Network Quick Toggle -->
+          <div class="adv-filter-section" style="padding-bottom: 12px;">
+            <label class="adv-toggle-row">
+              <div class="adv-toggle-title">
+                <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                  <line x1="12" y1="20" x2="12.01" y2="20"/>
+                </svg>
+                <span>5G Network Only</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="adv-toggle-badge">5G FAST</span>
+                <label class="adv-switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="detail5GToggle">
+                  <span class="adv-slider"></span>
+                </label>
+              </div>
+            </label>
+          </div>
+
+          <!-- Section 2: Brand -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Brand</span>
+              <span class="adv-badge-count" id="detailBrandBadgeCount">All Brands</span>
+            </div>
+            <div class="adv-search-box">
+              <svg class="adv-search-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+              <input type="text" id="detailBrandSearchInput" placeholder="Search brand..." class="adv-search-input" autocomplete="off" aria-label="Search brand">
+            </div>
+            <div class="adv-brands-list" id="detailBrandsList">
+              <div style="color: #94a3b8; font-size: 13px; padding: 8px;">Loading brands...</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
+              <span style="font-size: 11px; color: #94a3b8;">Select 1 or more</span>
+              <a href="/brands" style="font-size: 11.5px; font-weight: 700; color: var(--primary); text-decoration: none;">All Brands Directory &rarr;</a>
+            </div>
+          </div>
+
+          <!-- Section 3: Price Range -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Price Range (PKR)</span>
+            </div>
+            <div class="adv-price-inputs">
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="detailMinPrice" placeholder="Min" min="0" step="5000" class="adv-price-input">
+              </div>
+              <span class="adv-price-sep">–</span>
+              <div class="adv-price-field">
+                <span>Rs</span>
+                <input type="number" id="detailMaxPrice" placeholder="Max" min="0" step="5000" class="adv-price-input">
+              </div>
+            </div>
+            <div class="adv-chips-grid" id="detailPriceChips">
+              <button type="button" class="adv-chip" data-min="" data-max="30000">&lt; 30K</button>
+              <button type="button" class="adv-chip" data-min="30000" data-max="60000">30K–60K</button>
+              <button type="button" class="adv-chip" data-min="60000" data-max="100000">60K–100K</button>
+              <button type="button" class="adv-chip" data-min="100000" data-max="">100K+</button>
+            </div>
+          </div>
+
+          <!-- Section 4: RAM -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">RAM</span>
+            </div>
+            <div class="adv-chips-grid" id="detailRamChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="4GB">4 GB</button>
+              <button type="button" class="adv-chip" data-val="6GB">6 GB</button>
+              <button type="button" class="adv-chip" data-val="8GB">8 GB</button>
+              <button type="button" class="adv-chip" data-val="12GB">12 GB+</button>
+            </div>
+          </div>
+
+          <!-- Section 5: Storage -->
+          <div class="adv-filter-section">
+            <div class="adv-section-title-wrap">
+              <span class="adv-section-title">Storage</span>
+            </div>
+            <div class="adv-chips-grid" id="detailStorageChips">
+              <button type="button" class="adv-chip active" data-val="">Any</button>
+              <button type="button" class="adv-chip" data-val="64GB">64 GB</button>
+              <button type="button" class="adv-chip" data-val="128GB">128 GB</button>
+              <button type="button" class="adv-chip" data-val="256GB">256 GB</button>
+              <button type="button" class="adv-chip" data-val="512GB">512 GB+</button>
+            </div>
+          </div>
+
+          <!-- Apply Button (desktop sidebar only; mobile uses drawer footer) -->
+          <button type="button" id="btnApplyDetailFilters" class="adv-apply-btn" style="display:none;">
+            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <span>Show Matching Phones</span>
+          </button>
+
+        </div>
       </div>
       <div class="mobile-filter-drawer-footer">
-        <button type="button" class="drawer-btn-reset" onclick="document.getElementById('btnResetDetailFilters')?.click()">Reset All</button>
-        <button type="button" class="drawer-btn-apply" onclick="closeMobileFilterPopup()">Apply &amp; View Results</button>
+        <button type="button" class="drawer-btn-reset" onclick="resetDetailMobileFilters()">Reset All</button>
+        <button type="button" class="drawer-btn-apply" onclick="applyDetailMobileFilters()">Apply &amp; View Results</button>
       </div>
     </div>
   </div>

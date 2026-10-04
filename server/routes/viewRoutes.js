@@ -27,12 +27,14 @@ function clearTemplateCache() {
 }
 
 function getTemplateHtml(templateFile) {
-  if (templateCache.has(templateFile)) {
+  if (process.env.NODE_ENV === 'production' && templateCache.has(templateFile)) {
     return templateCache.get(templateFile);
   }
   const filePath = path.join(viewsDir, templateFile);
   const content = fs.readFileSync(filePath, 'utf8');
-  templateCache.set(templateFile, content);
+  if (process.env.NODE_ENV === 'production') {
+    templateCache.set(templateFile, content);
+  }
   return content;
 }
 
