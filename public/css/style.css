@@ -207,6 +207,18 @@ button, input, select, textarea {
   padding: 0;
 }
 
+/* Hide mobile drawer elements on desktop */
+.nav-drawer-header,
+.nav-drawer-section-label,
+.nav-drawer-backdrop {
+  display: none !important;
+}
+
+/* Hide injected nav drawer SVG icons on desktop (not existing .svg-icon ones) */
+.nav-links .nav-link > svg:not(.svg-icon) {
+  display: none;
+}
+
 .nav-links li {
   white-space: nowrap;
   flex-shrink: 0;
@@ -3225,9 +3237,7 @@ button, input, select, textarea {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    background: rgba(15, 23, 42, 0.55);
     z-index: 10009;
     animation: navBackdropFadeIn 0.25s ease forwards;
   }
@@ -3276,12 +3286,24 @@ button, input, select, textarea {
 
   /* Drawer navigation section */
   .nav-drawer-section-label {
+    display: block !important;
     font-size: 10px;
     font-weight: 800;
     color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 1.2px;
     padding: 18px 20px 8px;
+  }
+
+  /* Override desktop hiding — show drawer elements on mobile */
+  .nav-drawer-header {
+    display: flex !important;
+  }
+  .nav-drawer-backdrop.show {
+    display: block !important;
+  }
+  .nav-links .nav-link > svg:not(.svg-icon) {
+    display: inline-block !important;
   }
 
   @keyframes mobileNavSlide {
