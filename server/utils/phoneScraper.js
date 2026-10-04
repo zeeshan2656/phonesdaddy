@@ -22,11 +22,191 @@ function slugify(text) {
 }
 
 /**
+ * Professional background removal for product photos on plain/solid backgrounds.
+ * Pipeline:
+ *  1. Robust background colour (median of border pixels).
+ *  2. Border flood-fill to find the background region only (inner details preserved).
+ *  3. Halo peel: removes leftover bg-tinted fringe pixels along the cut edge.
+ *  4. 1px erosion + removal of tiny leftover specks (connected components).
+ *  5. Blurred + tightened alpha matte for smooth anti-aliased edges (no jaggies).
+ *  6. Edge defringe: colours of semi-transparent edge pixels are replaced with
+ *     nearby interior colours so no white/grey outline remains on dark phones.
+ */
+async function removeImageBackground(inputBuffer) {
+  try {
+    const { data, info } = await sharp(inputBuffer).rotate().ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { width, height } = info;
+    const ch = 4;
+    const N = width * height;
+
+    // Already has real transparency at the corners -> keep as-is
+    const cornerA = [0, width - 1, (height - 1) * width, N - 1].map(p => data[p * ch + 3]);
+    if (cornerA.every(a => a < 250)) {
+      return await sharp(data, { raw: { width, height, channels: 4 } }).png().toBuffer();
+    }
+
+    // 1. Background colour = per-channel median of all border pixels
+    const rs = [], gs = [], bs = [];
+    const pushPx = (p) => { rs.push(data[p * ch]); gs.push(data[p * ch + 1]); bs.push(data[p * ch + 2]); };
+    for (let x = 0; x < width; x++) { pushPx(x); pushPx((height - 1) * width + x); }
+    for (let y = 1; y < height - 1; y++) { pushPx(y * width); pushPx(y * width + width - 1); }
+    const median = (arr) => { arr.sort((a, b) => a - b); return arr[arr.length >> 1]; };
+    const bgR = median(rs), bgG = median(gs), bgB = median(bs);
+
+    const dist = (p) => {
+      const i = p * ch;
+      const dr = data[i] - bgR, dg = data[i + 1] - bgG, db = data[i + 2] - bgB;
+      return Math.sqrt(dr * dr + dg * dg + db * db);
+    };
+
+    const TOL = 44;        // flood-fill tolerance
+    const PEEL_TOL = 80;   // fringe pixels this close to bg colour get peeled
+
+    // 2. Flood fill from border -> bg mask (1 = background)
+    const bg = new Uint8Array(N);
+    const stack = new Int32Array(N);
+    let sp = 0;
+    const seed = (p) => { if (!bg[p] && dist(p) <= TOL) { bg[p] = 1; stack[sp++] = p; } };
+    for (let x = 0; x < width; x++) { seed(x); seed((height - 1) * width + x); }
+    for (let y = 0; y < height; y++) { seed(y * width); seed(y * width + width - 1); }
+    while (sp > 0) {
+      const p = stack[--sp];
+      const x = p % width;
+      if (x > 0) seed(p - 1);
+      if (x < width - 1) seed(p + 1);
+      if (p >= width) seed(p - width);
+      if (p < N - width) seed(p + width);
+    }
+
+    let bgCount = 0;
+    for (let i = 0; i < N; i++) bgCount += bg[i];
+    if (bgCount < N * 0.02) {
+      // No plain background detected: do not damage the image
+      return await sharp(data, { raw: { width, height, channels: 4 } }).png().toBuffer();
+    }
+
+    const isEdgeFg = (p) => {
+      if (bg[p]) return false;
+      const x = p % width;
+      return (x > 0 && bg[p - 1]) || (x < width - 1 && bg[p + 1]) ||
+             (p >= width && bg[p - width]) || (p < N - width && bg[p + width]);
+    };
+
+    // 3. Halo peel (3 passes): remove bg-tinted fringe on the edge
+    for (let pass = 0; pass < 3; pass++) {
+      const peel = [];
+      for (let p = 0; p < N; p++) {
+        if (isEdgeFg(p) && dist(p) <= PEEL_TOL) peel.push(p);
+      }
+      if (!peel.length) break;
+      for (const p of peel) bg[p] = 1;
+    }
+
+    // 4a. Unconditional 1px erosion of the foreground for a clean cut
+    {
+      const erode = [];
+      for (let p = 0; p < N; p++) if (isEdgeFg(p)) erode.push(p);
+      for (const p of erode) bg[p] = 1;
+    }
+
+    // 4b. Keep only the main object (drop specks / leftover islands)
+    {
+      const label = new Int32Array(N);
+      const sizes = [0];
+      let nextLabel = 1;
+      for (let s = 0; s < N; s++) {
+        if (bg[s] || label[s]) continue;
+        let size = 0;
+        sp = 0;
+        stack[sp++] = s;
+        label[s] = nextLabel;
+        while (sp > 0) {
+          const p = stack[--sp];
+          size++;
+          const x = p % width;
+          const nb = [x > 0 ? p - 1 : -1, x < width - 1 ? p + 1 : -1, p >= width ? p - width : -1, p < N - width ? p + width : -1];
+          for (const q of nb) {
+            if (q >= 0 && !bg[q] && !label[q]) { label[q] = nextLabel; stack[sp++] = q; }
+          }
+        }
+        sizes.push(size);
+        nextLabel++;
+      }
+      const maxSize = Math.max(...sizes);
+      for (let p = 0; p < N; p++) {
+        if (!bg[p] && sizes[label[p]] < maxSize * 0.1) bg[p] = 1;
+      }
+    }
+
+    // 5. Smooth alpha matte: blur the mask then tighten with a smoothstep curve
+    const maskBuf = Buffer.alloc(N);
+    for (let p = 0; p < N; p++) maskBuf[p] = bg[p] ? 0 : 255;
+    const blurRes = await sharp(maskBuf, { raw: { width, height, channels: 1 } })
+      .blur(1.1).raw().toBuffer({ resolveWithObject: true });
+    const blurred = blurRes.data;
+    const bch = blurRes.info.channels;
+    const alpha = new Uint8Array(N);
+    for (let p = 0; p < N; p++) {
+      let t = (blurred[p * bch] - 70) / (210 - 70);
+      t = t < 0 ? 0 : t > 1 ? 1 : t;
+      alpha[p] = Math.round(255 * t * t * (3 - 2 * t));
+    }
+
+    // 6. Defringe: only trust colours at least 2px inside the object
+    const known = new Uint8Array(N);
+    for (let p = 0; p < N; p++) known[p] = bg[p] ? 0 : 1;
+    for (let it = 0; it < 2; it++) {
+      const prev = known.slice();
+      for (let p = 0; p < N; p++) {
+        if (!prev[p]) continue;
+        const x = p % width;
+        if ((x > 0 && !prev[p - 1]) || (x < width - 1 && !prev[p + 1]) ||
+            (p >= width && !prev[p - width]) || (p < N - width && !prev[p + width])) {
+          known[p] = 0;
+        }
+      }
+    }
+    for (let pass = 0; pass < 5; pass++) {
+      const updates = [];
+      for (let p = 0; p < N; p++) {
+        if (known[p] || alpha[p] === 0) continue;
+        const x = p % width, y = (p - x) / width;
+        let r = 0, g = 0, b = 0, c = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = y + dy;
+          if (yy < 0 || yy >= height) continue;
+          for (let dx = -1; dx <= 1; dx++) {
+            const xx = x + dx;
+            if (xx < 0 || xx >= width) continue;
+            const q = yy * width + xx;
+            if (known[q]) { r += data[q * ch]; g += data[q * ch + 1]; b += data[q * ch + 2]; c++; }
+          }
+        }
+        if (c) updates.push([p, Math.round(r / c), Math.round(g / c), Math.round(b / c)]);
+      }
+      if (!updates.length) break;
+      for (const [p, r, g, b] of updates) {
+        data[p * ch] = r; data[p * ch + 1] = g; data[p * ch + 2] = b;
+        known[p] = 1;
+      }
+    }
+
+    for (let p = 0; p < N; p++) data[p * ch + 3] = alpha[p];
+
+    return await sharp(data, { raw: { width, height, channels: 4 } }).png().toBuffer();
+  } catch (err) {
+    console.error('removeImageBackground error, returning original buffer:', err.message);
+    return inputBuffer;
+  }
+}
+
+/**
+ * Legacy simple background removal (kept for reference / fallback).
  * Remove plain/solid background from mobile phone product images
  * Uses boundary flood-fill (BFS) with RGB Euclidean distance and edge feathering.
  * Preserves inner phone details, screen, and icons while making outer background transparent.
  */
-async function removeImageBackground(inputBuffer) {
+async function removeImageBackgroundLegacy(inputBuffer) {
   try {
     const image = sharp(inputBuffer);
     const { data, info } = await image.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
