@@ -73,10 +73,10 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
 
   // Versioned static asset URLs for 1-year immutable caching & instant cache-busting on build
   html = html
-    .replace(/\/css\/style\.css(\?v=[^"']*)?/g, '/css/style.css?v=2026.32')
-    .replace(/\/js\/app\.js(\?v=[^"']*)?/g, '/js/app.js?v=2026.32')
-    .replace(/\/js\/icons\.js(\?v=[^"']*)?/g, '/js/icons.js?v=2026.32')
-    .replace(/\/js\/phone-detail\.js(\?v=[^"']*)?/g, '/js/phone-detail.js?v=2026.32');
+    .replace(/\/css\/style\.css(\?v=[^"']*)?/g, '/css/style.css?v=2026.33')
+    .replace(/\/js\/app\.js(\?v=[^"']*)?/g, '/js/app.js?v=2026.33')
+    .replace(/\/js\/icons\.js(\?v=[^"']*)?/g, '/js/icons.js?v=2026.33')
+    .replace(/\/js\/phone-detail\.js(\?v=[^"']*)?/g, '/js/phone-detail.js?v=2026.33');
 
   const bundle = await SettingsModel.getViewSnippetsBundle();
   const branding = bundle.branding;

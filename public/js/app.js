@@ -224,19 +224,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Professional Mobile Navigation Drawer ──
+  // ── Mobile Navigation Menu ──
   if (toggleBtn && navLinks) {
-    // Create backdrop overlay
+    // Create backdrop overlay (appended to site-header for correct stacking)
     let navBackdrop = document.querySelector('.nav-drawer-backdrop');
     if (!navBackdrop) {
       navBackdrop = document.createElement('div');
       navBackdrop.className = 'nav-drawer-backdrop';
-      document.body.appendChild(navBackdrop);
+      const siteHeader = document.querySelector('.site-header');
+      if (siteHeader) siteHeader.appendChild(navBackdrop);
+      else document.body.appendChild(navBackdrop);
     }
 
     // Inject drawer header with branding + close button (once)
     if (!navLinks.querySelector('.nav-drawer-header')) {
-      // Grab brand info from the page logo
       const pageLogo = document.querySelector('.brand-logo');
       const logoHTML = pageLogo ? pageLogo.innerHTML : '<div class="brand-icon">P</div><span>PhonesDaddy</span>';
 
@@ -244,19 +245,18 @@ document.addEventListener('DOMContentLoaded', () => {
       headerDiv.className = 'nav-drawer-header';
       headerDiv.innerHTML = `
         <a href="/" class="nav-drawer-brand">${logoHTML}</a>
-        <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">
+        <button class="nav-drawer-close" aria-label="Close menu">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       `;
       navLinks.insertBefore(headerDiv, navLinks.firstChild);
 
-      // Add section label
       const sectionLabel = document.createElement('div');
       sectionLabel.className = 'nav-drawer-section-label';
-      sectionLabel.textContent = 'Navigation';
+      sectionLabel.textContent = 'Menu';
       headerDiv.insertAdjacentElement('afterend', sectionLabel);
 
-      // Add icons to nav links that don't have one
+      // Add icons to nav links
       const NAV_ICONS = {
         'Home': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
         'Mobiles': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>',
@@ -264,83 +264,47 @@ document.addEventListener('DOMContentLoaded', () => {
         'Compare': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
         'News': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/></svg>',
       };
-
       navLinks.querySelectorAll('.nav-link').forEach(link => {
-        if (link.querySelector('svg')) return; // Already has an icon
-        const text = link.textContent.trim().split(/\s+/)[0]; // First word
+        if (link.querySelector('svg')) return;
+        const text = link.textContent.trim().split(/\s+/)[0];
         const icon = NAV_ICONS[text];
         if (icon) link.insertAdjacentHTML('afterbegin', icon);
       });
     }
 
-    function openDrawer() {
-      navLinks.style.display = 'flex';
+    function openMenu() {
+      navLinks.classList.add('show');
       navBackdrop.classList.add('show');
-      // Force reflow then animate
-      requestAnimationFrame(() => {
-        navLinks.classList.add('show');
-      });
-      document.body.style.overflow = 'hidden';
       toggleBtn.innerHTML = getUiIcon('close');
       toggleBtn.setAttribute('aria-expanded', 'true');
     }
 
-    function closeDrawer() {
+    function closeMenu() {
       navLinks.classList.remove('show');
       navBackdrop.classList.remove('show');
-      document.body.style.overflow = '';
       toggleBtn.innerHTML = getUiIcon('menu');
       toggleBtn.setAttribute('aria-expanded', 'false');
-      // Hide after transition
-      setTimeout(() => {
-        if (!navLinks.classList.contains('show')) {
-          navLinks.style.display = 'none';
-        }
-      }, 340);
     }
 
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-
-      // Close mobile search if open
       if (searchWrapper && searchWrapper.classList.contains('mobile-open')) {
         searchWrapper.classList.remove('mobile-open');
-        if (searchToggleBtn) {
-          searchToggleBtn.classList.remove('active');
-          searchToggleBtn.innerHTML = getUiIcon('search');
-        }
+        if (searchToggleBtn) { searchToggleBtn.classList.remove('active'); searchToggleBtn.innerHTML = getUiIcon('search'); }
       }
-
-      if (navLinks.classList.contains('show')) {
-        closeDrawer();
-      } else {
-        openDrawer();
-      }
+      navLinks.classList.contains('show') ? closeMenu() : openMenu();
     });
 
-    // Close button inside drawer
     navLinks.addEventListener('click', (e) => {
-      if (e.target.closest('.nav-drawer-close')) {
-        closeDrawer();
-      }
+      if (e.target.closest('.nav-drawer-close') || e.target.closest('.nav-link')) closeMenu();
     });
 
-    // Backdrop click closes
-    navBackdrop.addEventListener('click', closeDrawer);
+    navBackdrop.addEventListener('click', closeMenu);
 
-    // Close menu when a nav link is clicked
-    navLinks.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', closeDrawer);
-    });
-
-    // Close menu on outside click
     document.addEventListener('click', (e) => {
       if (navLinks.classList.contains('show') &&
           !navLinks.contains(e.target) &&
-          !toggleBtn.contains(e.target) &&
-          !navBackdrop.contains(e.target)) {
-        closeDrawer();
-      }
+          !toggleBtn.contains(e.target)) closeMenu();
     });
   }
 

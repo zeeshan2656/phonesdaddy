@@ -3206,109 +3206,81 @@ button, input, select, textarea {
     background: #f1f5f9;
   }
 
-  /* ─── Professional Mobile Navigation Drawer ─── */
+  /* ─── Clean Mobile Navigation Dropdown (No blur, no fixed transitions) ─── */
   .nav-links {
     display: none;
-    position: fixed;
-    top: 0;
-    right: -100%;
-    bottom: 0;
-    width: 280px;
-    max-width: 85vw;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
     background: #ffffff;
     flex-direction: column;
-    padding: 0;
-    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.18);
-    gap: 0;
-    z-index: 10010;
+    padding: 8px 12px 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.13), 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-top: 3px solid var(--primary);
+    gap: 2px;
+    z-index: 999;
+    max-height: calc(100vh - 56px);
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    transition: right 0.32s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .nav-links.show {
     display: flex;
-    right: 0;
-    animation: none;
+    animation: mobileNavDrop 0.2s ease-out both;
   }
 
-  /* Backdrop overlay behind drawer */
+  @keyframes mobileNavDrop {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Drawer header & backdrop — mobile only */
   .nav-drawer-backdrop {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.55);
-    z-index: 10009;
-    animation: navBackdropFadeIn 0.25s ease forwards;
+    background: rgba(15, 23, 42, 0.4);
+    z-index: 998;
   }
-  .nav-drawer-backdrop.show { display: block; }
-  @keyframes navBackdropFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .nav-drawer-backdrop.show { display: block !important; }
 
-  /* Drawer header with branding */
+  /* Show drawer header on mobile */
   .nav-drawer-header {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: 10px 8px 14px;
     border-bottom: 1px solid #f1f5f9;
-    flex-shrink: 0;
+    margin-bottom: 6px;
   }
   .nav-drawer-header .nav-drawer-brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
     color: var(--dark);
     text-decoration: none;
   }
-  .nav-drawer-header .nav-drawer-brand .brand-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-  }
   .nav-drawer-close {
-    width: 34px;
-    height: 34px;
+    width: 32px; height: 32px;
     border-radius: 50%;
-    background: #f1f5f9;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #f1f5f9; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     color: #64748b;
-    transition: background 0.15s, color 0.15s;
-    flex-shrink: 0;
   }
-  .nav-drawer-close:hover { background: #e2e8f0; color: #0f172a; }
-  .nav-drawer-close svg { width: 16px; height: 16px; }
+  .nav-drawer-close svg { width: 15px; height: 15px; }
 
-  /* Drawer navigation section */
   .nav-drawer-section-label {
     display: block !important;
-    font-size: 10px;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    padding: 18px 20px 8px;
+    font-size: 10px; font-weight: 800; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    padding: 6px 8px 4px;
   }
 
-  /* Override desktop hiding — show drawer elements on mobile */
-  .nav-drawer-header {
-    display: flex !important;
-  }
-  .nav-drawer-backdrop.show {
-    display: block !important;
-  }
+  /* Show injected icons on mobile */
   .nav-links .nav-link > svg:not(.svg-icon) {
     display: inline-block !important;
-  }
-
-  @keyframes mobileNavSlide {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
   }
 
   /* ── Mobile Filters Collapsible Drawer & Closed Filter Groups ── */
