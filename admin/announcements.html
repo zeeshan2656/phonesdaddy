@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Announcements — PhonesDaddy Admin</title>
+  <link rel="stylesheet" href="/css/admin.css?v=2026.5">
+</head>
+<body class="admin-body">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">
+      <div style="display: flex; align-items: center; gap: 10px;" id="adminSidebarBrand">
+        <div class="brand-icon" style="width: 28px; height: 28px; font-size: 16px;">P</div>
+        <span>PhonesDaddy</span>
+      </div>
+      <button class="admin-sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="Close Navigation"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    </div>
+    <ul class="admin-nav">
+      <li><a href="/admin/dashboard" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a></li>
+      <li><a href="/admin/phones" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg> Phones</a></li>
+      <li><a href="/admin/brands" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg> Brands</a></li>
+      <li><a href="/admin/news" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/></svg> Blog &amp; News</a></li>
+      <li><a href="/admin/announcements" class="admin-nav-link active"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Announcements</a></li>
+      <li><a href="/admin/reviews" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Reviews &amp; Comments</a></li>
+      <li>
+        <a href="/admin/pwa" class="admin-nav-link" id="navPwaLink">
+          <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/><path d="m9 6 3-3 3 3"/><path d="M12 3v8"/></svg>
+          <span>Application (PWA)</span>
+        </a>
+      </li>
+      <li class="admin-nav-item-dropdown collapsed" id="navSettingsDropdown">
+        <div class="admin-nav-link admin-nav-dropdown-toggle" onclick="toggleSettingsDropdown(event)">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</span>
+          </div>
+          <span class="dropdown-arrow">▼</span>
+        </div>
+        <ul class="admin-nav-submenu" id="settingsSubmenu">
+          <li><a href="/admin/settings#branding" class="admin-nav-sublink"><span>🎨 Site Identity &amp; Branding</span></a></li>
+          <li><a href="/admin/settings#general" class="admin-nav-sublink"><span>🌐 General &amp; Snippets</span></a></li>
+          <li><a href="/admin/settings#ad-placements" class="admin-nav-sublink"><span>📢 Ad Placements</span></a></li>
+          <li><a href="/admin/settings#profile" class="admin-nav-sublink"><span>👤 Admin Profile</span></a></li>
+          <li><a href="/admin/settings#users" class="admin-nav-sublink"><span>👥 Team &amp; User Access</span></a></li>
+        </ul>
+      </li>
+      <li><a href="/" target="_blank" class="admin-nav-link"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> Public Site</a></li>
+    </ul>
+    <div class="admin-sidebar-footer">
+      <span>Logged in as <strong>Admin</strong></span>
+      <button onclick="handleLogout()" style="background: none; border: none; color: #ef4444; font-weight: 700; cursor: pointer;">Logout</button>
+    </div>
+  </aside>
+
+  <div class="admin-sidebar-backdrop" onclick="closeAdminSidebar()"></div>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar-title-wrap">
+        <button type="button" class="admin-hamburger-btn" onclick="toggleAdminSidebar()" aria-label="Toggle Navigation Menu"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button>
+        <div>
+          <h2>Announcement Popups</h2>
+          <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 2px;">
+            Create site-wide popup announcements for your visitors
+          </p>
+        </div>
+      </div>
+      <div class="admin-topbar-actions">
+        <button onclick="openAnnModal()" class="btn btn-primary">+ New Announcement</button>
+      </div>
+    </header>
+
+    <div id="adminToast" class="admin-toast" style="display:none;"></div>
+
+    <div class="admin-content">
+
+      <!-- Stats Row -->
+      <div class="admin-stats-grid" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-title">Total Announcements</div>
+          <div class="stat-value" id="statTotal">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title" style="color: #0d9488;">🟢 Currently Active</div>
+          <div class="stat-value" id="statActive" style="color: #0d9488;">-</div>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-card-title">All Announcements</div>
+          <button onclick="loadAnnList()" class="btn btn-outline btn-sm">🔄 Refresh</button>
+        </div>
+
+        <div class="admin-table-responsive">
+          <table class="admin-table" id="annTable">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Message</th>
+                <th>Color</th>
+                <th>Status</th>
+                <th>Show Once</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="annTableBody">
+              <tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ══════════ MODAL ══════════ -->
+  <div class="admin-modal-backdrop" id="annModal" style="display: none;">
+    <div class="admin-modal-box" style="width: 560px; max-width: 100%;">
+      <!-- Modal Header -->
+      <div style="padding: 20px 24px; border-bottom: 1px solid var(--admin-border); display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--admin-dark); margin: 0;" id="annModalTitle">New Announcement</h3>
+        <button onclick="closeAnnModal()" style="background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 22px; line-height: 1;" title="Close">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div style="padding: 24px; overflow-y: auto; max-height: 70vh;">
+        <input type="hidden" id="annId">
+
+        <div class="form-group">
+          <label class="form-label">Title *</label>
+          <input type="text" id="annTitle" class="form-control" placeholder="e.g. Big Sale This Weekend!">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Message *</label>
+          <textarea id="annMessage" class="form-control" rows="3" placeholder="Enter announcement details..." style="resize: vertical;"></textarea>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">CTA Button Text <span style="color: #94a3b8; font-weight: 400;">(optional)</span></label>
+            <input type="text" id="annCtaText" class="form-control" placeholder="e.g. Learn More">
+          </div>
+          <div class="form-group">
+            <label class="form-label">CTA URL <span style="color: #94a3b8; font-weight: 400;">(optional)</span></label>
+            <input type="url" id="annCtaUrl" class="form-control" placeholder="https://...">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Accent Color</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;" id="annColorSwatches"></div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+            <input type="color" id="annBgColor" value="#0d9488" style="width: 36px; height: 36px; border: 1px solid var(--admin-border); border-radius: var(--admin-radius); cursor: pointer; padding: 2px;">
+            <input type="text" id="annBgHex" class="form-control" value="#0d9488" style="width: 100px; font-family: monospace; font-size: 13px;">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Start Date <span style="color: #94a3b8; font-weight: 400;">(optional)</span></label>
+            <input type="datetime-local" id="annStart" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date <span style="color: #94a3b8; font-weight: 400;">(optional)</span></label>
+            <input type="datetime-local" id="annEnd" class="form-control">
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; padding: 16px; background: #f8fafc; border: 1px solid var(--admin-border); border-radius: var(--admin-radius); margin-bottom: 18px;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--admin-dark);">
+            <input type="checkbox" id="annIsActive" style="width: 16px; height: 16px; accent-color: var(--admin-primary);">
+            Activate immediately
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--admin-dark);">
+            <input type="checkbox" id="annShowOnce" checked style="width: 16px; height: 16px; accent-color: var(--admin-primary);">
+            Show once per session
+          </label>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding: 16px 24px; border-top: 1px solid var(--admin-border); display: flex; justify-content: flex-end; gap: 10px;">
+        <button onclick="closeAnnModal()" class="btn btn-outline">Cancel</button>
+        <button onclick="saveAnn()" class="btn btn-primary" id="annSaveBtn">Save Announcement</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin.js"></script>
+  <script>
+    // ── Color presets ──
+    const PRESETS = ['#0d9488','#0ea5e9','#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#0f172a'];
+    let selectedColor = '#0d9488';
+
+    function renderColorSwatches(active) {
+      document.getElementById('annColorSwatches').innerHTML = PRESETS.map(c => {
+        const sel = c === active;
+        return '<div onclick="selectColor(\'' + c + '\')" style="width:32px;height:32px;border-radius:var(--admin-radius);background:' + c +
+          ';cursor:pointer;border:2.5px solid ' + (sel ? '#0f172a' : 'transparent') +
+          ';display:flex;align-items:center;justify-content:center;transition:transform 0.12s;' +
+          (sel ? 'transform:scale(1.12);' : '') + '">' +
+          (sel ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : '') +
+          '</div>';
+      }).join('');
+    }
+
+    function selectColor(c) {
+      selectedColor = c;
+      document.getElementById('annBgColor').value = c;
+      document.getElementById('annBgHex').value = c;
+      renderColorSwatches(c);
+    }
+
+    document.getElementById('annBgColor').addEventListener('input', function() {
+      selectedColor = this.value;
+      document.getElementById('annBgHex').value = this.value;
+      renderColorSwatches(this.value);
+    });
+
+    document.getElementById('annBgHex').addEventListener('input', function() {
+      if (/^#[0-9a-f]{6}$/i.test(this.value)) {
+        selectedColor = this.value;
+        document.getElementById('annBgColor').value = this.value;
+        renderColorSwatches(this.value);
+      }
+    });
+
+    // ── Modal ──
+    function openAnnModal(id) {
+      ['annId','annTitle','annMessage','annCtaText','annCtaUrl','annStart','annEnd'].forEach(i => document.getElementById(i).value = '');
+      document.getElementById('annIsActive').checked = false;
+      document.getElementById('annShowOnce').checked = true;
+      document.getElementById('annModalTitle').textContent = id ? 'Edit Announcement' : 'New Announcement';
+      selectColor('#0d9488');
+      if (id) { document.getElementById('annId').value = id; loadForEdit(id); }
+      document.getElementById('annModal').style.display = 'flex';
+    }
+
+    function closeAnnModal() {
+      document.getElementById('annModal').style.display = 'none';
+    }
+
+    async function loadForEdit(id) {
+      try {
+        const r = await fetch('/api/announcements/admin/' + id);
+        const j = await r.json();
+        if (!j.success) return;
+        const d = j.data;
+        document.getElementById('annTitle').value = d.title || '';
+        document.getElementById('annMessage').value = d.message || '';
+        document.getElementById('annCtaText').value = d.cta_text || '';
+        document.getElementById('annCtaUrl').value = d.cta_url || '';
+        document.getElementById('annIsActive').checked = !!d.is_active;
+        document.getElementById('annShowOnce').checked = d.show_once !== 0;
+        if (d.start_date) document.getElementById('annStart').value = d.start_date.slice(0, 16);
+        if (d.end_date) document.getElementById('annEnd').value = d.end_date.slice(0, 16);
+        selectColor(d.bg_color || '#0d9488');
+      } catch (e) { console.error(e); }
+    }
+
+    async function saveAnn() {
+      const id = document.getElementById('annId').value;
+      const title = document.getElementById('annTitle').value.trim();
+      const message = document.getElementById('annMessage').value.trim();
+      if (!title || !message) { showAdminToast('Title and Message are required', 'error'); return; }
+
+      const btn = document.getElementById('annSaveBtn');
+      btn.disabled = true; btn.textContent = 'Saving...';
+
+      try {
+        const res = await fetch(id ? '/api/announcements/admin/' + id : '/api/announcements/admin', {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title, message,
+            emoji: '',
+            cta_text: document.getElementById('annCtaText').value.trim(),
+            cta_url: document.getElementById('annCtaUrl').value.trim(),
+            bg_color: selectedColor,
+            text_color: '#ffffff',
+            is_active: document.getElementById('annIsActive').checked,
+            show_once: document.getElementById('annShowOnce').checked,
+            start_date: document.getElementById('annStart').value || null,
+            end_date: document.getElementById('annEnd').value || null
+          })
+        });
+        const j = await res.json();
+        if (j.success) { showAdminToast(j.message || 'Saved!', 'success'); closeAnnModal(); loadAnnList(); }
+        else showAdminToast(j.message || 'Error saving', 'error');
+      } catch (e) { showAdminToast('Network error', 'error'); }
+      finally { btn.disabled = false; btn.textContent = 'Save Announcement'; }
+    }
+
+    async function toggleAnn(id) {
+      try {
+        const r = await fetch('/api/announcements/admin/' + id + '/toggle', { method: 'PATCH' });
+        const j = await r.json();
+        if (j.success) { showAdminToast(j.message, 'success'); loadAnnList(); }
+        else showAdminToast('Failed', 'error');
+      } catch (e) { showAdminToast('Network error', 'error'); }
+    }
+
+    async function deleteAnn(id, title) {
+      if (!confirm('Delete announcement "' + title + '"? This cannot be undone.')) return;
+      try {
+        const r = await fetch('/api/announcements/admin/' + id, { method: 'DELETE' });
+        const j = await r.json();
+        if (j.success) { showAdminToast('Deleted successfully', 'success'); loadAnnList(); }
+        else showAdminToast('Failed', 'error');
+      } catch (e) { showAdminToast('Network error', 'error'); }
+    }
+
+    function esc(s) { return s ? s.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
+    async function loadAnnList() {
+      const tbody = document.getElementById('annTableBody');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#94a3b8;">Loading...</td></tr>';
+      try {
+        const r = await fetch('/api/announcements/admin/list');
+        const j = await r.json();
+        if (!j.success) throw new Error();
+        const items = j.data || [];
+
+        // Stats
+        document.getElementById('statTotal').textContent = items.length;
+        document.getElementById('statActive').textContent = items.filter(i => i.is_active).length;
+
+        if (!items.length) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:48px;color:#94a3b8;"><div style="font-size:14px;font-weight:600;">No announcements yet</div><div style="font-size:13px;margin-top:4px;">Click "+ New Announcement" to create one</div></td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = items.map(item => {
+          const on = !!item.is_active;
+          const c = item.bg_color || '#0d9488';
+          return '<tr>' +
+            '<td><strong style="color: var(--admin-dark);">' + esc(item.title) + '</strong></td>' +
+            '<td style="max-width:260px;"><div style="color:#64748b;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word;max-height:60px;overflow:hidden;">' + esc(item.message) + '</div></td>' +
+            '<td><div style="width:24px;height:24px;border-radius:var(--admin-radius-sm);background:' + c + ';border:1px solid rgba(0,0,0,0.1);"></div></td>' +
+            '<td><span class="phone-card-badge ' + (on ? 'badge-available' : 'badge-discontinued') + '">' + (on ? 'ACTIVE' : 'INACTIVE') + '</span></td>' +
+            '<td style="font-size:13px;color:#64748b;">' + (item.show_once ? 'Yes' : 'No') + '</td>' +
+            '<td style="text-align:right;">' +
+              '<div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">' +
+                '<button class="btn btn-sm ' + (on ? 'btn-outline' : 'btn-primary') + '" onclick="toggleAnn(' + item.id + ')">' + (on ? 'Deactivate' : 'Activate') + '</button>' +
+                '<button class="btn btn-sm btn-outline" onclick="openAnnModal(' + item.id + ')">Edit</button>' +
+                '<button class="btn btn-sm" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;" onclick="deleteAnn(' + item.id + ',\'' + esc(item.title).replace(/'/g, "\\'") + '\')">Delete</button>' +
+              '</div>' +
+            '</td>' +
+          '</tr>';
+        }).join('');
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#ef4444;">Failed to load announcements</td></tr>';
+      }
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('annModal').addEventListener('click', function(e) {
+      if (e.target === this) closeAnnModal();
+    });
+
+    // Init
+    renderColorSwatches('#0d9488');
+    loadAnnList();
+  </script>
+</body>
+</html>

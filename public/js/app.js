@@ -224,8 +224,81 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Mobile navigation hamburger drawer
+  // ── Professional Mobile Navigation Drawer ──
   if (toggleBtn && navLinks) {
+    // Create backdrop overlay
+    let navBackdrop = document.querySelector('.nav-drawer-backdrop');
+    if (!navBackdrop) {
+      navBackdrop = document.createElement('div');
+      navBackdrop.className = 'nav-drawer-backdrop';
+      document.body.appendChild(navBackdrop);
+    }
+
+    // Inject drawer header with branding + close button (once)
+    if (!navLinks.querySelector('.nav-drawer-header')) {
+      // Grab brand info from the page logo
+      const pageLogo = document.querySelector('.brand-logo');
+      const logoHTML = pageLogo ? pageLogo.innerHTML : '<div class="brand-icon">P</div><span>PhonesDaddy</span>';
+
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'nav-drawer-header';
+      headerDiv.innerHTML = `
+        <a href="/" class="nav-drawer-brand">${logoHTML}</a>
+        <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      `;
+      navLinks.insertBefore(headerDiv, navLinks.firstChild);
+
+      // Add section label
+      const sectionLabel = document.createElement('div');
+      sectionLabel.className = 'nav-drawer-section-label';
+      sectionLabel.textContent = 'Navigation';
+      headerDiv.insertAdjacentElement('afterend', sectionLabel);
+
+      // Add icons to nav links that don't have one
+      const NAV_ICONS = {
+        'Home': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+        'Mobiles': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>',
+        'Brands': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>',
+        'Compare': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
+        'News': '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/></svg>',
+      };
+
+      navLinks.querySelectorAll('.nav-link').forEach(link => {
+        if (link.querySelector('svg')) return; // Already has an icon
+        const text = link.textContent.trim().split(/\s+/)[0]; // First word
+        const icon = NAV_ICONS[text];
+        if (icon) link.insertAdjacentHTML('afterbegin', icon);
+      });
+    }
+
+    function openDrawer() {
+      navLinks.style.display = 'flex';
+      navBackdrop.classList.add('show');
+      // Force reflow then animate
+      requestAnimationFrame(() => {
+        navLinks.classList.add('show');
+      });
+      document.body.style.overflow = 'hidden';
+      toggleBtn.innerHTML = getUiIcon('close');
+      toggleBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeDrawer() {
+      navLinks.classList.remove('show');
+      navBackdrop.classList.remove('show');
+      document.body.style.overflow = '';
+      toggleBtn.innerHTML = getUiIcon('menu');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      // Hide after transition
+      setTimeout(() => {
+        if (!navLinks.classList.contains('show')) {
+          navLinks.style.display = 'none';
+        }
+      }, 340);
+    }
+
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
 
@@ -238,28 +311,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      const isOpen = navLinks.classList.toggle('show');
-      toggleBtn.innerHTML = isOpen ? getUiIcon('close') : getUiIcon('menu');
-      toggleBtn.setAttribute('aria-expanded', String(isOpen));
+      if (navLinks.classList.contains('show')) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
     });
+
+    // Close button inside drawer
+    navLinks.addEventListener('click', (e) => {
+      if (e.target.closest('.nav-drawer-close')) {
+        closeDrawer();
+      }
+    });
+
+    // Backdrop click closes
+    navBackdrop.addEventListener('click', closeDrawer);
 
     // Close menu when a nav link is clicked
     navLinks.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('show');
-        toggleBtn.innerHTML = getUiIcon('menu');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-      });
+      link.addEventListener('click', closeDrawer);
     });
 
     // Close menu on outside click
     document.addEventListener('click', (e) => {
       if (navLinks.classList.contains('show') &&
           !navLinks.contains(e.target) &&
-          !toggleBtn.contains(e.target)) {
-        navLinks.classList.remove('show');
-        toggleBtn.innerHTML = getUiIcon('menu');
-        toggleBtn.setAttribute('aria-expanded', 'false');
+          !toggleBtn.contains(e.target) &&
+          !navBackdrop.contains(e.target)) {
+        closeDrawer();
       }
     });
   }
@@ -387,5 +467,216 @@ async function loadDynamicFooterPages() {
     s.src = '/js/pwa.js?v=1.0.1';
     s.defer = true;
     document.head.appendChild(s);
+  }
+})();
+
+// ==========================================================================
+//  Announcement Popup — Professional themed popup for site visitors
+// ==========================================================================
+(function initAnnouncementPopup() {
+  if (window.location.pathname.startsWith('/admin')) return;
+
+  const STORAGE_KEY = 'pd_ann_dismissed';
+
+  function injectStyles() {
+    if (document.getElementById('ann-popup-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'ann-popup-styles';
+    style.textContent = `
+      #annPopupOverlay {
+        position: fixed; inset: 0; z-index: 99999;
+        background: rgba(15,23,42,0.45);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px;
+        animation: annOverlayIn 0.25s ease forwards;
+      }
+      @keyframes annOverlayIn { from{opacity:0} to{opacity:1} }
+      @keyframes annCardIn {
+        from { opacity:0; transform: translateY(24px) scale(0.96); }
+        to   { opacity:1; transform: translateY(0) scale(1); }
+      }
+      @keyframes annCardOut {
+        from { opacity:1; transform: translateY(0) scale(1); }
+        to   { opacity:0; transform: translateY(18px) scale(0.97); }
+      }
+      #annPopupCard {
+        background: #ffffff;
+        border-radius: 14px;
+        max-width: 460px;
+        width: 100%;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08);
+        animation: annCardIn 0.32s cubic-bezier(0.16,1,0.3,1) forwards;
+        overflow: hidden;
+        position: relative;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      #annPopupCard.closing {
+        animation: annCardOut 0.22s ease forwards;
+      }
+      /* Accent top bar — uses the admin-set bg color */
+      .ann-card-accent {
+        height: 4px;
+        width: 100%;
+      }
+      .ann-card-body {
+        padding: 24px 24px 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .ann-card-icon-wrap {
+        width: 44px; height: 44px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      .ann-card-icon-wrap svg {
+        width: 22px; height: 22px;
+      }
+      .ann-card-content { flex: 1; min-width: 0; }
+      .ann-card-label {
+        font-size: 10px; font-weight: 800; letter-spacing: 1px;
+        text-transform: uppercase; margin-bottom: 4px;
+      }
+      .ann-card-title {
+        font-size: 16px; font-weight: 800; color: #0f172a;
+        line-height: 1.35; margin-bottom: 8px;
+      }
+      .ann-card-msg {
+        font-size: 13.5px; color: #475569; line-height: 1.65;
+        white-space: pre-wrap;
+      }
+      .ann-close-btn {
+        position: absolute; top: 14px; right: 14px;
+        width: 28px; height: 28px; border-radius: 50%;
+        background: #f1f5f9; border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        color: #64748b; transition: background 0.15s, color 0.15s;
+        flex-shrink: 0;
+      }
+      .ann-close-btn:hover { background: #e2e8f0; color: #0f172a; }
+      .ann-close-btn svg { width: 14px; height: 14px; }
+      .ann-card-footer {
+        padding: 14px 24px 20px;
+        display: flex; align-items: center; gap: 12px;
+        border-top: 1px solid #f1f5f9;
+      }
+      .ann-cta-btn {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 9px 20px; border-radius: 8px;
+        font-size: 13px; font-weight: 700;
+        text-decoration: none; border: none; cursor: pointer;
+        transition: opacity 0.15s, transform 0.12s;
+        color: #ffffff;
+      }
+      .ann-cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+      .ann-cta-btn svg { width: 13px; height: 13px; }
+      .ann-dismiss-btn {
+        font-size: 12px; color: #94a3b8; cursor: pointer;
+        background: none; border: none; text-decoration: none;
+        transition: color 0.15s; padding: 0;
+      }
+      .ann-dismiss-btn:hover { color: #64748b; }
+      @media (max-width: 480px) {
+        #annPopupCard { border-radius: 12px; }
+        .ann-card-body { padding: 20px 18px 16px; gap: 12px; }
+        .ann-card-footer { padding: 12px 18px 18px; }
+        .ann-card-title { font-size: 15px; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Megaphone SVG icon (colorless, stroked)
+  const ICON_MEGAPHONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>`;
+  const ICON_ARROW = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`;
+  const ICON_CLOSE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+
+  function closePopup(annId, showOnce) {
+    const overlay = document.getElementById('annPopupOverlay');
+    const card = document.getElementById('annPopupCard');
+    if (!overlay) return;
+    if (showOnce) sessionStorage.setItem(STORAGE_KEY, String(annId));
+    card.classList.add('closing');
+    setTimeout(() => overlay.remove(), 250);
+  }
+
+  function renderPopup(ann) {
+    if (ann.show_once) {
+      if (sessionStorage.getItem(STORAGE_KEY) === String(ann.id)) return;
+    }
+
+    injectStyles();
+
+    const accentColor = ann.bg_color || '#0d9488';
+    // Make icon bg a very light tint of the accent
+    const iconBg = accentColor + '18'; // ~10% opacity
+
+    const overlay = document.createElement('div');
+    overlay.id = 'annPopupOverlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', ann.title || 'Announcement');
+
+    const hasCta = ann.cta_text && ann.cta_text.trim();
+
+    overlay.innerHTML = `
+      <div id="annPopupCard">
+        <!-- Accent bar -->
+        <div class="ann-card-accent" style="background:${accentColor};"></div>
+
+        <!-- Close button -->
+        <button class="ann-close-btn" id="annCloseBtn" aria-label="Close">${ICON_CLOSE}</button>
+
+        <!-- Body -->
+        <div class="ann-card-body">
+          <div class="ann-card-icon-wrap" style="background:${iconBg}; color:${accentColor};">
+            ${ICON_MEGAPHONE}
+          </div>
+          <div class="ann-card-content">
+            <div class="ann-card-label" style="color:${accentColor};">Announcement</div>
+            <div class="ann-card-title">${ann.title || ''}</div>
+            <div class="ann-card-msg">${ann.message || ''}</div>
+          </div>
+        </div>
+
+        ${hasCta ? `
+        <div class="ann-card-footer">
+          <a href="${ann.cta_url || '#'}" class="ann-cta-btn" style="background:${accentColor};"
+            ${ann.cta_url ? 'target="_blank" rel="noopener"' : ''}>
+            ${ICON_ARROW}
+            ${ann.cta_text}
+          </a>
+          <button class="ann-dismiss-btn" id="annDismissBtn">Dismiss</button>
+        </div>` : ''}
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Handlers
+    const dismiss = () => closePopup(ann.id, ann.show_once);
+    document.getElementById('annCloseBtn').addEventListener('click', dismiss);
+    const dismissBtn = document.getElementById('annDismissBtn');
+    if (dismissBtn) dismissBtn.addEventListener('click', dismiss);
+    overlay.addEventListener('click', e => { if (e.target === overlay) dismiss(); });
+    document.addEventListener('keydown', function escH(e) {
+      if (e.key === 'Escape') { dismiss(); document.removeEventListener('keydown', escH); }
+    });
+  }
+
+  function fetchAndShow() {
+    fetch('/api/announcements/active')
+      .then(r => r.json())
+      .then(json => { if (json.success && json.announcement) renderPopup(json.announcement); })
+      .catch(() => {});
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fetchAndShow);
+  } else {
+    setTimeout(fetchAndShow, 700);
   }
 })();
