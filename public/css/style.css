@@ -118,6 +118,7 @@ button, input, select, textarea {
   top: 0;
   z-index: 1000;
   box-shadow: var(--shadow-sm);
+  overflow: visible;
 }
 
 .site-header .container {
@@ -3356,15 +3357,16 @@ button, input, select, textarea {
   /* Desktop search hidden by default on mobile */
   .header-search {
     display: none;
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 68px;
     left: 0;
     right: 0;
     width: 100%;
+    box-sizing: border-box;
     background: #ffffff;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 12px 25px -4px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    border-bottom: 2px solid var(--primary);
+    box-shadow: 0 12px 25px -4px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
     z-index: 1001;
   }
 
