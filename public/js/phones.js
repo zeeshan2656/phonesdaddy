@@ -30,9 +30,37 @@ let currentFilters = {
 
 async function initCatalog() {
   parseUrlParams();
-  await loadBrandFilters();
+
+  // Check if server-side rendered initial data is already present in the DOM
+  const initialDataEl = document.getElementById('initialCatalogData');
+  let initialData = null;
+  if (initialDataEl) {
+    try {
+      initialData = JSON.parse(initialDataEl.textContent);
+    } catch (_) {}
+  }
+
+  // Load brands if not pre-rendered by SSR
+  const brandList = document.getElementById('brandFiltersList');
+  const needsBrands = !brandList || brandList.children.length === 0 || brandList.textContent.includes('Loading brands');
+  if (needsBrands) {
+    await loadBrandFilters();
+  }
+
   setupFilterListeners();
-  loadPhones();
+
+  // If URL has specific query filters or page > 1, fetch filtered results
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasCustomQuery = urlParams.has('brand') || urlParams.has('minPrice') || urlParams.has('maxPrice') ||
+    urlParams.has('ram') || urlParams.has('storage') || urlParams.has('is5G') ||
+    (urlParams.has('sort') && urlParams.get('sort') !== 'newest') ||
+    (urlParams.has('page') && parseInt(urlParams.get('page'), 10) > 1);
+
+  if (hasCustomQuery || !initialData) {
+    loadPhones();
+  } else if (initialData && initialData.pagination) {
+    renderPagination(initialData.pagination);
+  }
 }
 
 function parseUrlParams() {
@@ -76,10 +104,10 @@ async function loadBrandFilters() {
         const count = parseInt(b.phone_count, 10) || 0;
         const isChecked = currentFilters.brand.includes(b.slug);
         return `
-          <label class="adv-brand-item" data-brand="${b.name.toLowerCase()}" title="${b.name} (${count} phones)">
+          <label class="adv-brand-item" data-brand="${escapeHtml(b.name.toLowerCase())}" title="${escapeHtml(b.name)} (${count} phones)">
             <div class="adv-brand-left">
-              <input type="checkbox" name="brand" value="${b.slug}" class="adv-brand-checkbox" ${isChecked ? 'checked' : ''}>
-              <span class="adv-brand-name">${b.name}</span>
+              <input type="checkbox" name="brand" value="${escapeHtml(b.slug)}" class="adv-brand-checkbox" aria-label="Filter by ${escapeHtml(b.name)}" ${isChecked ? 'checked' : ''}>
+              <span class="adv-brand-name">${escapeHtml(b.name)}</span>
             </div>
             <span class="adv-brand-count">${count}</span>
           </label>
@@ -272,7 +300,7 @@ async function loadPhones() {
   const countEl = document.getElementById('catalogTotalCount');
   if (!container) return;
 
-  container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 48px; color: #64748b;">Loading smartphones...</div>`;
+  container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 48px; color: #475569;">Loading smartphones...</div>`;
 
   const queryParams = new URLSearchParams();
   queryParams.set('page', currentFilters.page);
@@ -293,22 +321,22 @@ async function loadPhones() {
       container.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
           <h3 style="font-size: 1.3rem; margin-bottom: 8px; color: #0f172a;">No phones found</h3>
-          <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Try relaxing your filters or search terms.</p>
-          <button class="btn btn-primary" onclick="document.getElementById('btnResetFilters').click()">Clear All Filters</button>
+          <p style="color: #475569; font-size: 14px; margin-bottom: 20px;">Try relaxing your filters or search terms.</p>
+          <button class="btn btn-primary" onclick="document.getElementById('btnResetFilters').click()" aria-label="Clear all applied filters">Clear All Filters</button>
         </div>
       `;
-      if (countEl) countEl.innerText = '0 phones';
+      if (countEl) countEl.innerText = '0 phones found';
       renderPagination({ total: 0, page: 1, limit: currentFilters.limit, totalPages: 0 });
       return;
     }
 
     if (countEl) {
-      countEl.innerText = `${json.pagination.total} phones found`;
+      countEl.innerText = `${json.pagination.total.toLocaleString()} phones found`;
     }
 
-    container.innerHTML = json.data.map(phone => {
+    container.innerHTML = json.data.map((phone, idx) => {
       try {
-        return createPhoneCardHtml(phone);
+        return createPhoneCardHtml(phone, idx);
       } catch (err) {
         console.error('Error rendering phone card:', err, phone);
         return '';
@@ -324,47 +352,68 @@ async function loadPhones() {
 
 function getCardThumb(img) {
   if (!img) return '/images/placeholder.svg';
-  if (img.endsWith('.webp') && !img.endsWith('-thumb.webp')) return img.replace(/\.webp$/, '-thumb.webp');
+  if (img.endsWith('-thumb.webp')) return img;
+  if (/\.(webp|png|jpe?g)$/i.test(img)) return img.replace(/\.(webp|png|jpe?g)$/i, '-thumb.webp');
   return img;
 }
 
-const eyeIcon = (typeof ICONS !== 'undefined' && ICONS.eye) || '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
-const commentIcon = (typeof ICONS !== 'undefined' && ICONS.comment) || '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
+const eyeIcon = '<svg class="svg-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const commentIcon = '<svg class="svg-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
 
-function createPhoneCardHtml(phone) {
+function createPhoneCardHtml(phone, index = 0) {
   if (!phone) return '';
   const priceVal = parseFloat(phone.price) || 0;
   const priceDisplay = priceVal > 0 ? formatPKR(priceVal) : 'Rumored Price';
   const brandName = phone.brand_name || '';
-  const phoneName = phone.name || 'Smartphone';
+  const phoneName = (phone.name || 'Smartphone').replace(/\s*Price\s*(&amp;|&)\s*Specs\s*/gi, '').trim();
   const phoneSlug = phone.slug || '';
-  const thumbImg = getCardThumb(phone.image);
+  const rawImg = phone.image || '/images/placeholder.svg';
+  const thumbImg = getCardThumb(rawImg);
+  const fullImg = rawImg.endsWith('-thumb.webp') ? rawImg.replace(/-thumb\.webp$/, '.webp') : rawImg;
   const viewsCount = parseInt(phone.views, 10) || 0;
   const reviewCount = parseInt(phone.review_count, 10) || 0;
+  const phoneUrl = `/phone/${escapeHtml(phoneSlug)}`;
+  const altText = `${phoneName} smartphone - ${brandName}`;
+
+  // LCP optimization: Card 0 loads eager with high priority; next 3 load eager; others lazy
+  let imgLoading = 'loading="lazy" decoding="async"';
+  if (index === 0) {
+    imgLoading = 'loading="eager" fetchpriority="high" decoding="sync"';
+  } else if (index < 4) {
+    imgLoading = 'loading="eager" decoding="async"';
+  }
 
   return `
-    <div class="phone-card" onclick="window.location.href='/phone/${escapeHtml(phoneSlug)}'">
+    <article class="phone-card" onclick="window.location.href='${phoneUrl}'" itemscope itemtype="https://schema.org/Product">
       <div class="phone-card-image-wrap">
         <span class="phone-card-brand-badge">${escapeHtml(brandName)}</span>
-        <a href="/phone/${escapeHtml(phoneSlug)}" onclick="event.stopPropagation()">
-          <img src="${escapeHtml(thumbImg)}" alt="${escapeHtml(phoneName)}" class="phone-card-image" loading="lazy" decoding="async" width="160" height="212">
+        <a href="${phoneUrl}" class="phone-card-image-link" aria-label="View specifications for ${escapeHtml(phoneName)}" onclick="event.stopPropagation()">
+          <picture>
+            <source type="image/webp" srcset="${escapeHtml(thumbImg)} 1x, ${escapeHtml(fullImg)} 2x">
+            <img src="${escapeHtml(thumbImg)}" srcset="${escapeHtml(thumbImg)} 1x, ${escapeHtml(fullImg)} 2x" sizes="(max-width: 480px) 140px, (max-width: 768px) 160px, 180px" alt="${escapeHtml(altText)}" class="phone-card-image" ${imgLoading} width="160" height="212" itemprop="image">
+          </picture>
         </a>
       </div>
       <div class="phone-card-body">
-        <a href="/phone/${escapeHtml(phoneSlug)}" onclick="event.stopPropagation()">
-          <h3 class="phone-card-title">${escapeHtml(phoneName)}</h3>
+        <a href="${phoneUrl}" class="phone-card-title-link" aria-label="${escapeHtml(phoneName)} specifications and price" onclick="event.stopPropagation()">
+          <h3 class="phone-card-title" itemprop="name" title="${escapeHtml(phoneName)}">${escapeHtml(phoneName)}</h3>
         </a>
-        <div class="phone-card-price">${priceDisplay}</div>
-        <div class="phone-card-stats-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px; font-size: 11.5px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
-          <span style="display: inline-flex; align-items: center; gap: 4px;" title="${viewsCount.toLocaleString()} views">
+        <div class="phone-card-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+          <meta itemprop="priceCurrency" content="PKR">
+          <meta itemprop="price" content="${priceVal}">
+          <link itemprop="availability" href="https://schema.org/InStock">
+          ${priceDisplay}
+        </div>
+        <div class="phone-card-stats-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px; font-size: 11.5px; color: #475569; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
+          <span style="display: inline-flex; align-items: center; gap: 4px;" aria-label="${viewsCount.toLocaleString()} views" title="${viewsCount.toLocaleString()} views">
             ${eyeIcon} <span class="stat-label">${viewsCount.toLocaleString()}</span>
           </span>
-          <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: ${reviewCount > 0 ? '#0d9488' : '#94a3b8'};" title="${reviewCount.toLocaleString()} reviews">
+          <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: ${reviewCount > 0 ? '#0f766e' : '#64748b'};" aria-label="${reviewCount.toLocaleString()} reviews" title="${reviewCount.toLocaleString()} reviews">
             ${commentIcon} <span class="stat-label">${reviewCount.toLocaleString()}</span>
           </span>
         </div>
       </div>
-    </div>
+    </article>
   `;
 }
 
@@ -381,7 +430,7 @@ function renderPagination(pagination) {
 
   // Previous button
   html += `
-    <button class="page-btn" ${pagination.page <= 1 ? 'disabled' : ''} onclick="goToPage(${pagination.page - 1})">
+    <button class="page-btn" ${pagination.page <= 1 ? 'disabled' : ''} aria-label="Go to previous page" onclick="goToPage(${pagination.page - 1})">
       &laquo;
     </button>
   `;
@@ -390,19 +439,20 @@ function renderPagination(pagination) {
   for (let i = 1; i <= pagination.totalPages; i++) {
     // Show first, last, and current neighbors
     if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 1 && i <= pagination.page + 1)) {
+      const isActive = (i === pagination.page);
       html += `
-        <button class="page-btn ${i === pagination.page ? 'active' : ''}" onclick="goToPage(${i})">
+        <button class="page-btn ${isActive ? 'active' : ''}" ${isActive ? 'aria-current="page"' : ''} aria-label="Go to page ${i}" onclick="goToPage(${i})">
           ${i}
         </button>
       `;
     } else if (i === pagination.page - 2 || i === pagination.page + 2) {
-      html += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
+      html += `<span style="padding: 0 4px; color: #64748b;" aria-hidden="true">...</span>`;
     }
   }
 
   // Next button
   html += `
-    <button class="page-btn" ${pagination.page >= pagination.totalPages ? 'disabled' : ''} onclick="goToPage(${pagination.page + 1})">
+    <button class="page-btn" ${pagination.page >= pagination.totalPages ? 'disabled' : ''} aria-label="Go to next page" onclick="goToPage(${pagination.page + 1})">
       &raquo;
     </button>
   `;
@@ -430,6 +480,7 @@ function handleQuickCompare(slug) {
 function toggleMobileFilterSidebar() {
   const sidebar = document.getElementById('filterSidebar');
   const stateText = document.getElementById('mobileFilterStateText');
+  const toggleBtn = document.getElementById('btnToggleMobileFilter');
   if (!sidebar) return;
 
   sidebar.classList.toggle('mobile-open');
@@ -437,13 +488,14 @@ function toggleMobileFilterSidebar() {
   if (stateText) {
     stateText.innerHTML = isOpen ? 'Tap to Close ▴' : 'Tap to Open ▾';
   }
+  if (toggleBtn) {
+    toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
 }
 
 function toggleFilterAccordion(groupId) {
-  // Only toggle accordion collapse on mobile / small screens (window width <= 768px)
   const group = document.getElementById(groupId);
   if (!group) return;
-
   group.classList.toggle('is-expanded');
 }
 

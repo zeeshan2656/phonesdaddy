@@ -43,8 +43,9 @@ function getTemplateHtml(templateFile) {
  */
 function getCardThumbUrl(imgUrl) {
   if (!imgUrl) return '/images/placeholder.svg';
-  if (imgUrl.endsWith('.webp') && !imgUrl.endsWith('-thumb.webp')) {
-    return imgUrl.replace(/\.webp$/, '-thumb.webp');
+  if (imgUrl.endsWith('-thumb.webp')) return imgUrl;
+  if (/\.(webp|png|jpe?g)$/i.test(imgUrl)) {
+    return imgUrl.replace(/\.(webp|png|jpe?g)$/i, '-thumb.webp');
   }
   return imgUrl;
 }
@@ -75,6 +76,7 @@ async function getRenderedViewHtml(templateFile, replacements = {}) {
   html = html
     .replace(/\/css\/style\.css(\?v=[^"']*)?/g, '/css/style.css?v=2026.33')
     .replace(/\/js\/app\.js(\?v=[^"']*)?/g, '/js/app.js?v=2026.33')
+    .replace(/\/js\/phones\.js(\?v=[^"']*)?/g, '/js/phones.js?v=2026.33')
     .replace(/\/js\/icons\.js(\?v=[^"']*)?/g, '/js/icons.js?v=2026.33')
     .replace(/\/js\/phone-detail\.js(\?v=[^"']*)?/g, '/js/phone-detail.js?v=2026.33');
 
@@ -477,7 +479,255 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// Phones Catalog / Listing with in-memory page caching
+// Cache key & TTL for Phones Catalog SSR
+const PHONES_CATALOG_SSR_CACHE_KEY = 'view_phones_catalog_ssr_replacements';
+const PHONES_CATALOG_SSR_TTL_SECONDS = 300; // 5 minutes
+
+async function getPhonesCatalogSsrReplacements(noCache = false) {
+  if (!noCache) {
+    const cached = cache.get(PHONES_CATALOG_SSR_CACHE_KEY);
+    if (cached) return cached;
+  }
+
+  try {
+    const branding = await SettingsModel.getBranding().catch(() => ({}));
+    const siteName = branding.site_name || 'PhonesDaddy';
+    const siteUrl = (branding.site_url || 'https://phonesdaddy.com').replace(/\/+$/, '');
+
+    // Fetch page 1 (24 phones) and active brands in parallel
+    const [phonesResult, activeBrandsResult] = await Promise.all([
+      PhoneModel.getPhones({ page: 1, limit: 24, sort: 'newest' }).catch(err => {
+        console.warn('PhoneModel.getPhones warning in SSR:', err.message);
+        return { phones: [], total: 0, page: 1, limit: 24, totalPages: 0 };
+      }),
+      pool.query(`
+        SELECT b.id, b.name, b.slug, COUNT(p.id) AS phone_count
+        FROM brands b
+        LEFT JOIN phones p ON b.id = p.brand_id
+        WHERE b.status = 'active'
+        GROUP BY b.id
+        ORDER BY phone_count DESC, b.name ASC
+      `).then(([rows]) => rows).catch(err => {
+        console.warn('Brands query warning in SSR:', err.message);
+        return [];
+      })
+    ]);
+
+    const phones = (phonesResult && phonesResult.phones) || [];
+    const total = (phonesResult && phonesResult.total) || 0;
+    const totalPages = (phonesResult && phonesResult.totalPages) || 1;
+    const activeBrands = activeBrandsResult || [];
+
+    // Helper for formatting PKR
+    function formatPKR(num) {
+      if (!num || isNaN(parseFloat(num)) || parseFloat(num) <= 0) return 'Price on Request';
+      return 'Rs. ' + Math.round(parseFloat(num)).toLocaleString('en-PK');
+    }
+
+    const eyeSvg = '<svg class="svg-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const commentSvg = '<svg class="svg-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
+
+    const renderCatalogCard = (p, idx) => {
+      const isLcp = (idx === 0);
+      const isAboveFold = (idx < 4);
+      
+      let loadingAttrs = 'loading="lazy" decoding="async"';
+      if (isLcp) {
+        loadingAttrs = 'loading="eager" fetchpriority="high" decoding="sync"';
+      } else if (isAboveFold) {
+        loadingAttrs = 'loading="eager" decoding="async"';
+      }
+
+      const rawImg = p.image || '/images/placeholder.svg';
+      const thumbImg = getCardThumbUrl(rawImg);
+      const fullImg = rawImg.endsWith('-thumb.webp') ? rawImg.replace(/-thumb\.webp$/, '.webp') : rawImg;
+      
+      const cleanName = (p.name || 'Smartphone').replace(/\s*Price\s*(&amp;|&)\s*Specs\s*/gi, '').trim();
+      const brandName = p.brand_name || '';
+      const priceVal = parseFloat(p.price) || 0;
+      const priceDisplay = priceVal > 0 ? formatPKR(priceVal) : 'Rumored Price';
+      const viewsCount = parseInt(p.views, 10) || 0;
+      const reviewCount = parseInt(p.review_count, 10) || 0;
+      const phoneUrl = `/phone/${escapeAttr(p.slug)}`;
+      const altText = `${cleanName} mobile phone - ${brandName}`;
+
+      return `
+        <article class="phone-card" onclick="window.location.href='${phoneUrl}'" itemscope itemtype="https://schema.org/Product">
+          <div class="phone-card-image-wrap">
+            <span class="phone-card-brand-badge">${escapeHtml(brandName)}</span>
+            <a href="${phoneUrl}" class="phone-card-image-link" aria-label="View specifications for ${escapeAttr(cleanName)}" onclick="event.stopPropagation()">
+              <picture>
+                <source type="image/webp" srcset="${escapeAttr(thumbImg)} 1x, ${escapeAttr(fullImg)} 2x">
+                <img src="${escapeAttr(thumbImg)}" srcset="${escapeAttr(thumbImg)} 1x, ${escapeAttr(fullImg)} 2x" sizes="(max-width: 480px) 140px, (max-width: 768px) 160px, 180px" alt="${escapeAttr(altText)}" class="phone-card-image" ${loadingAttrs} width="160" height="212" itemprop="image">
+              </picture>
+            </a>
+          </div>
+          <div class="phone-card-body">
+            <a href="${phoneUrl}" class="phone-card-title-link" aria-label="${escapeAttr(cleanName)} specifications and price" onclick="event.stopPropagation()">
+              <h3 class="phone-card-title" itemprop="name" title="${escapeAttr(cleanName)}">${escapeHtml(cleanName)}</h3>
+            </a>
+            <div class="phone-card-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <meta itemprop="priceCurrency" content="PKR">
+              <meta itemprop="price" content="${priceVal}">
+              <link itemprop="availability" href="https://schema.org/InStock">
+              ${priceDisplay}
+            </div>
+            <div class="phone-card-stats-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px; font-size: 11.5px; color: #475569; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
+              <span style="display: inline-flex; align-items: center; gap: 4px;" aria-label="${viewsCount.toLocaleString()} views" title="${viewsCount.toLocaleString()} views">
+                ${eyeSvg} <span class="stat-label">${viewsCount.toLocaleString()}</span>
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: ${reviewCount > 0 ? '#0f766e' : '#64748b'};" aria-label="${reviewCount.toLocaleString()} reviews" title="${reviewCount.toLocaleString()} reviews">
+                ${commentSvg} <span class="stat-label">${reviewCount.toLocaleString()}</span>
+              </span>
+            </div>
+          </div>
+        </article>
+      `;
+    };
+
+    const phonesGridHtml = phones.length > 0 
+      ? phones.map((p, idx) => renderCatalogCard(p, idx)).join('')
+      : `<div style="grid-column: 1/-1; text-align: center; color: #475569; padding: 48px;">No mobile phones found in catalog.</div>`;
+
+    // LCP Preload tag in <head> for Card 0
+    let lcpPreload = '';
+    if (phones.length > 0 && phones[0].image) {
+      const lcpImg = getCardThumbUrl(phones[0].image);
+      lcpPreload = `<link rel="preload" href="${escapeAttr(lcpImg)}" as="image" type="image/webp" fetchpriority="high">`;
+    }
+
+    // Sidebar Brands Pre-rendered
+    const sidebarBrandsHtml = activeBrands.map(b => {
+      const count = parseInt(b.phone_count, 10) || 0;
+      return `
+        <label class="adv-brand-item" data-brand="${escapeAttr((b.name || '').toLowerCase())}" title="${escapeAttr(b.name || '')} (${count} phones)">
+          <div class="adv-brand-left">
+            <input type="checkbox" name="brand" value="${escapeAttr(b.slug || '')}" class="adv-brand-checkbox" aria-label="Filter by ${escapeAttr(b.name || '')}">
+            <span class="adv-brand-name">${escapeHtml(b.name || '')}</span>
+          </div>
+          <span class="adv-brand-count">${count}</span>
+        </label>
+      `;
+    }).join('');
+
+    // Pre-rendered Pagination
+    let paginationHtml = '';
+    if (totalPages > 1) {
+      paginationHtml += `<button class="page-btn" disabled aria-label="Previous Page">&laquo;</button>`;
+      for (let i = 1; i <= Math.min(5, totalPages); i++) {
+        paginationHtml += `<button class="page-btn ${i === 1 ? 'active' : ''}" ${i === 1 ? 'aria-current="page"' : ''} aria-label="Page ${i}" onclick="goToPage(${i})">${i}</button>`;
+      }
+      if (totalPages > 5) {
+        paginationHtml += `<span style="padding: 0 4px; color: #64748b;" aria-hidden="true">...</span>`;
+        paginationHtml += `<button class="page-btn" aria-label="Page ${totalPages}" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+      }
+      if (totalPages > 1) {
+        paginationHtml += `<button class="page-btn" aria-label="Next Page" onclick="goToPage(2)">&raquo;</button>`;
+      }
+    }
+
+    // Schema.org JSON-LD Structured Data
+    const itemListElements = phones.slice(0, 24).map((p, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      item: {
+        '@type': 'Product',
+        name: p.name,
+        url: `${siteUrl}/phone/${p.slug}`,
+        image: p.image ? (p.image.startsWith('http') ? p.image : `${siteUrl}${p.image}`) : `${siteUrl}/images/placeholder.svg`,
+        brand: {
+          '@type': 'Brand',
+          name: p.brand_name || 'Smartphone'
+        },
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'PKR',
+          price: p.price ? parseFloat(p.price) : 0,
+          availability: 'https://schema.org/InStock',
+          url: `${siteUrl}/phone/${p.slug}`
+        }
+      }
+    }));
+
+    const schemaObj = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'CollectionPage',
+          '@id': `${siteUrl}/phones#webpage`,
+          url: `${siteUrl}/phones`,
+          name: `All Mobile Phones & Specifications — ${siteName}`,
+          description: `Browse and compare mobile phone prices and specifications on ${siteName}.`,
+          isPartOf: {
+            '@type': 'WebSite',
+            '@id': `${siteUrl}/#website`,
+            name: siteName,
+            url: siteUrl
+          },
+          breadcrumb: {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: siteUrl
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Mobile Phones',
+                item: `${siteUrl}/phones`
+              }
+            ]
+          }
+        },
+        {
+          '@type': 'ItemList',
+          '@id': `${siteUrl}/phones#itemlist`,
+          name: 'Mobile Phone Catalog',
+          numberOfItems: total,
+          itemListElement: itemListElements
+        }
+      ]
+    };
+
+    const schemaJsonLd = `<script type="application/ld+json">${JSON.stringify(schemaObj)}</script>`;
+
+    const initialDataScript = `<script id="initialCatalogData" type="application/json">${JSON.stringify({
+      pagination: { total, page: 1, limit: 24, totalPages },
+      count: phones.length
+    })}</script>`;
+
+    const replacements = {
+      '{{PHONES_GRID_HTML}}': phonesGridHtml,
+      '{{CATALOG_TOTAL_COUNT}}': `${total.toLocaleString()} phones found`,
+      '{{CATALOG_LCP_PRELOAD}}': lcpPreload,
+      '{{SIDEBAR_BRANDS_HTML}}': sidebarBrandsHtml,
+      '{{PAGINATION_HTML}}': paginationHtml,
+      '{{SCHEMA_JSON_LD}}': schemaJsonLd,
+      '{{INITIAL_PHONES_DATA}}': initialDataScript,
+      '{{BRAND_COUNT_LABEL}}': `${activeBrands.length} Brands`
+    };
+
+    cache.set(PHONES_CATALOG_SSR_CACHE_KEY, replacements, PHONES_CATALOG_SSR_TTL_SECONDS, ['phones', 'brands']);
+    return replacements;
+  } catch (err) {
+    console.error('Error generating phones catalog SSR replacements:', err);
+    return {
+      '{{PHONES_GRID_HTML}}': '<div style="grid-column: 1/-1; text-align: center; color: #475569; padding: 48px;">Loading catalog...</div>',
+      '{{CATALOG_TOTAL_COUNT}}': 'Mobile Phones Catalog',
+      '{{CATALOG_LCP_PRELOAD}}': '',
+      '{{SIDEBAR_BRANDS_HTML}}': '',
+      '{{PAGINATION_HTML}}': '',
+      '{{SCHEMA_JSON_LD}}': '',
+      '{{INITIAL_PHONES_DATA}}': '',
+      '{{BRAND_COUNT_LABEL}}': 'All Brands'
+    };
+  }
+}
+
+// Phones Catalog / Listing with in-memory page caching & instant SSR
 router.get('/phones', async (req, res, next) => {
   try {
     const isAdmin = req.session && req.session.admin;
@@ -494,10 +744,11 @@ router.get('/phones', async (req, res, next) => {
       }
     }
 
-    const html = await getRenderedViewHtml('phones.html');
+    const ssrReplacements = await getPhonesCatalogSsrReplacements(noCache);
+    const html = await getRenderedViewHtml('phones.html', ssrReplacements);
 
     if (!isAdmin && !noCache) {
-      cache.set(cacheKey, html, 600, ['phones', 'settings']);
+      cache.set(cacheKey, html, 600, ['phones', 'brands', 'settings']);
     }
 
     res.setHeader('X-Cache', 'MISS');
@@ -873,23 +1124,57 @@ router.get('/robots.txt', async (req, res) => {
   }
   host = host.replace(/\/+$/, '');
 
-  const robots = `# Google-Friendly robots.txt for ${branding.site_name || 'PhonesDaddy'}
+  const robots = `# Google-Friendly & AI Agentic robots.txt for ${branding.site_name || 'PhonesDaddy'}
 User-agent: *
 Allow: /
+Allow: /api/phones
+Allow: /api/phones/*
+Allow: /api/brands
+Allow: /api/brands/*
+Allow: /api/pta-tax/*
+Allow: /api/news
+Allow: /api/news/*
+Allow: /api/settings/public
 Disallow: /admin
 Disallow: /admin/*
-Disallow: /api/*
+Disallow: /api/admin
+Disallow: /api/admin/*
+Disallow: /api/auth/*
 
 User-agent: Googlebot
 Allow: /
+Allow: /api/phones
+Allow: /api/phones/*
+Allow: /api/brands
+Allow: /api/brands/*
 Disallow: /admin
 Disallow: /admin/*
-Disallow: /api/*
+Disallow: /api/admin
+Disallow: /api/admin/*
 
 User-agent: Googlebot-Image
 Allow: /uploads/
 Allow: /images/
 Allow: /webfiles/
+
+# AI & Agentic Crawlers (Enabled for Search, Assistants & Citations)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
 
 # XML Sitemaps (Sitemap Index & Specialized Sub-Sitemaps)
 Sitemap: ${host}/sitemap.xml

@@ -1,20 +1,54 @@
-# Google-Friendly Robots.txt for PhonesDaddy
+# Google-Friendly & AI Agentic robots.txt for PhonesDaddy
 User-agent: *
 Allow: /
+Allow: /api/phones
+Allow: /api/phones/*
+Allow: /api/brands
+Allow: /api/brands/*
+Allow: /api/pta-tax/*
+Allow: /api/news
+Allow: /api/news/*
+Allow: /api/settings/public
 Disallow: /admin
 Disallow: /admin/*
-Disallow: /api/*
+Disallow: /api/admin
+Disallow: /api/admin/*
+Disallow: /api/auth/*
 
 User-agent: Googlebot
 Allow: /
+Allow: /api/phones
+Allow: /api/phones/*
+Allow: /api/brands
+Allow: /api/brands/*
 Disallow: /admin
 Disallow: /admin/*
-Disallow: /api/*
+Disallow: /api/admin
+Disallow: /api/admin/*
 
 User-agent: Googlebot-Image
 Allow: /uploads/
 Allow: /images/
 Allow: /webfiles/
+
+# AI & Agentic Crawlers (Enabled for Search, Assistants & Citations)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
 
 # XML Sitemaps (Sitemap Index & Specialized Sub-Sitemaps)
 Sitemap: https://phonesdaddy.com/sitemap.xml
@@ -22,3 +56,4 @@ Sitemap: https://phonesdaddy.com/sitemap-phones.xml
 Sitemap: https://phonesdaddy.com/sitemap-brands.xml
 Sitemap: https://phonesdaddy.com/sitemap-news.xml
 Sitemap: https://phonesdaddy.com/sitemap-pages.xml
+

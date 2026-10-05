@@ -3,16 +3,16 @@
    ========================================================================== */
 
 :root {
-  --primary: #0d9488;
-  --primary-hover: #0f766e;
+  --primary: #0f766e;
+  --primary-hover: #115e59;
   --primary-light: #f0fdfa;
   --primary-border: #99f6e4;
   
   --dark: #0f172a;
   --dark-light: #1e293b;
   --text-main: #1e293b;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
+  --text-muted: #475569;
+  --text-light: #64748b;
   
   --bg-page: #f8fafc;
   --bg-surface: #ffffff;
@@ -20,7 +20,7 @@
   --border-light: #f1f5f9;
   
   --success: #16a34a;
-  --warning: #f59e0b;
+  --warning: #b45309;
   --danger: #dc2626;
   --info: #0284c7;
 
@@ -36,6 +36,19 @@
 
   --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --max-width: 1240px;
+}
+
+/* Accessibility screen-reader only utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border-width: 0 !important;
 }
 
 *, *::before, *::after {
@@ -1285,6 +1298,8 @@ button, input, select, textarea {
   object-fit: contain;
   transition: transform 0.2s ease;
   border-radius: 0 !important;
+  content-visibility: auto;
+  contain-intrinsic-size: 160px 112px;
 }
 
 .phone-card:hover .phone-card-image {
@@ -1298,7 +1313,7 @@ button, input, select, textarea {
   left: 5px;
   z-index: 3;
   background: #ffffff;
-  color: #475569;
+  color: #334155;
   border: 1px solid #cbd5e1;
   font-size: 8.5px;
   font-weight: 700;
@@ -4650,7 +4665,7 @@ button, input, select, textarea {
   font-size: 10.5px;
   font-weight: 700;
   background: #f1f5f9;
-  color: #64748b;
+  color: #334155;
   padding: 1px 6px;
   border-radius: 10px;
 }
@@ -4666,7 +4681,7 @@ button, input, select, textarea {
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: #64748b;
   pointer-events: none;
 }
 
@@ -4686,7 +4701,7 @@ button, input, select, textarea {
 .adv-search-input:focus {
   border-color: var(--primary);
   background: #ffffff;
-  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.12);
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
 }
 
 /* Brand List */
@@ -4757,8 +4772,8 @@ button, input, select, textarea {
 .adv-brand-count {
   font-size: 10.5px;
   font-weight: 600;
-  color: #94a3b8;
-  background: #f8fafc;
+  color: #475569;
+  background: #f1f5f9;
   padding: 1px 5px;
   border-radius: 4px;
   margin-left: 6px;
@@ -4790,7 +4805,7 @@ button, input, select, textarea {
   transform: translateY(-50%);
   font-size: 10.5px;
   font-weight: 700;
-  color: #94a3b8;
+  color: #475569;
   pointer-events: none;
 }
 
@@ -4812,7 +4827,7 @@ button, input, select, textarea {
 }
 
 .adv-price-sep {
-  color: #94a3b8;
+  color: #475569;
   font-size: 11px;
   font-weight: 700;
 }

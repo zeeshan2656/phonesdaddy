@@ -208,6 +208,64 @@ if (IMAGES_BASE && fs.existsSync(IMAGES_BASE) && path.resolve(IMAGES_BASE) !== p
 // 3. Mount general public static directory (CSS, JS, bundled icons)
 app.use(express.static(path.join(__dirname, '../public'), staticOptions));
 
+// 4. On-the-fly WebP thumbnail generation & placeholder fallback for missing thumbnails
+const sharp = require('sharp');
+app.get(/^\/(uploads|webfiles|images)\/phones\/.+-thumb\.webp$/i, async (req, res, next) => {
+  try {
+    const requestedPath = req.path;
+    const basePathPart = requestedPath.replace(/-thumb\.webp$/i, '');
+    const searchDirs = [
+      UPLOADS_BASE,
+      WEBFILES_BASE,
+      path.join(__dirname, '../public/uploads'),
+      path.join(__dirname, '../public/webfiles'),
+      path.join(__dirname, '../public/images')
+    ];
+    const extensions = ['.webp', '.jpg', '.jpeg', '.png', '.svg'];
+    
+    let sourceFilePath = null;
+    let targetThumbPath = null;
+    
+    for (const dir of searchDirs) {
+      if (!dir || !fs.existsSync(dir)) continue;
+      const sub = basePathPart.replace(/^\/(uploads|webfiles|images)\//, '');
+      for (const ext of extensions) {
+        const candidate = path.join(dir, sub + ext);
+        if (fs.existsSync(candidate)) {
+          sourceFilePath = candidate;
+          targetThumbPath = path.join(dir, sub + '-thumb.webp');
+          break;
+        }
+      }
+      if (sourceFilePath) break;
+    }
+    
+    if (sourceFilePath && targetThumbPath && !sourceFilePath.endsWith('.svg')) {
+      const buffer = await sharp(sourceFilePath)
+        .rotate()
+        .resize({ width: 320, height: 424, fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 78, effort: 4 })
+        .toBuffer();
+      
+      try {
+        fs.mkdirSync(path.dirname(targetThumbPath), { recursive: true });
+        fs.writeFileSync(targetThumbPath, buffer);
+      } catch (_) {}
+      
+      res.setHeader('Content-Type', 'image/webp');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return res.send(buffer);
+    }
+    
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.sendFile(path.join(__dirname, '../public/images/placeholder.svg'));
+  } catch (err) {
+    res.setHeader('Content-Type', 'image/svg+xml');
+    return res.sendFile(path.join(__dirname, '../public/images/placeholder.svg'));
+  }
+});
+
 // REST API Endpoints
 app.use('/api/phones', searchRoutes); // Handles /api/phones/search
 app.use('/api/phones', phoneRoutes);   // Handles /api/phones, /latest, /slug/:slug
