@@ -10,7 +10,7 @@
  * - Complete exclusion of admin routes & mutations
  */
 
-const VERSION = 'v1.0.2';
+const VERSION = 'v1.0.3';
 const STATIC_CACHE = `pd-static-${VERSION}`;
 const RUNTIME_CACHE = `pd-runtime-${VERSION}`;
 const IMAGE_CACHE = `pd-images-${VERSION}`;
@@ -96,12 +96,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Strictly skip ALL Admin panel routes, Admin assets (/css/admin.css, /js/admin.js), and Auth APIs
+  // Strictly skip ALL Admin panel routes, Admin assets (/css/admin.css, /js/admin.js), SEO tools, and Auth APIs
   if (
     url.pathname.startsWith('/admin') ||
     url.pathname.startsWith('/api/admin') ||
     url.pathname.startsWith('/api/auth') ||
-    url.pathname.includes('admin')
+    url.pathname.includes('admin') ||
+    url.pathname.includes('seo-assistant')
   ) {
     return;
   }
