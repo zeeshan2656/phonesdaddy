@@ -162,7 +162,7 @@ class SettingsModel {
    * Fetch all configured scraper sources (merging built-ins with custom saved sources)
    */
   static async getScraperSources() {
-    const settings = await this.getAllSettings();
+    const settings = await SettingsModel.getAllSettings();
     let sources = null;
     if (settings.scraper_sources) {
       try {
@@ -175,10 +175,10 @@ class SettingsModel {
     }
 
     if (!Array.isArray(sources) || sources.length === 0) {
-      sources = this.getDefaultScraperSources();
+      sources = SettingsModel.getDefaultScraperSources();
     } else {
       // Ensure built-in sources exist in the list
-      const defaults = this.getDefaultScraperSources();
+      const defaults = SettingsModel.getDefaultScraperSources();
       for (const def of defaults) {
         const found = sources.find(s => s.id === def.id || s.domain === def.domain);
         if (!found) {
@@ -199,7 +199,7 @@ class SettingsModel {
    */
   static async saveScraperSources(sourcesArray) {
     if (!Array.isArray(sourcesArray)) return false;
-    await this.updateSettings({
+    await SettingsModel.updateSettings({
       scraper_sources: JSON.stringify(sourcesArray)
     });
     return true;

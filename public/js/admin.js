@@ -889,15 +889,32 @@ async function initPhoneForm() {
   const form = document.getElementById('phoneForm');
   if (!form) return;
 
-  await populateBrandDropdown();
-  initPhoneFormScraperSources();
+  // Initialize Yoast-Style On-Page SEO Assistant IMMEDIATELY (Zero network dependency)
+  try {
+    if (window.SeoAssistant && document.getElementById('phoneSeoAssistantWrap')) {
+      if (!window.seoAssistant || typeof window.seoAssistant.runAnalysis !== 'function') {
+        window.seoAssistant = new window.SeoAssistant({
+          mode: 'phone',
+          containerId: 'phoneSeoAssistantWrap'
+        });
+      }
+    }
+  } catch (seoErr) {
+    console.error('Error initializing SeoAssistant in initPhoneForm:', seoErr);
+  }
 
-  // Initialize Yoast-Style On-Page SEO Assistant
-  if (window.SeoAssistant && document.getElementById('phoneSeoAssistantWrap')) {
-    window.seoAssistant = new window.SeoAssistant({
-      mode: 'phone',
-      containerId: 'phoneSeoAssistantWrap'
-    });
+  // Populate scraper source active tags/pills (Non-blocking)
+  try {
+    initPhoneFormScraperSources();
+  } catch (srcErr) {
+    console.warn('Error initializing phone form scraper sources:', srcErr);
+  }
+
+  // Populate brand dropdown asynchronously
+  try {
+    await populateBrandDropdown();
+  } catch (brandErr) {
+    console.error('Error populating brand dropdown:', brandErr);
   }
 
   // Check if we are editing (URL contains /edit/:id)
@@ -5182,7 +5199,7 @@ async function loadScraperSources() {
   `;
 
   try {
-    const res = await fetch('/api/admin/settings/scraper-sources');
+    const res = await fetch('/api/admin/settings/scraper-sources', { credentials: 'same-origin' });
     const json = await res.json();
 
     if (json.success && Array.isArray(json.sources)) {
@@ -5496,6 +5513,7 @@ async function saveScraperSourceModal(e) {
   try {
     const res = await fetch('/api/admin/settings/scraper-sources', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id,
@@ -5549,7 +5567,8 @@ async function deleteScraperSource(sourceId, sourceName) {
 
   try {
     const res = await fetch(`/api/admin/settings/scraper-sources/${encodeURIComponent(sourceId)}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      credentials: 'same-origin'
     });
     const json = await res.json();
     if (json.success) {
@@ -5571,6 +5590,7 @@ async function toggleScraperSourceStatus(sourceId, enabled) {
   try {
     const res = await fetch('/api/admin/settings/scraper-sources', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...src,
@@ -6874,21 +6894,39 @@ async function initPwaSidebarBadge() {
 }
 window.initPwaSidebarBadge = initPwaSidebarBadge;
 
-document.addEventListener('DOMContentLoaded', () => {
-  initMobileNavigation();
-  initSettingsDropdown();
-  initRoleAccessUI();
-  initLoginForm();
-  initDashboard();
-  initPhonesList();
-  initPhoneForm();
-  initBrandsList();
-  initSettings();
-  initAdminBranding();
-  initBulkImportModalListener();
-  initPwaSidebarBadge();
-  initPhoneFormScraperSources();
-});
+function runAdminInit() {
+  const tasks = [
+    { name: 'MobileNavigation', fn: initMobileNavigation },
+    { name: 'SettingsDropdown', fn: initSettingsDropdown },
+    { name: 'RoleAccessUI', fn: initRoleAccessUI },
+    { name: 'LoginForm', fn: initLoginForm },
+    { name: 'Dashboard', fn: initDashboard },
+    { name: 'PhonesList', fn: initPhonesList },
+    { name: 'PhoneForm', fn: initPhoneForm },
+    { name: 'BrandsList', fn: initBrandsList },
+    { name: 'Settings', fn: initSettings },
+    { name: 'AdminBranding', fn: initAdminBranding },
+    { name: 'BulkImportModalListener', fn: initBulkImportModalListener },
+    { name: 'PwaSidebarBadge', fn: initPwaSidebarBadge },
+    { name: 'PhoneFormScraperSources', fn: initPhoneFormScraperSources }
+  ];
+
+  for (const t of tasks) {
+    try {
+      if (typeof t.fn === 'function') {
+        t.fn();
+      }
+    } catch (err) {
+      console.warn(`[Admin Init] ${t.name} warning:`, err);
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', runAdminInit);
+} else {
+  runAdminInit();
+}
 
 
 

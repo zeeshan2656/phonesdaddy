@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Site Settings & Head Snippets — PhonesDaddy Admin</title>
-  <link rel="stylesheet" href="/css/admin.css?v=2026.5">
+  <link rel="stylesheet" href="/css/admin.css?v=2026.6">
   <style>
     .code-editor-wrapper {
       position: relative;
@@ -1962,7 +1962,37 @@
     </div>
   </div>
 
-  <script src="/js/icons.js"></script>
-  <script src="/js/admin.js"></script>
+  <script src="/js/icons.js?v=2026.3"></script>
+  <script src="/js/admin.js?v=2026.3"></script>
+  <script>
+    // Resilient immediate hash handler & tab fallback for settings page
+    (function() {
+      function checkSettingsHash() {
+        const hash = window.location.hash;
+        if (hash === '#scraper-sources' || hash === '#scraper') {
+          if (typeof window.switchSettingsSection === 'function') {
+            window.switchSettingsSection('scraper');
+          } else {
+            // Immediate DOM fallback
+            const secScraper = document.getElementById('settingsSectionScraper');
+            const secBrand = document.getElementById('settingsSectionBranding');
+            const tabScraper = document.getElementById('tabBtnScraper');
+            const tabBrand = document.getElementById('tabBtnBranding');
+            if (secScraper) secScraper.style.display = 'block';
+            if (secBrand) secBrand.style.display = 'none';
+            if (tabScraper) tabScraper.classList.add('active');
+            if (tabBrand) tabBrand.classList.remove('active');
+          }
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkSettingsHash);
+      } else {
+        checkSettingsHash();
+      }
+      setTimeout(checkSettingsHash, 100);
+    })();
+  </script>
 </body>
 </html>

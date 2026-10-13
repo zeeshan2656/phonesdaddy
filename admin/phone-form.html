@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Phone Form — PhonesDaddy Admin</title>
-  <link rel="stylesheet" href="/css/admin.css?v=2026.5">
-  <link rel="stylesheet" href="/css/seo-assistant.css?v=2026.1">
+  <link rel="stylesheet" href="/css/admin.css?v=2026.6">
+  <link rel="stylesheet" href="/css/seo-assistant.css?v=2026.3">
   <!-- Quill Snow CSS for Rich Summary Editor -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
   <style>
@@ -672,12 +672,12 @@
     </div>
   </main>
 
-  <script src="/js/icons.js"></script>
+  <script src="/js/icons.js?v=2026.3"></script>
   <!-- Quill Rich Text Editor Library -->
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
   <!-- Yoast-Inspired On-Page SEO Assistant -->
-  <script src="/js/seo-assistant.js?v=2026.1"></script>
-  <script src="/js/admin.js?v=2.7.0"></script>
+  <script src="/js/seo-assistant.js?v=2026.3"></script>
+  <script src="/js/admin.js?v=2026.3"></script>
   <script>
     (function() {
       const urlInput = document.getElementById('externalUrlInput');
@@ -1206,6 +1206,31 @@
           if (dash) dash.style.display = 'none';
         });
       }
+    })();
+  </script>
+  <script>
+    // Resilient inline bootstrap for Phone SEO Assistant (guarantees display on slow networks or cached deployments)
+    (function() {
+      function bootstrapPhoneSeo() {
+        if (window.SeoAssistant && document.getElementById('phoneSeoAssistantWrap') && (!window.seoAssistant || typeof window.seoAssistant.runAnalysis !== 'function')) {
+          try {
+            window.seoAssistant = new window.SeoAssistant({
+              mode: 'phone',
+              containerId: 'phoneSeoAssistantWrap'
+            });
+          } catch (err) {
+            console.warn('Inline SeoAssistant init warning:', err);
+          }
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootstrapPhoneSeo);
+      } else {
+        bootstrapPhoneSeo();
+      }
+      setTimeout(bootstrapPhoneSeo, 80);
+      setTimeout(bootstrapPhoneSeo, 350);
     })();
   </script>
 </body>
