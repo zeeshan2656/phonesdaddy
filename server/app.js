@@ -136,8 +136,16 @@ const staticOptions = {
   etag: true,
   lastModified: true,
   setHeaders: (res, filePath) => {
-    // Admin scripts and styles must never be cached so updates reflect immediately
-    if (filePath.includes('admin') || filePath.endsWith('admin.js') || filePath.endsWith('admin.css')) {
+    // Admin scripts, SEO assistant tools, and admin styles must never be cached so updates reflect immediately
+    const isNoCacheAsset = 
+      filePath.includes('admin') || 
+      filePath.includes('seo-assistant') || 
+      filePath.endsWith('admin.js') || 
+      filePath.endsWith('admin.css') || 
+      filePath.endsWith('seo-assistant.js') || 
+      filePath.endsWith('seo-assistant.css');
+
+    if (isNoCacheAsset) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
