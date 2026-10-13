@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Article Editor — PhonesDaddy Admin</title>
   <link rel="stylesheet" href="/css/admin.css?v=2026.5">
+  <link rel="stylesheet" href="/css/seo-assistant.css?v=2026.1">
   <!-- Quill Snow CSS -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
   <style>
@@ -281,6 +282,9 @@
               </div>
             </div>
 
+            <!-- Yoast-Inspired On-Page SEO Assistant -->
+            <div id="newsSeoAssistantWrap"></div>
+
           </div>
 
         </div>
@@ -291,6 +295,8 @@
   <!-- Quill JS Core -->
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
   <script src="/js/icons.js"></script>
+  <!-- Yoast-Inspired On-Page SEO Assistant -->
+  <script src="/js/seo-assistant.js?v=2026.1"></script>
   <script src="/js/admin.js"></script>
   <script>
     let quill;
@@ -496,6 +502,24 @@
           document.getElementById('previewPlaceholder').style.display = 'none';
           document.getElementById('btnRemoveImage').style.display = 'inline-block';
         }
+
+        // Populate On-Page SEO fields
+        const focusEl = document.getElementById('seoFocusKeywordInput');
+        const titleEl = document.getElementById('seoTitleInput');
+        const metaEl = document.getElementById('seoMetaDescInput');
+        const canonicalEl = document.getElementById('seoCanonicalInput');
+
+        if (focusEl) focusEl.value = a.focus_keyword || '';
+        if (titleEl) titleEl.value = a.meta_title || '';
+        if (metaEl) metaEl.value = a.meta_description || '';
+        if (canonicalEl) canonicalEl.value = a.canonical_url || '';
+
+        if (window.seoAssistant) {
+          if (a.related_keywords) {
+            window.seoAssistant.loadRelatedKeywords(a.related_keywords);
+          }
+          window.seoAssistant.runAnalysis();
+        }
       } catch (err) {
         console.error('Error loading article:', err);
         alert('Server error loading article data');
@@ -529,6 +553,19 @@
       formData.append('status', status);
       formData.append('is_hot', is_hot);
       formData.append('content', content);
+
+      // Collect On-Page SEO fields
+      const focusKw = document.getElementById('seoFocusKeywordInput')?.value || '';
+      const metaTitle = document.getElementById('seoTitleInput')?.value || '';
+      const metaDesc = document.getElementById('seoMetaDescInput')?.value || '';
+      const canonical = document.getElementById('seoCanonicalInput')?.value || '';
+      const relatedKws = document.getElementById('seoRelatedKeywordsHidden')?.value || '';
+
+      formData.append('focus_keyword', focusKw.trim());
+      formData.append('meta_title', metaTitle.trim());
+      formData.append('meta_description', metaDesc.trim());
+      formData.append('canonical_url', canonical.trim());
+      formData.append('related_keywords', relatedKws);
 
       if (imageFile) {
         formData.append('image', imageFile);
@@ -592,6 +629,14 @@
     document.addEventListener('DOMContentLoaded', () => {
       initQuillEditor();
       setupCoverImagePicker();
+
+      // Initialize Yoast-Style SEO Assistant
+      if (window.SeoAssistant && document.getElementById('newsSeoAssistantWrap')) {
+        window.seoAssistant = new window.SeoAssistant({
+          mode: 'article',
+          containerId: 'newsSeoAssistantWrap'
+        });
+      }
 
       // Auto-generate slug on title blur if slug is empty
       document.getElementById('articleTitle').addEventListener('blur', (e) => {

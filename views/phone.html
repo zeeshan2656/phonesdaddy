@@ -7,6 +7,18 @@
   <title>{{PAGE_TITLE}}</title>
   <meta name="description" content="{{META_DESCRIPTION}}">
   <link rel="canonical" href="{{CANONICAL_URL}}">
+  
+  <!-- OpenGraph / Social Meta Tags -->
+  <meta property="og:type" content="product">
+  <meta property="og:site_name" content="{{SITE_NAME}}">
+  <meta property="og:title" content="{{PAGE_TITLE}}">
+  <meta property="og:description" content="{{META_DESCRIPTION}}">
+  <meta property="og:url" content="{{CANONICAL_URL}}">
+  <meta property="og:image" content="{{OG_IMAGE}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{PAGE_TITLE}}">
+  <meta name="twitter:description" content="{{META_DESCRIPTION}}">
+  <meta name="twitter:image" content="{{OG_IMAGE}}">
   {{SITE_FAVICON_TAG}}
   {{PHONE_IMAGE_PRELOAD}}
   <link rel="stylesheet" href="/css/style.css?v=2026.20">
@@ -873,7 +885,7 @@
                 <button type="button" class="phone-slider-arrow slider-arrow-prev" id="btnSliderPrev" onclick="slidePhoneImage(-1)" aria-label="Previous photo">&#8249;</button>
 
                 <div class="phone-slider-stage" id="phoneSliderStage">
-                  <img id="phoneDetailImage" src="{{PHONE_IMAGE}}" alt="{{PHONE_NAME}}" class="phone-main-image" width="300" height="400" fetchpriority="high" style="cursor:pointer;" onclick="openCurrentInGallery()" title="Click to view full-size gallery">
+                  <img id="phoneDetailImage" src="{{PHONE_IMAGE}}" alt="{{PHONE_IMAGE_ALT}}" class="phone-main-image" width="300" height="400" fetchpriority="high" style="cursor:pointer;" onclick="openCurrentInGallery()" title="Click to view full-size gallery">
                 </div>
 
                 <button type="button" class="phone-slider-arrow slider-arrow-next" id="btnSliderNext" onclick="slidePhoneImage(1)" aria-label="Next photo">&#8250;</button>

@@ -318,6 +318,17 @@ class PhoneModel {
       phone.images = phone.image ? [phone.image] : [];
     }
 
+    // Parse gallery_alts JSON
+    if (phone.gallery_alts) {
+      try {
+        phone.gallery_alts = typeof phone.gallery_alts === 'string' ? JSON.parse(phone.gallery_alts) : phone.gallery_alts;
+      } catch (_) {
+        phone.gallery_alts = {};
+      }
+    } else {
+      phone.gallery_alts = {};
+    }
+
     // Parse affiliate_links JSON
     if (phone.affiliate_links) {
       try {
@@ -373,6 +384,17 @@ class PhoneModel {
       phone.images = phone.image ? [phone.image] : [];
     }
 
+    // Parse gallery_alts JSON
+    if (phone.gallery_alts) {
+      try {
+        phone.gallery_alts = typeof phone.gallery_alts === 'string' ? JSON.parse(phone.gallery_alts) : phone.gallery_alts;
+      } catch (_) {
+        phone.gallery_alts = {};
+      }
+    } else {
+      phone.gallery_alts = {};
+    }
+
     // Parse affiliate_links JSON
     if (phone.affiliate_links) {
       try {
@@ -404,16 +426,19 @@ class PhoneModel {
 
       const [res] = await connection.query(`
         INSERT INTO phones (
-          brand_id, name, slug, short_description, image, images, affiliate_links, video_url, release_date,
-          status, price, featured, popular, views, meta_title, meta_description
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          brand_id, name, slug, short_description, image, image_alt, images, gallery_alts, affiliate_links, video_url, release_date,
+          status, price, featured, popular, views, meta_title, meta_description,
+          focus_keyword, related_keywords, canonical_url
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         phoneData.brand_id,
         phoneData.name,
         phoneData.slug,
         phoneData.short_description || '',
         phoneData.image || '',
-        phoneData.images ? JSON.stringify(phoneData.images) : null,
+        phoneData.image_alt || null,
+        phoneData.images ? (typeof phoneData.images === 'object' ? JSON.stringify(phoneData.images) : String(phoneData.images)) : null,
+        phoneData.gallery_alts ? (typeof phoneData.gallery_alts === 'object' ? JSON.stringify(phoneData.gallery_alts) : String(phoneData.gallery_alts)) : null,
         (Array.isArray(phoneData.affiliate_links) && phoneData.affiliate_links.length > 0)
           ? JSON.stringify(phoneData.affiliate_links)
           : (phoneData.affiliate_links && typeof phoneData.affiliate_links === 'string' && phoneData.affiliate_links !== '[]' ? phoneData.affiliate_links : null),
@@ -425,7 +450,10 @@ class PhoneModel {
         phoneData.popular ? 1 : 0,
         0,
         phoneData.meta_title || `${phoneData.name} Price in Pakistan & Specifications | PhonesDaddy`,
-        phoneData.meta_description || `${phoneData.name} specifications, price in Pakistan, camera, battery, and details.`
+        phoneData.meta_description || `${phoneData.name} specifications, price in Pakistan, camera, battery, and details.`,
+        phoneData.focus_keyword || null,
+        phoneData.related_keywords ? (typeof phoneData.related_keywords === 'object' ? JSON.stringify(phoneData.related_keywords) : String(phoneData.related_keywords)) : null,
+        phoneData.canonical_url || null
       ]);
 
       const phoneId = res.insertId;
@@ -476,7 +504,8 @@ class PhoneModel {
       let updateFields = [
         'brand_id = ?', 'name = ?', 'slug = ?', 'short_description = ?',
         'release_date = ?', 'status = ?', 'price = ?', 'featured = ?',
-        'popular = ?', 'meta_title = ?', 'meta_description = ?'
+        'popular = ?', 'meta_title = ?', 'meta_description = ?',
+        'focus_keyword = ?', 'related_keywords = ?', 'canonical_url = ?'
       ];
       let updateValues = [
         phoneData.brand_id,
@@ -489,7 +518,10 @@ class PhoneModel {
         phoneData.featured ? 1 : 0,
         phoneData.popular ? 1 : 0,
         phoneData.meta_title || `${phoneData.name} Price in Pakistan & Specifications | PhonesDaddy`,
-        phoneData.meta_description || `${phoneData.name} specifications, price in Pakistan, camera, battery, and details.`
+        phoneData.meta_description || `${phoneData.name} specifications, price in Pakistan, camera, battery, and details.`,
+        phoneData.focus_keyword !== undefined ? (phoneData.focus_keyword || null) : null,
+        phoneData.related_keywords !== undefined ? (phoneData.related_keywords ? (typeof phoneData.related_keywords === 'object' ? JSON.stringify(phoneData.related_keywords) : String(phoneData.related_keywords)) : null) : null,
+        phoneData.canonical_url !== undefined ? (phoneData.canonical_url || null) : null
       ];
 
       if (phoneData.affiliate_links !== undefined) {
@@ -510,10 +542,20 @@ class PhoneModel {
         updateValues.push(phoneData.image);
       }
 
+      if (phoneData.image_alt !== undefined) {
+        updateFields.push('image_alt = ?');
+        updateValues.push(phoneData.image_alt || null);
+      }
+
       // Always update images gallery if provided
       if (phoneData.images !== undefined) {
         updateFields.push('images = ?');
         updateValues.push(Array.isArray(phoneData.images) ? JSON.stringify(phoneData.images) : phoneData.images);
+      }
+
+      if (phoneData.gallery_alts !== undefined) {
+        updateFields.push('gallery_alts = ?');
+        updateValues.push(phoneData.gallery_alts ? (typeof phoneData.gallery_alts === 'object' ? JSON.stringify(phoneData.gallery_alts) : String(phoneData.gallery_alts)) : null);
       }
 
       updateValues.push(id);

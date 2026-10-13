@@ -34,6 +34,14 @@ let adminPhoneFilters = {
 // Admin Brands Cache
 let adminBrandsList = [];
 
+// Admin Gallery Images & Image ALT Text State (Module & Window scope)
+let adminGalleryImages = [];
+let adminGalleryAlts = {};
+let adminManualAltKeys = new Set();
+window.adminGalleryImages = adminGalleryImages;
+window.adminGalleryAlts = adminGalleryAlts;
+window.adminManualAltKeys = adminManualAltKeys;
+
 // Helper: Debounce
 function debounce(func, delay = 300) {
   let timer;
@@ -882,6 +890,15 @@ async function initPhoneForm() {
   if (!form) return;
 
   await populateBrandDropdown();
+  initPhoneFormScraperSources();
+
+  // Initialize Yoast-Style On-Page SEO Assistant
+  if (window.SeoAssistant && document.getElementById('phoneSeoAssistantWrap')) {
+    window.seoAssistant = new window.SeoAssistant({
+      mode: 'phone',
+      containerId: 'phoneSeoAssistantWrap'
+    });
+  }
 
   // Check if we are editing (URL contains /edit/:id)
   const pathParts = window.location.pathname.split('/');
@@ -934,8 +951,62 @@ async function initPhoneForm() {
     });
   }
 
-  // Admin Gallery Images State & Helpers
-  let adminGalleryImages = [];
+  // Admin Gallery Images & Image ALT Text State (Reset for form)
+  adminGalleryImages = [];
+  adminGalleryAlts = {};
+  adminManualAltKeys = new Set();
+  window.adminGalleryImages = adminGalleryImages;
+  window.adminGalleryAlts = adminGalleryAlts;
+  window.adminManualAltKeys = adminManualAltKeys;
+
+  function derivePhoneAltText(roleIdx, phoneName, focusKeyword) {
+    const cleanName = (phoneName || '').trim() || 'Mobile phone';
+    const roles = [
+      'smartphone front and back view',
+      'smartphone rear camera design and lenses',
+      'smartphone display screen and punch-hole bezel',
+      'smartphone side profile buttons and frame',
+      'smartphone back glass finish and color aesthetics',
+      'smartphone detailed hardware specification view'
+    ];
+    const role = roles[roleIdx % roles.length];
+    return `${cleanName} ${role}`;
+  }
+  window.derivePhoneAltText = derivePhoneAltText;
+
+  function autoUpdateGeneratedAlts() {
+    const phoneName = document.getElementById('phoneNameInput')?.value.trim();
+    const focusKeyword = document.getElementById('seoFocusKeywordInput')?.value.trim();
+    if (!phoneName) return;
+
+    // Main image ALT text
+    const mainAltEl = document.getElementById('phoneImageAlt');
+    if (mainAltEl && !adminManualAltKeys.has('main')) {
+      mainAltEl.value = derivePhoneAltText(0, phoneName, focusKeyword);
+    }
+
+    // Gallery images ALT texts
+    if (adminGalleryImages && adminGalleryImages.length > 0) {
+      let changed = false;
+      adminGalleryImages.forEach((src, idx) => {
+        if (!adminManualAltKeys.has(src)) {
+          adminGalleryAlts[src] = derivePhoneAltText(idx + 1, phoneName, focusKeyword);
+          changed = true;
+          const inp = document.querySelector(`.gallery-alt-input[data-src="${CSS.escape(src)}"]`);
+          if (inp) inp.value = adminGalleryAlts[src];
+        }
+      });
+      if (changed) {
+        const jsonEl = document.getElementById('phoneGalleryAltsJson');
+        if (jsonEl) jsonEl.value = JSON.stringify(adminGalleryAlts);
+      }
+    }
+
+    if (window.seoAssistant) {
+      window.seoAssistant.runAnalysis();
+    }
+  }
+  window.autoUpdateGeneratedAlts = autoUpdateGeneratedAlts;
 
   function setAdminPrimaryImage(src) {
     const scrapedImgInput = document.getElementById('phoneScrapedImage');
@@ -961,12 +1032,14 @@ async function initPhoneForm() {
     const grid = document.getElementById('adminGalleryGrid');
     const badge = document.getElementById('galleryCountBadge');
     const imagesJsonInput = document.getElementById('phoneImagesJson');
+    const altsJsonInput = document.getElementById('phoneGalleryAltsJson');
 
     if (!container || !grid) return;
 
     if (adminGalleryImages.length === 0) {
       container.style.display = 'none';
       if (imagesJsonInput) imagesJsonInput.value = '[]';
+      if (altsJsonInput) altsJsonInput.value = '{}';
       return;
     }
 
@@ -975,27 +1048,77 @@ async function initPhoneForm() {
     if (imagesJsonInput) imagesJsonInput.value = JSON.stringify(adminGalleryImages);
 
     const activePrimary = primaryImage || (document.getElementById('phoneScrapedImage')?.value || adminGalleryImages[0]);
+    const phoneName = document.getElementById('phoneNameInput')?.value.trim();
+    const focusKeyword = document.getElementById('seoFocusKeywordInput')?.value.trim();
+
+    // Ensure each image has an ALT text
+    adminGalleryImages.forEach((src, idx) => {
+      if (!adminGalleryAlts[src]) {
+        adminGalleryAlts[src] = derivePhoneAltText(idx + 1, phoneName, focusKeyword);
+      }
+    });
+    if (altsJsonInput) altsJsonInput.value = JSON.stringify(adminGalleryAlts);
 
     grid.innerHTML = adminGalleryImages.map((src, idx) => {
       const isPrimary = src === activePrimary;
+      const currentAlt = adminGalleryAlts[src] || derivePhoneAltText(idx + 1, phoneName, focusKeyword);
       return `
-        <div style="position: relative; width: 84px; height: 84px; border-radius: 8px; border: 2px solid ${isPrimary ? '#0284c7' : '#e2e8f0'}; background: #ffffff; padding: 4px; box-shadow: ${isPrimary ? '0 0 0 2px #bae6fd' : '0 1px 2px rgba(0,0,0,0.05)'}; cursor: pointer; transition: all .15s ease;"
+        <div style="position: relative; width: 135px; border-radius: 8px; border: 2px solid ${isPrimary ? '#0d9488' : '#e2e8f0'}; background: #ffffff; padding: 6px; box-shadow: ${isPrimary ? '0 0 0 2px #99f6e4' : '0 1px 2px rgba(0,0,0,0.05)'}; transition: all .15s ease;"
              class="gallery-thumb-card"
-             data-src="${escapeHtml(src)}"
-             title="${isPrimary ? 'Current Primary Image' : 'Click to set as Primary Image'}">
-          ${isPrimary ? '<span style="position: absolute; bottom: 3px; left: 3px; background: #0284c7; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; z-index: 2;">★ Primary</span>' : ''}
-          <button type="button" class="btn-remove-gallery-img" data-idx="${idx}" style="position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #ef4444; color: #fff; border: 1px solid #fff; font-size: 12px; font-weight: bold; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 3;" title="Remove from gallery">&times;</button>
-          <img src="${escapeHtml(src)}" alt="Gallery image ${idx + 1}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; pointer-events: none;" onerror="this.parentElement.style.display='none'">
+             data-src="${escapeHtml(src)}">
+          <div style="position: relative; width: 100%; height: 75px; cursor: pointer;"
+               class="gallery-thumb-click-area"
+               title="${isPrimary ? 'Current Primary Image' : 'Click to set as Primary Image'}">
+            ${isPrimary ? '<span style="position: absolute; bottom: 2px; left: 2px; background: #0d9488; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; z-index: 2;">★ Primary</span>' : ''}
+            <button type="button" class="btn-remove-gallery-img" data-idx="${idx}" style="position: absolute; top: -4px; right: -4px; width: 20px; height: 20px; border-radius: 50%; background: #ef4444; color: #fff; border: 1px solid #fff; font-size: 12px; font-weight: bold; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 3;" title="Remove from gallery">&times;</button>
+            <img src="${escapeHtml(src)}" alt="${escapeHtml(currentAlt)}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px; pointer-events: none;" onerror="this.parentElement.parentElement.style.display='none'">
+          </div>
+          <div style="margin-top: 6px;">
+            <div style="display: flex; gap: 3px; align-items: center;">
+              <input type="text" class="gallery-alt-input" data-src="${escapeHtml(src)}" data-idx="${idx}" placeholder="ALT description..." value="${escapeAttr(currentAlt)}" style="width: 100%; font-size: 11px; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none; background: #fff;" title="SEO Image ALT text">
+              <button type="button" class="btn-regen-single-alt" data-idx="${idx}" data-src="${escapeHtml(src)}" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 10px; cursor: pointer; color: #0d9488; font-weight: 700;" title="Derive ALT text for this view">⚡</button>
+            </div>
+          </div>
         </div>
       `;
     }).join('');
 
     // Wire click to set primary
-    grid.querySelectorAll('.gallery-thumb-card').forEach(card => {
-      card.addEventListener('click', (e) => {
+    grid.querySelectorAll('.gallery-thumb-click-area').forEach(cardArea => {
+      cardArea.addEventListener('click', (e) => {
         if (e.target.closest('.btn-remove-gallery-img')) return;
-        const src = card.dataset.src;
-        setAdminPrimaryImage(src);
+        const card = cardArea.closest('.gallery-thumb-card');
+        const src = card ? card.dataset.src : null;
+        if (src) setAdminPrimaryImage(src);
+      });
+    });
+
+    // Wire ALT text changes
+    grid.querySelectorAll('.gallery-alt-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const src = inp.dataset.src;
+        adminGalleryAlts[src] = inp.value.trim();
+        adminManualAltKeys.add(src);
+        if (altsJsonInput) altsJsonInput.value = JSON.stringify(adminGalleryAlts);
+        if (window.seoAssistant) window.seoAssistant.runAnalysis();
+      });
+    });
+
+    // Wire individual regenerate ALT button
+    grid.querySelectorAll('.btn-regen-single-alt').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const src = btn.dataset.src;
+        const idx = parseInt(btn.dataset.idx, 10);
+        const pName = document.getElementById('phoneNameInput')?.value.trim();
+        const fKw = document.getElementById('seoFocusKeywordInput')?.value.trim();
+        const newAlt = derivePhoneAltText(idx + 1, pName, fKw);
+        adminGalleryAlts[src] = newAlt;
+        adminManualAltKeys.delete(src);
+        const inp = grid.querySelector(`.gallery-alt-input[data-src="${CSS.escape(src)}"]`);
+        if (inp) inp.value = newAlt;
+        if (altsJsonInput) altsJsonInput.value = JSON.stringify(adminGalleryAlts);
+        if (window.seoAssistant) window.seoAssistant.runAnalysis();
       });
     });
 
@@ -1007,6 +1130,8 @@ async function initPhoneForm() {
         if (!isNaN(removeIdx)) {
           const removedSrc = adminGalleryImages[removeIdx];
           adminGalleryImages.splice(removeIdx, 1);
+          delete adminGalleryAlts[removedSrc];
+          adminManualAltKeys.delete(removedSrc);
           let newPrimary = activePrimary;
           if (removedSrc === activePrimary) {
             newPrimary = adminGalleryImages[0] || '';
@@ -1022,6 +1147,52 @@ async function initPhoneForm() {
   // Expose gallery helpers globally so edit loader can populate gallery images
   window.renderAdminGallery = renderAdminGallery;
   window.setAdminPrimaryImage = setAdminPrimaryImage;
+
+  // Wire Main Image ALT Text controls
+  const mainAltInput = document.getElementById('phoneImageAlt');
+  if (mainAltInput) {
+    mainAltInput.addEventListener('input', () => {
+      adminManualAltKeys.add('main');
+      mainAltInput.dataset.manual = 'true';
+      if (window.seoAssistant) window.seoAssistant.runAnalysis();
+    });
+  }
+
+  const btnRegenMainAlt = document.getElementById('btnRegenMainAlt');
+  if (btnRegenMainAlt) {
+    btnRegenMainAlt.addEventListener('click', () => {
+      const pName = document.getElementById('phoneNameInput')?.value.trim();
+      const fKw = document.getElementById('seoFocusKeywordInput')?.value.trim();
+      if (mainAltInput) {
+        mainAltInput.value = derivePhoneAltText(0, pName, fKw);
+        adminManualAltKeys.delete('main');
+        delete mainAltInput.dataset.manual;
+        if (window.seoAssistant) window.seoAssistant.runAnalysis();
+      }
+    });
+  }
+
+  const btnRegenAllGalleryAlts = document.getElementById('btnRegenAllGalleryAlts');
+  if (btnRegenAllGalleryAlts) {
+    btnRegenAllGalleryAlts.addEventListener('click', () => {
+      const pName = document.getElementById('phoneNameInput')?.value.trim();
+      const fKw = document.getElementById('seoFocusKeywordInput')?.value.trim();
+      adminGalleryImages.forEach((src, idx) => {
+        adminGalleryAlts[src] = derivePhoneAltText(idx + 1, pName, fKw);
+        adminManualAltKeys.delete(src);
+      });
+      renderAdminGallery(adminGalleryImages);
+      if (window.seoAssistant) window.seoAssistant.runAnalysis();
+    });
+  }
+
+  // Auto-update ALT texts when phone model name changes
+  const phoneNameInput = document.getElementById('phoneNameInput');
+  if (phoneNameInput) {
+    phoneNameInput.addEventListener('input', () => {
+      autoUpdateGeneratedAlts();
+    });
+  }
 
   // Setup Dynamic Spec Row Button
   const addSpecBtn = document.getElementById('btnAddSpecRow');
@@ -1423,7 +1594,7 @@ async function initPhoneForm() {
         cancelAdminAutoStart();
         const raw = urlInput.value.trim();
         if (!raw) {
-          alert('Please paste a phone URL from whatmobile.com.pk or gsmarena.com first.');
+          alert('Please paste a phone URL from a configured website source first.');
           urlInput.focus();
           return;
         }
@@ -1473,12 +1644,13 @@ async function initPhoneForm() {
 
         if (fetchStatus) {
           const sCount = Array.isArray(json.data.specs) ? [...new Set(json.data.specs.map(s => s.section))].length : 0;
+          const srcTitle = json.data.source_name || (json.data.source === 'gsmarena' ? 'GSMArena' : (json.data.source === 'whatmobile' ? 'WhatMobile' : 'External Website'));
           fetchStatus.style.display = 'block';
           fetchStatus.style.background = '#f0fdf4';
           fetchStatus.style.color = '#166534';
           fetchStatus.style.border = '1px solid #bbf7d0';
           fetchStatus.innerHTML = `
-            <div style="font-weight: 700; margin-bottom: 4px;">Specs Successfully Fetched from ${json.data.source === 'gsmarena' ? 'GSMArena' : 'WhatMobile'}!</div>
+            <div style="font-weight: 700; margin-bottom: 4px;">Specs Successfully Fetched from ${escapeHtml(srcTitle)}!</div>
             <div>Loaded <strong>${json.data.specs?.length || 0}</strong> specifications across <strong>${sCount}</strong> sections into Builder below.</div>
           `;
         }
@@ -1597,7 +1769,7 @@ async function initPhoneForm() {
     // 5. Handle Post External Links & Store Deals (Section 3)
     const sourceUrl = data.sourceUrl || data.url;
     if (sourceUrl) {
-      const sourceStore = data.source === 'gsmarena' ? 'GSMArena Source' : (data.source === 'whatmobile' ? 'WhatMobile Source' : 'External Source');
+      const sourceStore = data.source_name ? `${data.source_name} Source` : (data.source === 'gsmarena' ? 'GSMArena Source' : (data.source === 'whatmobile' ? 'WhatMobile Source' : 'External Source'));
       const existingUrls = Array.from(document.querySelectorAll('.aff-url-input')).map(i => i.value.trim());
       if (!existingUrls.includes(sourceUrl)) {
         addAffiliateRow(sourceStore, 'Source', sourceUrl);
@@ -1684,11 +1856,31 @@ async function initPhoneForm() {
         }
       });
     }
+
+    // Automatically trigger On-Page SEO Assistant update & suggestions upon auto-fetch
+    if (window.seoAssistant) {
+      setTimeout(() => {
+        const focusInput = document.getElementById('seoFocusKeywordInput');
+        if (focusInput && !focusInput.value) {
+          window.seoAssistant.suggestFocusKeyword();
+        }
+        const titleInput = document.getElementById('seoTitleInput');
+        if (titleInput && !titleInput.value) {
+          window.seoAssistant.suggestSeoTitle();
+        }
+        const metaInput = document.getElementById('seoMetaDescInput');
+        if (metaInput && !metaInput.value) {
+          window.seoAssistant.suggestMetaDescription();
+        }
+        window.seoAssistant.generateRelatedKeywordsSuggestions();
+        window.seoAssistant.runAnalysis();
+      }, 350);
+    }
   };
 
   if (isEdit && phoneId) {
     document.getElementById('phoneFormTitle').innerText = 'Edit Mobile Phone';
-    loadPhoneDataForEdit(phoneId);
+    await loadPhoneDataForEdit(phoneId);
   } else {
     // Populate default standard specifications template for convenient phone creation
     populateDefaultSpecTemplate();
@@ -1783,6 +1975,22 @@ async function initPhoneForm() {
     const extractedVid = extractYouTubeVideoId(rawVideoUrl);
     const videoUrl = extractedVid ? `https://www.youtube.com/watch?v=${extractedVid}` : rawVideoUrl;
     formData.set('video_url', videoUrl);
+
+    // Collect On-Page SEO Assistant fields
+    const focusKw = document.getElementById('seoFocusKeywordInput')?.value || '';
+    const metaTitle = document.getElementById('seoTitleInput')?.value || '';
+    const metaDesc = document.getElementById('seoMetaDescInput')?.value || '';
+    const canonical = document.getElementById('seoCanonicalInput')?.value || '';
+    const relatedKws = document.getElementById('seoRelatedKeywordsHidden')?.value || '';
+    const imageAlt = document.getElementById('phoneImageAlt')?.value || '';
+
+    formData.set('focus_keyword', focusKw.trim());
+    formData.set('meta_title', metaTitle.trim());
+    formData.set('meta_description', metaDesc.trim());
+    formData.set('canonical_url', canonical.trim());
+    formData.set('related_keywords', relatedKws);
+    formData.set('image_alt', imageAlt.trim());
+    formData.set('gallery_alts', JSON.stringify(adminGalleryAlts));
 
     try {
       const url = isEdit ? `/api/phones/${phoneId}` : '/api/phones';
@@ -1906,40 +2114,95 @@ async function loadPhoneDataForEdit(id) {
 
     const p = json.data;
     const form = document.getElementById('phoneForm');
-    form.brand_id.value = p.brand_id;
-    form.name.value = p.name;
-    form.slug.value = p.slug;
-    form.price.value = p.price;
-    form.status.value = p.status || 'Available';
-    form.release_date.value = p.release_date || '';
-
-    // Load Short Summary / Key Highlights into Quill & textarea
-    if (typeof window.setAdminSummaryContent === 'function') {
-      window.setAdminSummaryContent(p.short_description || '');
-    } else {
-      form.short_description.value = p.short_description || '';
-      if (window.quillSummary) {
-        if ((p.short_description || '').startsWith('<')) {
-          window.quillSummary.clipboard.dangerouslyPasteHTML(0, p.short_description);
-        } else {
-          window.quillSummary.setText(p.short_description || '');
+    if (form) {
+      if (form.brand_id) {
+        form.brand_id.value = p.brand_id || '';
+        if (p.brand_id && (!form.brand_id.value || form.brand_id.value != p.brand_id)) {
+          if (typeof populateBrandDropdown === 'function') {
+            await populateBrandDropdown(p.brand_id);
+          }
         }
       }
+      if (form.name) form.name.value = p.name || '';
+      if (form.slug) form.slug.value = p.slug || '';
+      if (form.price) form.price.value = p.price || '';
+      if (form.status) form.status.value = p.status || 'Available';
+      if (form.release_date) form.release_date.value = p.release_date || '';
+      if (form.featured) form.featured.checked = !!p.featured;
+      if (form.popular) form.popular.checked = !!p.popular;
     }
 
-    form.featured.checked = !!p.featured;
-    form.popular.checked = !!p.popular;
+    // Load Short Summary / Key Highlights into Quill & textarea
+    try {
+      if (typeof window.setAdminSummaryContent === 'function') {
+        window.setAdminSummaryContent(p.short_description || '');
+      } else {
+        if (form && form.short_description) form.short_description.value = p.short_description || '';
+        if (window.quillSummary) {
+          if ((p.short_description || '').startsWith('<')) {
+            window.quillSummary.clipboard.dangerouslyPasteHTML(0, p.short_description);
+          } else {
+            window.quillSummary.setText(p.short_description || '');
+          }
+        }
+      }
+    } catch (errSumm) {
+      console.warn('Summary populate warning:', errSumm);
+    }
 
-    if (p.image) {
-      const previewImg = document.getElementById('currentImagePreview');
-      const btnDeletePhoneImage = document.getElementById('btnDeletePhoneImage');
-      if (previewImg) {
-        previewImg.src = p.image;
-        previewImg.style.display = 'block';
+    // Populate Main Image Preview
+    try {
+      if (p.image) {
+        const previewImg = document.getElementById('currentImagePreview');
+        const btnDeletePhoneImage = document.getElementById('btnDeletePhoneImage');
+        if (previewImg) {
+          previewImg.src = p.image;
+          previewImg.style.display = 'block';
+        }
+        if (btnDeletePhoneImage && p.image !== '/images/placeholder.svg') {
+          btnDeletePhoneImage.style.display = 'inline-flex';
+        }
       }
-      if (btnDeletePhoneImage && p.image !== '/images/placeholder.svg') {
-        btnDeletePhoneImage.style.display = 'inline-flex';
+    } catch (errImg) {
+      console.warn('Image preview warning:', errImg);
+    }
+
+    // Populate Main Image ALT Text
+    try {
+      const mainAltInput = document.getElementById('phoneImageAlt');
+      if (mainAltInput) {
+        mainAltInput.value = p.image_alt || '';
+        if (p.image_alt) {
+          mainAltInput.dataset.manual = 'true';
+          adminManualAltKeys.add('main');
+        } else {
+          delete mainAltInput.dataset.manual;
+          adminManualAltKeys.delete('main');
+        }
       }
+      window.adminManualAltKeys = adminManualAltKeys;
+    } catch (errAlt) {
+      console.warn('Main ALT populate warning:', errAlt);
+    }
+
+    // Populate Gallery ALTs Map
+    try {
+      if (p.gallery_alts) {
+        adminGalleryAlts = typeof p.gallery_alts === 'string' ? JSON.parse(p.gallery_alts) : p.gallery_alts;
+        if (typeof adminGalleryAlts === 'object' && adminGalleryAlts) {
+          Object.keys(adminGalleryAlts).forEach(k => adminManualAltKeys.add(k));
+        } else {
+          adminGalleryAlts = {};
+        }
+      } else {
+        adminGalleryAlts = {};
+      }
+      window.adminGalleryAlts = adminGalleryAlts;
+      window.adminManualAltKeys = adminManualAltKeys;
+    } catch (errGalAlt) {
+      console.warn('Gallery ALTs populate warning:', errGalAlt);
+      adminGalleryAlts = {};
+      window.adminGalleryAlts = adminGalleryAlts;
     }
 
     // Populate Gallery Images in Edit Mode
@@ -2008,19 +2271,34 @@ async function loadPhoneDataForEdit(id) {
       if (container) {
         container.innerHTML = '';
         const specsList = [];
-        if (Array.isArray(p.raw_specs) && p.raw_specs.length > 0) {
-          for (const s of p.raw_specs) {
-            specsList.push({ section: s.section, key: s.spec_key || s.key || '', value: s.spec_value || s.value || '' });
+        let rawSpecs = p.raw_specs;
+        if (typeof rawSpecs === 'string') {
+          try { rawSpecs = JSON.parse(rawSpecs); } catch (_) { rawSpecs = []; }
+        }
+        let specsObj = p.specs;
+        if (typeof specsObj === 'string') {
+          try { specsObj = JSON.parse(specsObj); } catch (_) { specsObj = null; }
+        }
+
+        if (Array.isArray(rawSpecs) && rawSpecs.length > 0) {
+          for (const s of rawSpecs) {
+            if (s) {
+              specsList.push({ section: s.section || 'Display', key: s.spec_key || s.key || '', value: s.spec_value || s.value || '' });
+            }
           }
-        } else if (Array.isArray(p.specs) && p.specs.length > 0) {
-          for (const s of p.specs) {
-            specsList.push({ section: s.section, key: s.key || s.spec_key || '', value: s.value || s.spec_value || '' });
+        } else if (Array.isArray(specsObj) && specsObj.length > 0) {
+          for (const s of specsObj) {
+            if (s) {
+              specsList.push({ section: s.section || 'Display', key: s.key || s.spec_key || '', value: s.value || s.spec_value || '' });
+            }
           }
-        } else if (p.specs && typeof p.specs === 'object') {
-          for (const [sec, items] of Object.entries(p.specs)) {
+        } else if (specsObj && typeof specsObj === 'object') {
+          for (const [sec, items] of Object.entries(specsObj)) {
             if (Array.isArray(items)) {
               for (const item of items) {
-                specsList.push({ section: sec, key: item.key || item.spec_key || '', value: item.value || item.spec_value || '' });
+                if (item) {
+                  specsList.push({ section: sec || 'Display', key: item.key || item.spec_key || '', value: item.value || item.spec_value || '' });
+                }
               }
             }
           }
@@ -2036,6 +2314,28 @@ async function loadPhoneDataForEdit(id) {
       }
     } catch (errSpec) {
       console.error('Specs rows populate error in edit mode:', errSpec);
+    }
+
+    // Populate On-Page SEO Assistant fields in Edit Mode
+    try {
+      const focusEl = document.getElementById('seoFocusKeywordInput');
+      const titleEl = document.getElementById('seoTitleInput');
+      const metaEl = document.getElementById('seoMetaDescInput');
+      const canonicalEl = document.getElementById('seoCanonicalInput');
+
+      if (focusEl) focusEl.value = p.focus_keyword || '';
+      if (titleEl) titleEl.value = p.meta_title || '';
+      if (metaEl) metaEl.value = p.meta_description || '';
+      if (canonicalEl) canonicalEl.value = p.canonical_url || '';
+
+      if (window.seoAssistant) {
+        if (p.related_keywords) {
+          window.seoAssistant.loadRelatedKeywords(p.related_keywords);
+        }
+        window.seoAssistant.runAnalysis();
+      }
+    } catch (errSeo) {
+      console.warn('SEO populate warning in edit mode:', errSeo);
     }
   } catch (err) {
     console.error('Error loading phone for edit:', err);
@@ -2066,6 +2366,12 @@ function addSpecRow(section = 'Display', key = '', value = '') {
     <input type="text" class="form-control spec-val-input" placeholder="Value (e.g. 6.8 inches)" value="${escapeHtml(value)}">
     <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" title="Delete row">&times;</button>
   `;
+
+  // Explicitly set property values to safeguard exact character content
+  const keyInp = row.querySelector('.spec-key-input');
+  if (keyInp) keyInp.value = key || '';
+  const valInp = row.querySelector('.spec-val-input');
+  if (valInp) valInp.value = value || '';
 
   container.appendChild(row);
 }
@@ -2911,9 +3217,10 @@ function initSettings() {
     submitSettingsForm();
   });
 
-  // Settings Sub-Menu Navigation (Branding vs General vs Ad Placements vs Profile vs Users)
+  // Settings Sub-Menu Navigation (Branding vs General vs Scraper Sources vs Ad Placements vs Profile vs Users)
   let initialSection = 'branding';
   if (window.location.hash === '#general') initialSection = 'general';
+  else if (window.location.hash === '#scraper-sources' || window.location.hash === '#scraper') initialSection = 'scraper';
   else if (window.location.hash === '#ad-placements') initialSection = 'ads';
   else if (window.location.hash === '#profile') initialSection = 'profile';
   else if (window.location.hash === '#users') initialSection = 'users';
@@ -2922,6 +3229,8 @@ function initSettings() {
   window.addEventListener('hashchange', () => {
     if (window.location.hash === '#branding') {
       switchSettingsSection('branding');
+    } else if (window.location.hash === '#scraper-sources' || window.location.hash === '#scraper') {
+      switchSettingsSection('scraper');
     } else if (window.location.hash === '#ad-placements') {
       switchSettingsSection('ads');
     } else if (window.location.hash === '#profile') {
@@ -3657,16 +3966,19 @@ const DUMMY_ADS = {
 function switchSettingsSection(section) {
   const secBrand = document.getElementById('settingsSectionBranding');
   const secGen = document.getElementById('settingsSectionGeneral');
+  const secScraper = document.getElementById('settingsSectionScraper');
   const secAds = document.getElementById('settingsSectionAds');
   const secProf = document.getElementById('settingsSectionProfile');
   const secUsers = document.getElementById('settingsSectionUsers');
   const tabBrand = document.getElementById('tabBtnBranding');
   const tabGen = document.getElementById('tabBtnGeneral');
+  const tabScraper = document.getElementById('tabBtnScraper');
   const tabAds = document.getElementById('tabBtnAds');
   const tabProf = document.getElementById('tabBtnProfile');
   const tabUsers = document.getElementById('tabBtnUsers');
   const sideBrand = document.getElementById('sideNavBranding');
   const sideGen = document.getElementById('sideNavGeneral');
+  const sideScraper = document.getElementById('sideNavScraper');
   const sideAds = document.getElementById('sideNavAds');
   const sideProf = document.getElementById('sideNavProfile');
   const sideUsers = document.getElementById('sideNavUsers');
@@ -3682,13 +3994,14 @@ function switchSettingsSection(section) {
   // Hide all sections first
   if (secBrand) secBrand.style.display = 'none';
   if (secGen) secGen.style.display = 'none';
+  if (secScraper) secScraper.style.display = 'none';
   if (secAds) secAds.style.display = 'none';
   if (secProf) secProf.style.display = 'none';
   if (secUsers) secUsers.style.display = 'none';
   if (btnAddUserTop) btnAddUserTop.style.display = 'none';
 
   // Remove active from all tabs & side links
-  [tabBrand, tabGen, tabAds, tabProf, tabUsers, sideBrand, sideGen, sideAds, sideProf, sideUsers].forEach(el => el && el.classList.remove('active'));
+  [tabBrand, tabGen, tabScraper, tabAds, tabProf, tabUsers, sideBrand, sideGen, sideScraper, sideAds, sideProf, sideUsers].forEach(el => el && el.classList.remove('active'));
 
   if (section === 'branding') {
     if (secBrand) secBrand.style.display = 'block';
@@ -3704,6 +4017,21 @@ function switchSettingsSection(section) {
     if (window.location.hash !== '#branding') {
       history.replaceState(null, null, '#branding');
     }
+  } else if (section === 'scraper') {
+    if (secScraper) secScraper.style.display = 'block';
+    if (tabScraper) tabScraper.classList.add('active');
+    if (sideScraper) sideScraper.classList.add('active');
+    if (btnTestingAdsTop) btnTestingAdsTop.style.display = 'none';
+    if (topbarTitle) topbarTitle.innerText = 'Auto-Fetch & Scraper Website Sources';
+    if (topbarSubtitle) topbarSubtitle.innerText = 'Configure websites from which phone specs and images are fetched, including custom gallery URL rules.';
+    if (btnPreviewTop) btnPreviewTop.style.display = 'none';
+    if (btnSaveSettingsTop) btnSaveSettingsTop.style.display = 'none';
+    if (btnSaveProfileTop) btnSaveProfileTop.style.display = 'none';
+    if (settingsBottomActions) settingsBottomActions.style.display = 'none';
+    if (window.location.hash !== '#scraper-sources') {
+      history.replaceState(null, null, '#scraper-sources');
+    }
+    loadScraperSources();
   } else if (section === 'ads') {
     if (secAds) secAds.style.display = 'block';
     if (tabAds) tabAds.classList.add('active');
@@ -4772,6 +5100,594 @@ function showUserModalAlert(msg, type = 'error') {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Auto-Fetch & Scraper Sources Management Controller
+// ─────────────────────────────────────────────────────────────────────────────
+
+let configuredScraperSourcesCache = [];
+let activeScraperSourcesCache = null;
+
+function buildPicturesUrlClient(specsUrl, rule = {}) {
+  if (!specsUrl || typeof specsUrl !== 'string') return '';
+  const url = specsUrl.trim();
+  const ruleType = rule.rule_type || 'insert_before_id';
+  const insertText = rule.param_insert_text || '';
+  const targetPattern = rule.param_target_pattern || '';
+
+  if (ruleType === 'same_page' || !insertText) return url;
+
+  if (ruleType === 'insert_before_id' || ruleType === 'insert_before') {
+    if (insertText && url.includes(insertText)) return url;
+    if (targetPattern) {
+      try {
+        const re = new RegExp(targetPattern, 'i');
+        if (re.test(url)) {
+          return url.replace(re, (m, p1, p2) => {
+            if (p1 !== undefined && p2 !== undefined) {
+              return p1 + insertText + p2;
+            }
+            return insertText + m;
+          });
+        }
+      } catch (_) {}
+      if (url.includes(targetPattern)) {
+        const idx = url.indexOf(targetPattern);
+        return url.slice(0, idx) + insertText + url.slice(idx);
+      }
+    }
+    // Default smart ID before extension (like GSMArena: -14989.php or -id.html)
+    if (/(-)(\d+\.php)$/i.test(url)) {
+      return url.replace(/(-)(\d+\.php)$/i, (m, p1, p2) => p1 + insertText + p2);
+    }
+    if (/(-)(\d+(\.[a-z0-9]+)?)$/i.test(url)) {
+      return url.replace(/(-)(\d+(\.[a-z0-9]+)?)$/i, (m, p1, p2) => p1 + insertText + p2);
+    }
+    return url;
+  }
+
+  if (ruleType === 'append_suffix' || ruleType === 'append') {
+    if (url.endsWith(insertText)) return url;
+    return url.replace(/\/+$/, '') + insertText;
+  }
+
+  if (ruleType === 'insert_before_extension') {
+    return url.replace(/(\.[a-z0-9]{2,5})$/i, (m, ext) => insertText + ext);
+  }
+
+  if (ruleType === 'replace_text' || ruleType === 'replace') {
+    if (!targetPattern) return url;
+    return url.replaceAll ? url.replaceAll(targetPattern, insertText) : url.split(targetPattern).join(insertText);
+  }
+
+  if (ruleType === 'custom_regex') {
+    if (!targetPattern) return url;
+    try {
+      return url.replace(new RegExp(targetPattern, 'gi'), insertText);
+    } catch (_) {
+      return url;
+    }
+  }
+
+  return url;
+}
+
+async function loadScraperSources() {
+  const container = document.getElementById('scraperSourcesListContainer');
+  const countBadge = document.getElementById('sourcesCountBadge');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="padding: 30px; text-align: center; color: #64748b; font-size: 13px;">
+      <span style="display: inline-block; animation: spin 1s infinite linear;">⏳</span> Loading configured scraper sources...
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/admin/settings/scraper-sources');
+    const json = await res.json();
+
+    if (json.success && Array.isArray(json.sources)) {
+      configuredScraperSourcesCache = json.sources;
+      activeScraperSourcesCache = json.sources.filter(s => s.enabled !== false);
+      if (countBadge) {
+        countBadge.textContent = `${json.sources.length} Source${json.sources.length === 1 ? '' : 's'} Configured`;
+      }
+      renderScraperSources(json.sources);
+    } else {
+      container.innerHTML = `
+        <div style="padding: 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; color: #991b1b; font-size: 13px;">
+          Failed to load sources: ${escapeHtml(json.message || 'Unknown error')}
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error('Error loading scraper sources:', err);
+    container.innerHTML = `
+      <div style="padding: 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; color: #991b1b; font-size: 13px;">
+        Network error while loading scraper sources.
+      </div>
+    `;
+  }
+}
+
+function renderScraperSources(sources) {
+  const container = document.getElementById('scraperSourcesListContainer');
+  if (!container) return;
+
+  if (!sources || sources.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 30px; text-align: center; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; color: #64748b;">
+        <p style="margin: 0 0 10px; font-weight: 600;">No website sources configured yet.</p>
+        <button type="button" onclick="openAddScraperSourceModal()" class="btn btn-primary btn-sm">➕ Add First Website Source</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = sources.map(src => {
+    const isBuiltin = !!src.is_builtin;
+    const isEnabled = src.enabled !== false;
+    const ruleLabelMap = {
+      'insert_before_id': 'Insert text before ID',
+      'append_suffix': 'Append suffix to URL',
+      'insert_before_extension': 'Insert before file extension',
+      'replace_text': 'Replace URL text',
+      'custom_regex': 'Custom regex match & replace',
+      'same_page': 'Same page (No transformation)'
+    };
+    const ruleLabel = ruleLabelMap[src.rule_type] || src.rule_type;
+    const previewPicUrl = src.image_url_example || buildPicturesUrlClient(src.specs_url_example, src);
+
+    return `
+      <div class="admin-card" style="border: 1px solid ${isEnabled ? '#e2e8f0' : '#cbd5e1'}; background: ${isEnabled ? '#ffffff' : '#f8fafc'}; opacity: ${isEnabled ? '1' : '0.85'}; border-radius: 8px; padding: 20px; transition: all 0.2s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 42px; height: 42px; border-radius: 8px; background: ${isEnabled ? 'linear-gradient(135deg, #0d9488, #0284c7)' : '#94a3b8'}; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+              ${escapeHtml(src.name.charAt(0).toUpperCase())}
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #0f172a;">${escapeHtml(src.name)}</h4>
+                <code style="background: #f1f5f9; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 700;">${escapeHtml(src.domain)}</code>
+                ${isBuiltin ? '<span style="background: #e0e7ff; color: #4338ca; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Built-in</span>' : '<span style="background: #fef3c7; color: #b45309; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">Custom Source</span>'}
+              </div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 3px;">
+                ${src.description ? escapeHtml(src.description) : `Extracts phone specs and pictures from ${escapeHtml(src.domain)}`}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <!-- Active Toggle -->
+            <label class="switch" style="margin: 0;" title="${isEnabled ? 'Disable source' : 'Enable source'}">
+              <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="toggleScraperSourceStatus('${escapeHtml(src.id)}', this.checked)">
+              <span class="slider"></span>
+            </label>
+            <span style="font-size: 12px; font-weight: 700; color: ${isEnabled ? '#0d9488' : '#94a3b8'}; min-width: 50px;">
+              ${isEnabled ? 'Active' : 'Disabled'}
+            </span>
+
+            <!-- Actions -->
+            <button type="button" onclick="testSourceDirectly('${escapeHtml(src.id)}')" class="btn btn-outline btn-sm" style="padding: 5px 12px; font-size: 12px; font-weight: 600;" title="Test Transformation">
+              🧪 Test
+            </button>
+            <button type="button" onclick="openEditScraperSourceModal('${escapeHtml(src.id)}')" class="btn btn-outline btn-sm" style="padding: 5px 12px; font-size: 12px; font-weight: 600;" title="Edit Source Configuration">
+              ✏️ Edit
+            </button>
+            ${!isBuiltin ? `
+              <button type="button" onclick="deleteScraperSource('${escapeHtml(src.id)}', '${escapeHtml(src.name)}')" class="btn btn-outline btn-sm" style="padding: 5px 10px; font-size: 12px; color: #ef4444; border-color: #fecaca;" title="Delete Custom Source">
+                🗑️
+              </button>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- URL Mapping Breakdown -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; font-size: 12.5px; display: flex; flex-direction: column; gap: 8px;">
+          <div>
+            <span style="color: #64748b; font-weight: 600;">Sample Specs URL:</span>
+            <div style="font-family: monospace; color: #0f172a; word-break: break-all; margin-top: 2px;">
+              ${escapeHtml(src.specs_url_example || 'None specified')}
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+            <div>
+              <span style="color: #64748b; font-weight: 600;">Gallery Rule:</span>
+              <span style="background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 11.5px; margin-left: 4px;">
+                ${escapeHtml(ruleLabel)}
+              </span>
+            </div>
+            ${src.param_insert_text ? `
+              <div>
+                <span style="color: #64748b; font-weight: 600;">Text Added:</span>
+                <code style="color: #0d9488; font-weight: 700; margin-left: 4px;">"${escapeHtml(src.param_insert_text)}"</code>
+              </div>
+            ` : ''}
+            ${src.param_target_pattern ? `
+              <div>
+                <span style="color: #64748b; font-weight: 600;">Pattern:</span>
+                <code style="color: #64748b; margin-left: 4px;">${escapeHtml(src.param_target_pattern)}</code>
+              </div>
+            ` : ''}
+            ${src.image_selector ? `
+              <div>
+                <span style="color: #64748b; font-weight: 600;">CSS Selector:</span>
+                <code style="color: #4338ca; margin-left: 4px;">${escapeHtml(src.image_selector)}</code>
+              </div>
+            ` : ''}
+          </div>
+
+          <div style="border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+            <span style="color: #64748b; font-weight: 600;">Generated Pictures URL:</span>
+            <div style="font-family: monospace; color: #059669; font-weight: 700; word-break: break-all; margin-top: 2px;">
+              ${escapeHtml(previewPicUrl)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openAddScraperSourceModal() {
+  const modal = document.getElementById('scraperSourceModal');
+  const form = document.getElementById('scraperSourceModalForm');
+  const title = document.getElementById('scraperModalTitle');
+  const alertEl = document.getElementById('scraperModalAlert');
+  if (!modal || !form) return;
+
+  form.reset();
+  document.getElementById('scraperModalId').value = '';
+  if (title) title.innerText = 'Add Another Website Source';
+  if (alertEl) alertEl.style.display = 'none';
+
+  document.getElementById('scraperModalRuleType').value = 'insert_before_id';
+  document.getElementById('scraperModalInsertText').value = 'pictures-';
+  document.getElementById('scraperModalTargetPattern').value = '';
+  document.getElementById('scraperModalImageSelector').value = '';
+  document.getElementById('scraperModalEnabled').checked = true;
+
+  handleScraperRuleTypeChange();
+  updateScraperModalLivePreview();
+
+  modal.style.display = 'flex';
+}
+
+function openEditScraperSourceModal(sourceId) {
+  const modal = document.getElementById('scraperSourceModal');
+  const title = document.getElementById('scraperModalTitle');
+  const alertEl = document.getElementById('scraperModalAlert');
+  if (!modal) return;
+
+  const src = configuredScraperSourcesCache.find(s => s.id === sourceId);
+  if (!src) {
+    showAdminToast('Source not found in cache. Refreshing list...', 'error');
+    loadScraperSources();
+    return;
+  }
+
+  if (title) title.innerText = `Edit Website Source: ${src.name}`;
+  if (alertEl) alertEl.style.display = 'none';
+
+  document.getElementById('scraperModalId').value = src.id;
+  document.getElementById('scraperModalName').value = src.name || '';
+  document.getElementById('scraperModalDomain').value = src.domain || '';
+  document.getElementById('scraperModalSpecsUrl').value = src.specs_url_example || '';
+  document.getElementById('scraperModalRuleType').value = src.rule_type || 'insert_before_id';
+  document.getElementById('scraperModalInsertText').value = src.param_insert_text || '';
+  document.getElementById('scraperModalTargetPattern').value = src.param_target_pattern || '';
+  document.getElementById('scraperModalImageSelector').value = src.image_selector || '';
+  document.getElementById('scraperModalEnabled').checked = src.enabled !== false;
+
+  handleScraperRuleTypeChange();
+  updateScraperModalLivePreview();
+
+  modal.style.display = 'flex';
+}
+
+function closeScraperSourceModal() {
+  const modal = document.getElementById('scraperSourceModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function handleScraperRuleTypeChange() {
+  const ruleType = document.getElementById('scraperModalRuleType').value;
+  const insertLabel = document.getElementById('scraperModalInsertTextLabel');
+  const insertInput = document.getElementById('scraperModalInsertText');
+  const patternLabel = document.getElementById('scraperModalTargetPatternLabel');
+  const patternInput = document.getElementById('scraperModalTargetPattern');
+  const paramsWrap = document.getElementById('scraperModalRuleParamsWrap');
+
+  if (!insertLabel || !insertInput) return;
+
+  if (ruleType === 'same_page') {
+    if (paramsWrap) paramsWrap.style.display = 'none';
+  } else {
+    if (paramsWrap) paramsWrap.style.display = 'grid';
+  }
+
+  if (ruleType === 'insert_before_id') {
+    insertLabel.textContent = 'Text to Insert (e.g. "pictures-")';
+    insertInput.placeholder = 'e.g. pictures-';
+    patternLabel.textContent = 'Target ID Pattern (Optional - auto-detects by default)';
+    patternInput.placeholder = 'Leave empty to auto-detect numeric ID before extension';
+  } else if (ruleType === 'append_suffix') {
+    insertLabel.textContent = 'Suffix to Append (e.g. "_Pictures" or "/pictures")';
+    insertInput.placeholder = 'e.g. _Pictures or /gallery';
+    patternLabel.textContent = 'Optional Pattern';
+    patternInput.placeholder = 'Optional';
+  } else if (ruleType === 'insert_before_extension') {
+    insertLabel.textContent = 'Text to Insert Before Extension (.php, .html)';
+    insertInput.placeholder = 'e.g. -pictures';
+    patternLabel.textContent = 'Target Extension (Optional)';
+    patternInput.placeholder = 'Leave empty for automatic';
+  } else if (ruleType === 'replace_text') {
+    insertLabel.textContent = 'Replacement Text (e.g. "/pictures/")';
+    insertInput.placeholder = 'e.g. /pictures/ or /gallery/';
+    patternLabel.textContent = 'Text to Replace (e.g. "/specs/")';
+    patternInput.placeholder = 'e.g. /specs/ or -specs.html';
+  } else if (ruleType === 'custom_regex') {
+    insertLabel.textContent = 'Replacement String / Capture Group';
+    insertInput.placeholder = 'e.g. $1pictures-$2';
+    patternLabel.textContent = 'Regular Expression Pattern';
+    patternInput.placeholder = 'e.g. (-)(\\d+\\.php)';
+  }
+
+  updateScraperModalLivePreview();
+}
+
+function updateScraperModalLivePreview() {
+  const specsUrl = (document.getElementById('scraperModalSpecsUrl')?.value || '').trim();
+  const ruleType = document.getElementById('scraperModalRuleType')?.value || 'insert_before_id';
+  const insertText = (document.getElementById('scraperModalInsertText')?.value || '').trim();
+  const targetPattern = (document.getElementById('scraperModalTargetPattern')?.value || '').trim();
+
+  const previewSpecs = document.getElementById('modalPreviewSpecsUrl');
+  const previewPics = document.getElementById('modalPreviewPicsUrl');
+
+  const fallbackUrl = specsUrl || 'https://www.gsmarena.com/vivo_v80_5g-14989.php';
+
+  if (previewSpecs) {
+    previewSpecs.textContent = fallbackUrl;
+  }
+
+  const generated = buildPicturesUrlClient(fallbackUrl, {
+    rule_type: ruleType,
+    param_insert_text: insertText,
+    param_target_pattern: targetPattern
+  });
+
+  if (previewPics) {
+    previewPics.textContent = generated || fallbackUrl;
+  }
+}
+
+async function saveScraperSourceModal(e) {
+  if (e) e.preventDefault();
+
+  const btn = document.getElementById('btnSaveScraperModal');
+  const alertEl = document.getElementById('scraperModalAlert');
+  const id = document.getElementById('scraperModalId')?.value;
+  const name = (document.getElementById('scraperModalName')?.value || '').trim();
+  const domain = (document.getElementById('scraperModalDomain')?.value || '').trim();
+  const specs_url_example = (document.getElementById('scraperModalSpecsUrl')?.value || '').trim();
+  const rule_type = document.getElementById('scraperModalRuleType')?.value;
+  const param_insert_text = (document.getElementById('scraperModalInsertText')?.value || '').trim();
+  const param_target_pattern = (document.getElementById('scraperModalTargetPattern')?.value || '').trim();
+  const image_selector = (document.getElementById('scraperModalImageSelector')?.value || '').trim();
+  const enabled = document.getElementById('scraperModalEnabled')?.checked;
+
+  if (!name || !domain) {
+    if (alertEl) {
+      alertEl.style.display = 'block';
+      alertEl.style.background = '#fef2f2';
+      alertEl.style.color = '#991b1b';
+      alertEl.style.border = '1px solid #fecaca';
+      alertEl.textContent = 'Website name and domain are required.';
+    }
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ Saving...';
+  }
+
+  try {
+    const res = await fetch('/api/admin/settings/scraper-sources', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        name,
+        domain,
+        specs_url_example,
+        rule_type,
+        param_insert_text,
+        param_target_pattern,
+        image_selector,
+        enabled
+      })
+    });
+
+    const json = await res.json();
+
+    if (json.success) {
+      closeScraperSourceModal();
+      showAdminToast(json.message || 'Scraper source saved successfully!', 'success');
+      loadScraperSources();
+    } else {
+      if (alertEl) {
+        alertEl.style.display = 'block';
+        alertEl.style.background = '#fef2f2';
+        alertEl.style.color = '#991b1b';
+        alertEl.style.border = '1px solid #fecaca';
+        alertEl.textContent = json.message || 'Failed to save source.';
+      }
+    }
+  } catch (err) {
+    console.error('Error saving scraper source:', err);
+    if (alertEl) {
+      alertEl.style.display = 'block';
+      alertEl.style.background = '#fef2f2';
+      alertEl.style.color = '#991b1b';
+      alertEl.style.border = '1px solid #fecaca';
+      alertEl.textContent = 'Network error while saving scraper source.';
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '💾 Save Website Source';
+    }
+  }
+}
+
+async function deleteScraperSource(sourceId, sourceName) {
+  if (!confirm(`Are you sure you want to remove the source "${sourceName}"?\n\nURLs from this domain will no longer be auto-fetched.`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/settings/scraper-sources/${encodeURIComponent(sourceId)}`, {
+      method: 'DELETE'
+    });
+    const json = await res.json();
+    if (json.success) {
+      showAdminToast(json.message || 'Source deleted successfully.', 'info');
+      loadScraperSources();
+    } else {
+      alert(json.message || 'Failed to delete source.');
+    }
+  } catch (err) {
+    console.error('Error deleting scraper source:', err);
+    alert('Network error while deleting scraper source.');
+  }
+}
+
+async function toggleScraperSourceStatus(sourceId, enabled) {
+  const src = configuredScraperSourcesCache.find(s => s.id === sourceId);
+  if (!src) return;
+
+  try {
+    const res = await fetch('/api/admin/settings/scraper-sources', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...src,
+        enabled: !!enabled
+      })
+    });
+    const json = await res.json();
+    if (json.success) {
+      showAdminToast(`Source "${src.name}" ${enabled ? 'enabled' : 'disabled'}.`, 'success');
+      loadScraperSources();
+    } else {
+      alert(json.message || 'Failed to update source status.');
+      loadScraperSources();
+    }
+  } catch (err) {
+    console.error('Error toggling source status:', err);
+    loadScraperSources();
+  }
+}
+
+function testSourceDirectly(sourceId) {
+  const src = configuredScraperSourcesCache.find(s => s.id === sourceId);
+  if (!src) return;
+  const input = document.getElementById('testScraperInputUrl');
+  if (input) {
+    input.value = src.specs_url_example || `https://${src.domain}/sample-phone`;
+    handleTestScraperUrl();
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+async function handleTestScraperUrl() {
+  const input = document.getElementById('testScraperInputUrl');
+  const resBox = document.getElementById('testScraperResultBox');
+  const badge = document.getElementById('testScraperMatchedBadge');
+  const specsText = document.getElementById('testScraperSpecsUrlText');
+  const picsText = document.getElementById('testScraperPicsUrlText');
+  const openLink = document.getElementById('testScraperOpenPicsLink');
+
+  if (!input || !resBox) return;
+  const url = input.value.trim();
+  if (!url) {
+    alert('Please enter or paste a phone specs URL to test.');
+    input.focus();
+    return;
+  }
+
+  // Find matching source
+  let matched = null;
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+    matched = configuredScraperSourcesCache.find(s => {
+      const d = (s.domain || '').toLowerCase().trim();
+      return d && (host.includes(d) || d.includes(host));
+    });
+  } catch (_) {}
+
+  const rule = matched || { rule_type: 'insert_before_id', param_insert_text: 'pictures-' };
+  const picsUrl = buildPicturesUrlClient(url, rule);
+
+  resBox.style.display = 'block';
+  if (badge) {
+    badge.textContent = matched ? `Matched: ${matched.name}` : 'Generic Fallback Rule';
+    badge.style.background = matched ? '#0d9488' : '#64748b';
+  }
+  if (specsText) specsText.textContent = url;
+  if (picsText) picsText.textContent = picsUrl;
+  if (openLink) {
+    openLink.href = picsUrl;
+    openLink.style.display = picsUrl ? 'inline-flex' : 'none';
+  }
+}
+
+async function initPhoneFormScraperSources() {
+  const container = document.getElementById('autoFetchSourcesPillsWrap');
+  const badge = document.getElementById('autoFetchSourcesBadge');
+  const desc = document.getElementById('autoFetchSourcesDesc');
+
+  try {
+    const res = await fetch('/api/settings/scraper-sources/active');
+    const json = await res.json();
+    if (json.success && Array.isArray(json.sources) && json.sources.length > 0) {
+      activeScraperSourcesCache = json.sources;
+      window.activeScraperSourcesCache = json.sources;
+      if (container) {
+        const pillsHtml = json.sources.map(s => `
+          <span style="display: inline-flex; align-items: center; gap: 4px; background: #ecfdf5; color: #047857; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11.5px;">
+            <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span> ${escapeHtml(s.name)}
+          </span>
+        `).join('');
+
+        container.innerHTML = `
+          ${pillsHtml}
+          <a href="/admin/settings#scraper-sources" target="_blank" style="font-size: 11.5px; color: #0d9488; font-weight: 700; text-decoration: none; padding: 3px 8px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 4px;" title="Manage website sources in Settings">
+            ⚙️ Sources
+          </a>
+          <button type="button" class="btn btn-outline btn-sm btn-open-bulk-import" onclick="openBulkImportModal()" style="font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-color: var(--admin-primary); color: var(--admin-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-2 2.5h3L11 10h4l-5 8 1.5-5.5h-3L10 2Z"/></svg>
+            ⚡ Bulk Import Queue (10+ Phones)
+          </button>
+        `;
+      }
+      if (badge) {
+        badge.textContent = `${json.sources.length} Sources Active`;
+      }
+      if (desc) {
+        const names = json.sources.map(s => `<strong>${escapeHtml(s.domain || s.name)}</strong>`).join(', ');
+        desc.innerHTML = `Paste a phone page link from ${names} to automatically fetch model details, price, images, and section specifications.`;
+      }
+    }
+  } catch (e) {
+    console.warn('Could not load active sources for phone form pills:', e);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Role-Based Navigation & UI Access Controller
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -5520,18 +6436,23 @@ function clearBulkQueueForm() {
 
 function parseBulkUrls(rawText) {
   if (!rawText || typeof rawText !== 'string') return [];
-  const regex = /https?:\/\/(?:www\.)?(?:whatmobile\.com\.pk|gsmarena\.com)[^\s"',;)<>]+/gi;
+  const regex = /https?:\/\/[^\s"',;)<>]+/gi;
   const matches = rawText.match(regex) || [];
   const valid = [];
   const seen = new Set();
+
+  const allowedDomains = (activeScraperSourcesCache && activeScraperSourcesCache.length > 0)
+    ? activeScraperSourcesCache.map(s => (s.domain || '').toLowerCase().trim().replace(/^www\./, '')).filter(Boolean)
+    : ['whatmobile.com.pk', 'gsmarena.com'];
 
   for (let raw of matches) {
     let clean = raw.trim().replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
     if (!clean) continue;
     try {
       const u = new URL(clean);
-      const host = u.hostname.toLowerCase();
-      if ((host.includes('whatmobile.com.pk') || host.includes('gsmarena.com')) && !seen.has(clean)) {
+      const host = u.hostname.toLowerCase().replace(/^www\./, '');
+      const isAllowed = allowedDomains.some(d => host === d || host.endsWith('.' + d) || d.includes(host));
+      if (isAllowed && !seen.has(clean)) {
         seen.add(clean);
         valid.push(clean);
       }
@@ -5564,7 +6485,7 @@ async function startBulkQueue() {
 
   const urls = parseBulkUrls(textarea.value);
   if (urls.length === 0) {
-    alert('Please paste at least one valid phone URL from WhatMobile or GSMArena.');
+    alert('Please paste at least one valid phone URL from a configured website source.');
     textarea.focus();
     return;
   }
@@ -5918,6 +6839,21 @@ window.saveUserModal = saveUserModal;
 window.toggleUserPwVisibility = toggleUserPwVisibility;
 window.loadTeamUsers = loadTeamUsers;
 window.initRoleAccessUI = initRoleAccessUI;
+window.loadScraperSources = loadScraperSources;
+window.openAddScraperSourceModal = openAddScraperSourceModal;
+window.openEditScraperSourceModal = openEditScraperSourceModal;
+window.closeScraperSourceModal = closeScraperSourceModal;
+window.handleScraperRuleTypeChange = handleScraperRuleTypeChange;
+window.updateScraperModalLivePreview = updateScraperModalLivePreview;
+window.saveScraperSourceModal = saveScraperSourceModal;
+window.deleteScraperSource = deleteScraperSource;
+window.toggleScraperSourceStatus = toggleScraperSourceStatus;
+window.testSourceDirectly = testSourceDirectly;
+window.handleTestScraperUrl = handleTestScraperUrl;
+window.buildPicturesUrlClient = buildPicturesUrlClient;
+window.initPhoneFormScraperSources = initPhoneFormScraperSources;
+window.parseBulkUrls = parseBulkUrls;
+window.activeScraperSourcesCache = activeScraperSourcesCache;
 
 // ── PWA Active Installations Sidebar Badge Synchronizer ───────────────────────
 async function initPwaSidebarBadge() {
@@ -5951,6 +6887,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminBranding();
   initBulkImportModalListener();
   initPwaSidebarBadge();
+  initPhoneFormScraperSources();
 });
 
 

@@ -158,6 +158,12 @@ class SettingsController {
       if (ad_article_bottom !== undefined) payload.ad_article_bottom = decodeSnippet(ad_article_bottom);
       if (ad_article_bottom_enabled !== undefined) payload.ad_article_bottom_enabled = ad_article_bottom_enabled ? '1' : '0';
 
+      if (req.body.scraper_sources !== undefined) {
+        payload.scraper_sources = typeof req.body.scraper_sources === 'object'
+          ? JSON.stringify(req.body.scraper_sources)
+          : String(req.body.scraper_sources);
+      }
+
       await SettingsModel.updateSettings(payload);
       cache.clear();
 
@@ -173,6 +179,216 @@ class SettingsController {
       res.status(500).json({
         success: false,
         message: 'Failed to update settings.'
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/settings/scraper-sources
+   * Retrieve all configured scraper sources
+   */
+  static async getScraperSources(req, res) {
+    try {
+      const sources = await SettingsModel.getScraperSources();
+      res.json({
+        success: true,
+        sources
+      });
+    } catch (err) {
+      console.error('Error in getScraperSources:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to load scraper sources.'
+      });
+    }
+  }
+
+  /**
+   * GET /api/admin/settings/scraper-sources/active
+   * Retrieve active scraper sources (for frontend phone form & queues)
+   */
+  static async getActiveScraperSources(req, res) {
+    try {
+      const sources = await SettingsModel.getScraperSources();
+      const active = sources.filter(s => s.enabled !== false);
+      res.json({
+        success: true,
+        sources: active
+      });
+    } catch (err) {
+      console.error('Error in getActiveScraperSources:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to load active scraper sources.'
+      });
+    }
+  }
+
+  /**
+   * POST /api/admin/settings/scraper-sources
+   * Add or update a scraper source
+   */
+  static async saveScraperSource(req, res) {
+    try {
+      const {
+        id,
+        name,
+        domain,
+        specs_url_example,
+        rule_type = 'insert_before_id',
+        param_insert_text = '',
+        param_target_pattern = '',
+        image_selector = '',
+        enabled = true,
+        description = ''
+      } = req.body;
+
+      if (!name || !domain) {
+        return res.status(400).json({
+          success: false,
+          message: 'Website name and domain/hostname are required.'
+        });
+      }
+
+      const cleanDomain = String(domain || '')
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//i, '')
+        .replace(/\/.*$/, '')
+        .replace(/^www\./i, '');
+
+      if (!cleanDomain) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide a valid domain (e.g. devicespecifications.com).'
+        });
+      }
+
+      const sources = await SettingsModel.getScraperSources();
+      const sourceId = (id || cleanDomain.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `source-${Date.now()}`).toLowerCase();
+
+      // Calculate preview pictures URL
+      const { buildPicturesUrl } = require('../utils/phoneScraper');
+      const testSpecsUrl = (specs_url_example || `https://${cleanDomain}/sample-phone-1234.php`).trim();
+      const generatedImageUrl = buildPicturesUrl(testSpecsUrl, {
+        rule_type,
+        param_insert_text,
+        param_target_pattern
+      });
+
+      const existingIndex = sources.findIndex(s => s.id === sourceId || s.domain === cleanDomain);
+      const isBuiltin = existingIndex >= 0 && !!sources[existingIndex].is_builtin;
+
+      const newSource = {
+        id: sourceId,
+        name: String(name).trim(),
+        domain: cleanDomain,
+        enabled: enabled === true || enabled === 'true' || enabled === '1' || enabled === 1,
+        is_builtin: isBuiltin,
+        specs_url_example: testSpecsUrl,
+        rule_type: rule_type || 'insert_before_id',
+        param_insert_text: String(param_insert_text || '').trim(),
+        param_target_pattern: String(param_target_pattern || '').trim(),
+        image_url_example: generatedImageUrl,
+        image_selector: String(image_selector || '').trim(),
+        description: String(description || '').trim()
+      };
+
+      if (existingIndex >= 0) {
+        sources[existingIndex] = { ...sources[existingIndex], ...newSource };
+      } else {
+        sources.push(newSource);
+      }
+
+      await SettingsModel.saveScraperSources(sources);
+
+      res.json({
+        success: true,
+        message: `Scraper source "${newSource.name}" saved successfully!`,
+        source: newSource,
+        sources
+      });
+    } catch (err) {
+      console.error('Error in saveScraperSource:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to save scraper source.'
+      });
+    }
+  }
+
+  /**
+   * DELETE /api/admin/settings/scraper-sources/:id
+   * Delete a custom scraper source
+   */
+  static async deleteScraperSource(req, res) {
+    try {
+      const { id } = req.params;
+      const sources = await SettingsModel.getScraperSources();
+      const target = sources.find(s => s.id === id);
+
+      if (!target) {
+        return res.status(404).json({
+          success: false,
+          message: 'Scraper source not found.'
+        });
+      }
+
+      if (target.is_builtin) {
+        return res.status(400).json({
+          success: false,
+          message: 'Built-in sources (GSMArena & WhatMobile) cannot be deleted. You can disable them instead.'
+        });
+      }
+
+      const updated = sources.filter(s => s.id !== id);
+      await SettingsModel.saveScraperSources(updated);
+
+      res.json({
+        success: true,
+        message: `Source "${target.name}" removed successfully.`,
+        sources: updated
+      });
+    } catch (err) {
+      console.error('Error in deleteScraperSource:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete scraper source.'
+      });
+    }
+  }
+
+  /**
+   * POST /api/admin/settings/scraper-sources/test-transform
+   * Live test URL transformation for previewing pictures URL
+   */
+  static async testUrlTransform(req, res) {
+    try {
+      const { specsUrl, rule_type, param_insert_text, param_target_pattern } = req.body;
+      if (!specsUrl) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone specs URL is required.'
+        });
+      }
+
+      const { buildPicturesUrl } = require('../utils/phoneScraper');
+      const picturesUrl = buildPicturesUrl(specsUrl, {
+        rule_type,
+        param_insert_text,
+        param_target_pattern
+      });
+
+      res.json({
+        success: true,
+        originalUrl: specsUrl,
+        picturesUrl,
+        isModified: picturesUrl !== specsUrl
+      });
+    } catch (err) {
+      res.status(400).json({
+        success: false,
+        message: err.message || 'Transformation failed.'
       });
     }
   }

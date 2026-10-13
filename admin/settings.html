@@ -372,6 +372,11 @@
             </a>
           </li>
           <li>
+            <a href="#scraper-sources" id="sideNavScraper" onclick="switchSettingsSection('scraper'); return false;" class="admin-nav-sublink">
+              <span>⚡ Auto-Fetch &amp; Data Sources</span>
+            </a>
+          </li>
+          <li>
             <a href="#ad-placements" id="sideNavAds" onclick="switchSettingsSection('ads'); return false;" class="admin-nav-sublink">
               <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Ad Placements</span>
               <span class="admin-nav-badge">9 Slots</span>
@@ -429,6 +434,9 @@
         </button>
         <button type="button" id="tabBtnGeneral" onclick="switchSettingsSection('general')" class="settings-tab-btn">
           <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> General &amp; Snippets</span>
+        </button>
+        <button type="button" id="tabBtnScraper" onclick="switchSettingsSection('scraper')" class="settings-tab-btn">
+          <span>⚡ Auto-Fetch &amp; Scraper Sources</span>
         </button>
         <button type="button" id="tabBtnAds" onclick="switchSettingsSection('ads')" class="settings-tab-btn">
           <span><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Ad Placements</span>
@@ -1138,6 +1146,96 @@
         </div>
         <!-- END WRAPPER: settingsSectionGeneral -->
 
+        <!-- WRAPPER: Auto-Fetch & Scraper Sources Section -->
+        <div id="settingsSectionScraper" class="settings-section" style="display: none;">
+
+          <!-- Notice Banner -->
+          <div style="background: linear-gradient(135deg, #042f2e 0%, #0f172a 100%); border: 1px solid #0d9488; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; color: #f0fdfa;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div>
+                <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(13, 148, 136, 0.3); border: 1px solid #14b8a6; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: #5eead4;">
+                  ⚡ Multi-Source Auto-Fetch Engine
+                </span>
+                <h3 style="font-size: 19px; font-weight: 800; margin: 0 0 6px; color: #ffffff;">Auto-Fetch &amp; Scraper Data Sources</h3>
+                <p style="font-size: 13px; color: #99f6e4; margin: 0; line-height: 1.5; max-width: 820px;">
+                  Configure which external websites can be used to automatically fetch mobile phone specifications, prices, and photo galleries. Add another phone website URL format and define custom rules for generating its picture gallery URL.
+                </p>
+              </div>
+              <div style="display: flex; gap: 10px; align-self: center;">
+                <button type="button" onclick="openAddScraperSourceModal()" class="btn btn-primary" style="background: #0d9488; border-color: #0d9488; padding: 9px 18px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>➕</span>
+                  <span>Add Another Website Source</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Configured Sources List Cards -->
+          <div class="admin-card" style="margin-bottom: 24px;">
+            <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 class="admin-card-title">🌐 Configured Website Sources</h3>
+                <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                  Active sources will be accepted in both single phone auto-fetch and the bulk import queue.
+                </p>
+              </div>
+              <div id="sourcesCountBadge" style="font-size: 12px; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 9999px;">
+                2 Sources Configured
+              </div>
+            </div>
+
+            <!-- Container where source cards render dynamically -->
+            <div id="scraperSourcesListContainer" style="display: flex; flex-direction: column; gap: 16px; margin-top: 10px;">
+              <!-- Cards rendered dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- Interactive Live URL Transformation & Scraper Tester Card -->
+          <div class="admin-card" id="scraperUrlTesterCard" style="background: #ffffff; border: 1px solid #e2e8f0;">
+            <div class="admin-card-header">
+              <div>
+                <h3 class="admin-card-title">🧪 Test URL Transformation &amp; Scraper</h3>
+                <p style="font-size: 13px; color: var(--admin-text-muted); margin-top: 4px;">
+                  Paste a mobile phone specifications URL from any source to test how its picture gallery URL is generated and verify specifications extraction.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px;">
+              <div style="flex: 1; min-width: 320px;">
+                <input type="url" id="testScraperInputUrl" class="form-control" placeholder="e.g. https://www.gsmarena.com/vivo_v80_5g-14989.php" style="padding: 10px 14px; font-size: 13.5px; font-family: monospace;">
+              </div>
+              <button type="button" onclick="handleTestScraperUrl()" class="btn btn-outline" style="padding: 10px 18px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <span>⚡</span>
+                <span>Test Transformation</span>
+              </button>
+            </div>
+
+            <!-- Results Output Box -->
+            <div id="testScraperResultBox" style="display: none; background: #0f172a; border-radius: 8px; padding: 16px; color: #f8fafc; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+                <span style="font-weight: 700; color: #38bdf8;">Transformation Result:</span>
+                <span id="testScraperMatchedBadge" style="background: #0d9488; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;"></span>
+              </div>
+              <div style="margin-bottom: 8px;">
+                <span style="color: #94a3b8; font-size: 12px;">Mobile Specs URL:</span>
+                <div id="testScraperSpecsUrlText" style="font-family: monospace; color: #e2e8f0; word-break: break-all; margin-top: 2px;"></div>
+              </div>
+              <div style="margin-bottom: 12px;">
+                <span style="color: #94a3b8; font-size: 12px;">Generated Pictures/Gallery URL:</span>
+                <div id="testScraperPicsUrlText" style="font-family: monospace; color: #34d399; font-weight: 700; word-break: break-all; margin-top: 2px;"></div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <a id="testScraperOpenPicsLink" href="#" target="_blank" class="btn btn-outline btn-sm" style="color: #38bdf8; border-color: #0284c7; padding: 4px 10px; font-size: 11.5px; text-decoration: none;">
+                  ↗ Open Generated Images URL in Browser
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- END WRAPPER: settingsSectionScraper -->
+
         <!-- WRAPPER: Ad Placements Section (Sub Menu) -->
         <div id="settingsSectionAds" class="settings-section" style="display: none;">
 
@@ -1748,6 +1846,117 @@
         <div style="padding: 14px 22px; border-top: 1px solid var(--admin-border); background: #f8fafc; display: flex; justify-content: flex-end; gap: 10px;">
           <button type="button" onclick="closeUserModal()" class="btn btn-outline btn-sm" style="padding: 8px 18px;">Cancel</button>
           <button type="submit" id="btnSaveUserModal" class="btn btn-primary btn-sm" style="padding: 8px 22px; font-weight: 700;">💾 Save User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Scraper Website Source -->
+  <div id="scraperSourceModal" class="admin-modal-overlay" style="display: none;" onclick="if(event.target === this) closeScraperSourceModal();">
+    <div class="admin-modal" style="max-width: 650px; width: 95%;">
+      <div style="padding: 18px 22px; border-bottom: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+        <div>
+          <h3 id="scraperModalTitle" style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0;">Add Another Website Source</h3>
+          <p id="scraperModalSubtitle" style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Configure website domain, phone specs URL format, and image gallery transformation rule.</p>
+        </div>
+        <button type="button" onclick="closeScraperSourceModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b;" aria-label="Close">✕</button>
+      </div>
+
+      <form id="scraperSourceModalForm" onsubmit="saveScraperSourceModal(event); return false;" style="margin: 0; display: flex; flex-direction: column;">
+        <input type="hidden" id="scraperModalId" value="">
+
+        <div style="padding: 22px; overflow-y: auto; max-height: calc(85vh - 140px);">
+          <!-- Modal Alert -->
+          <div id="scraperModalAlert" style="display: none; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; font-weight: 600;"></div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <!-- Website Name -->
+            <div>
+              <label class="form-label" for="scraperModalName" style="font-size: 12px; font-weight: 700; color: #334155;">Website Name <span style="color: #ef4444;">*</span></label>
+              <input type="text" id="scraperModalName" class="form-control" placeholder="e.g. DeviceSpecifications, Smartprix" required oninput="updateScraperModalLivePreview()">
+            </div>
+
+            <!-- Domain / Hostname -->
+            <div>
+              <label class="form-label" for="scraperModalDomain" style="font-size: 12px; font-weight: 700; color: #334155;">Domain / Hostname <span style="color: #ef4444;">*</span></label>
+              <input type="text" id="scraperModalDomain" class="form-control" placeholder="e.g. devicespecifications.com" required oninput="updateScraperModalLivePreview()">
+              <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">Used to detect when a pasted URL belongs to this website.</small>
+            </div>
+          </div>
+
+          <!-- Sample Phone Specs URL -->
+          <div style="margin-bottom: 16px;">
+            <label class="form-label" for="scraperModalSpecsUrl" style="font-size: 12px; font-weight: 700; color: #334155;">Sample Phone Specs URL <span style="color: #ef4444;">*</span></label>
+            <input type="url" id="scraperModalSpecsUrl" class="form-control" placeholder="e.g. https://www.gsmarena.com/vivo_v80_5g-14989.php" required style="font-family: monospace; font-size: 13px;" oninput="updateScraperModalLivePreview()">
+            <small style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">Paste an authentic phone page link from this website to configure and preview the rule.</small>
+          </div>
+
+          <!-- Image / Pictures URL Transformation Rule Section -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+              <span>🖼️ Image / Pictures URL Transformation Rule</span>
+              <span class="badge" style="background: #ccfbf1; color: #0f766e; font-size: 11px; padding: 2px 7px;">Automatic URL Generator</span>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label class="form-label" for="scraperModalRuleType" style="font-size: 12px; font-weight: 700; color: #334155;">How are images/pictures URLs constructed?</label>
+              <select id="scraperModalRuleType" class="form-control" style="font-weight: 600;" onchange="handleScraperRuleTypeChange()">
+                <option value="insert_before_id">Insert text before ID / number (e.g. GSMArena: adds "pictures-" before 14989.php)</option>
+                <option value="append_suffix">Append text to URL (e.g. WhatMobile: adds "_Pictures" to URL)</option>
+                <option value="insert_before_extension">Insert text before file extension (.php, .html)</option>
+                <option value="replace_text">Replace specific text in URL (e.g. replace /specs/ with /pictures/)</option>
+                <option value="custom_regex">Custom Regular Expression Replacement</option>
+                <option value="same_page">Same Page (Pictures are already on the specs page)</option>
+              </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;" id="scraperModalRuleParamsWrap">
+              <div>
+                <label class="form-label" for="scraperModalInsertText" id="scraperModalInsertTextLabel" style="font-size: 12px; font-weight: 700; color: #334155;">Text to Add / Insert</label>
+                <input type="text" id="scraperModalInsertText" class="form-control" placeholder="e.g. pictures- or _Pictures" value="pictures-" oninput="updateScraperModalLivePreview()">
+              </div>
+              <div>
+                <label class="form-label" for="scraperModalTargetPattern" id="scraperModalTargetPatternLabel" style="font-size: 12px; font-weight: 700; color: #334155;">Target Text / Pattern (Optional)</label>
+                <input type="text" id="scraperModalTargetPattern" class="form-control" placeholder="Leave empty for auto-detecting ID" oninput="updateScraperModalLivePreview()">
+              </div>
+            </div>
+
+            <!-- Dynamic Live Preview Box -->
+            <div style="background: #0f172a; border-radius: 6px; padding: 12px 14px; color: #e2e8f0; font-size: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; color: #38bdf8; font-size: 11.5px;">⚡ Live Transformation Preview:</span>
+                <span style="font-size: 10px; color: #94a3b8;">Updates as you type</span>
+              </div>
+              <div style="color: #94a3b8; font-size: 11px;">Input Specs URL:</div>
+              <div id="modalPreviewSpecsUrl" style="font-family: monospace; color: #cbd5e1; word-break: break-all; margin-bottom: 6px;">https://www.gsmarena.com/vivo_v80_5g-14989.php</div>
+              <div style="color: #94a3b8; font-size: 11px;">➜ Resulting Images URL:</div>
+              <div id="modalPreviewPicsUrl" style="font-family: monospace; color: #34d399; font-weight: 700; word-break: break-all;">https://www.gsmarena.com/vivo_v80_5g-pictures-14989.php</div>
+            </div>
+          </div>
+
+          <!-- Image Container / Selector (Optional) -->
+          <div style="margin-bottom: 14px;">
+            <label class="form-label" for="scraperModalImageSelector" style="font-size: 12px; font-weight: 700; color: #334155;">Gallery Image Container / Selector (Optional)</label>
+            <input type="text" id="scraperModalImageSelector" class="form-control" placeholder="e.g. #pictures-list or .gallery-photos (Leave empty for automatic)">
+            <small style="font-size: 11px; color: #64748b; margin-top: 3px; display: block;">Specific DOM container ID or CSS class on the pictures page where phone images reside.</small>
+          </div>
+
+          <!-- Status Switch -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f1f5f9; border-radius: 6px;">
+            <div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #1e293b;">Enable this Website Source</div>
+              <div style="font-size: 11.5px; color: #64748b;">Active sources will be accepted in single fetch and bulk queues.</div>
+            </div>
+            <label class="switch" style="margin: 0;">
+              <input type="checkbox" id="scraperModalEnabled" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div style="padding: 14px 22px; border-top: 1px solid var(--admin-border); background: #f8fafc; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" onclick="closeScraperSourceModal()" class="btn btn-outline btn-sm" style="padding: 8px 18px;">Cancel</button>
+          <button type="submit" id="btnSaveScraperModal" class="btn btn-primary btn-sm" style="padding: 8px 22px; font-weight: 700;">💾 Save Website Source</button>
         </div>
       </form>
     </div>

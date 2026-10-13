@@ -126,7 +126,21 @@ class NewsController {
    */
   static async create(req, res, next) {
     try {
-      const { title, slug, summary, author, category, is_hot, status, content } = req.body;
+      const {
+        title,
+        slug,
+        summary,
+        author,
+        category,
+        is_hot,
+        status,
+        content,
+        meta_title,
+        meta_description,
+        focus_keyword,
+        related_keywords,
+        canonical_url
+      } = req.body;
 
       if (!title || title.trim() === '') {
         return res.status(400).json({ success: false, message: 'Title is required' });
@@ -156,7 +170,12 @@ class NewsController {
         is_hot: is_hot === '1' || is_hot === 1 || is_hot === 'true' || is_hot === true,
         status: status || 'published',
         content: content || '',
-        image
+        image,
+        meta_title: meta_title ? meta_title.trim() : null,
+        meta_description: meta_description ? meta_description.trim() : null,
+        focus_keyword: focus_keyword ? focus_keyword.trim() : null,
+        related_keywords: related_keywords || null,
+        canonical_url: canonical_url ? canonical_url.trim() : null
       });
 
       cache.invalidateTags(['news', 'home']);
@@ -181,7 +200,21 @@ class NewsController {
   static async update(req, res, next) {
     try {
       const { id } = req.params;
-      const { title, slug, summary, author, category, is_hot, status, content } = req.body;
+      const {
+        title,
+        slug,
+        summary,
+        author,
+        category,
+        is_hot,
+        status,
+        content,
+        meta_title,
+        meta_description,
+        focus_keyword,
+        related_keywords,
+        canonical_url
+      } = req.body;
 
       const existing = await NewsModel.getById(id);
       if (!existing) {
@@ -212,7 +245,12 @@ class NewsController {
         is_hot: is_hot === '1' || is_hot === 1 || is_hot === 'true' || is_hot === true,
         status: status || existing.status,
         content: content !== undefined ? content : existing.content,
-        image
+        image,
+        meta_title: meta_title !== undefined ? (meta_title ? meta_title.trim() : null) : existing.meta_title,
+        meta_description: meta_description !== undefined ? (meta_description ? meta_description.trim() : null) : existing.meta_description,
+        focus_keyword: focus_keyword !== undefined ? (focus_keyword ? focus_keyword.trim() : null) : existing.focus_keyword,
+        related_keywords: related_keywords !== undefined ? (related_keywords || null) : existing.related_keywords,
+        canonical_url: canonical_url !== undefined ? (canonical_url ? canonical_url.trim() : null) : existing.canonical_url
       });
 
       cache.invalidateTags(['news', 'home']);

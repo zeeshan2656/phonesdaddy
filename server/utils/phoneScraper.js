@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const SettingsModel = require('../models/settingsModel');
 
 // Common User-Agent to avoid blocking
 const DEFAULT_HEADERS = {
@@ -422,6 +423,75 @@ async function downloadAllImages(imageUrls, slug) {
 }
 
 /**
+ * Dynamically build the pictures/gallery URL from the phone specs URL using configured transformation rules
+ * @param {string} specsUrl - Mobile specs page URL
+ * @param {object} rule - Rule config { rule_type, param_insert_text, param_target_pattern }
+ */
+function buildPicturesUrl(specsUrl, rule = {}) {
+  if (!specsUrl || typeof specsUrl !== 'string') return '';
+  const url = specsUrl.trim();
+  const ruleType = rule.rule_type || 'insert_before_id';
+  const insertText = rule.param_insert_text || '';
+  const targetPattern = rule.param_target_pattern || '';
+
+  if (ruleType === 'same_page' || !insertText) return url;
+
+  if (ruleType === 'insert_before_id' || ruleType === 'insert_before') {
+    if (insertText && url.includes(insertText)) return url;
+    if (targetPattern) {
+      try {
+        const re = new RegExp(targetPattern, 'i');
+        if (re.test(url)) {
+          return url.replace(re, (m, p1, p2) => {
+            if (p1 !== undefined && p2 !== undefined) {
+              return p1 + insertText + p2;
+            }
+            return insertText + m;
+          });
+        }
+      } catch (_) {}
+      if (url.includes(targetPattern)) {
+        const idx = url.indexOf(targetPattern);
+        return url.slice(0, idx) + insertText + url.slice(idx);
+      }
+    }
+    // Default smart ID before extension (like GSMArena: -14989.php or -id.html)
+    if (/(-)(\d+\.php)$/i.test(url)) {
+      return url.replace(/(-)(\d+\.php)$/i, (m, p1, p2) => p1 + insertText + p2);
+    }
+    if (/(-)(\d+(\.[a-z0-9]+)?)$/i.test(url)) {
+      return url.replace(/(-)(\d+(\.[a-z0-9]+)?)$/i, (m, p1, p2) => p1 + insertText + p2);
+    }
+    return url;
+  }
+
+  if (ruleType === 'append_suffix' || ruleType === 'append') {
+    if (url.endsWith(insertText)) return url;
+    return url.replace(/\/+$/, '') + insertText;
+  }
+
+  if (ruleType === 'insert_before_extension') {
+    return url.replace(/(\.[a-z0-9]{2,5})$/i, (m, ext) => insertText + ext);
+  }
+
+  if (ruleType === 'replace_text' || ruleType === 'replace') {
+    if (!targetPattern) return url;
+    return url.replaceAll(targetPattern, insertText);
+  }
+
+  if (ruleType === 'custom_regex') {
+    if (!targetPattern) return url;
+    try {
+      return url.replace(new RegExp(targetPattern, 'gi'), insertText);
+    } catch (_) {
+      return url;
+    }
+  }
+
+  return url;
+}
+
+/**
  * Fetch GSMArena gallery images strictly following user rule:
  * For GSMArena: add (-pictures) to the given link before (-ID.php)
  * Example: https://www.gsmarena.com/umidigi_g100x-14541.php
@@ -523,6 +593,194 @@ async function fetchWhatMobileGallery(mainPageUrl, mainImageUrl) {
   }
 
   return imageUrls;
+}
+
+/**
+ * Generic Gallery Fetcher for custom website sources
+ */
+async function fetchGenericGallery(picturesUrl, mainImageUrl, sourceConfig = {}) {
+  const imageUrls = [];
+  if (mainImageUrl) imageUrls.push(mainImageUrl);
+
+  try {
+    if (!picturesUrl) return imageUrls;
+    console.log(`Checking pictures URL: ${picturesUrl}`);
+    const picRes = await fetch(picturesUrl, {
+      headers: DEFAULT_HEADERS,
+      signal: AbortSignal.timeout(12000)
+    });
+
+    if (picRes.ok) {
+      const picHtml = await picRes.text();
+      let searchHtml = picHtml;
+
+      if (sourceConfig.image_selector) {
+        const sel = sourceConfig.image_selector.replace(/^[#.]/, '');
+        const match = picHtml.match(new RegExp(`<(?:div|section|ul)[^>]+(?:id|class)=["'][^"']*${sel}[^"']*["'][^>]*>([\\s\\S]*?)<\\/(?:div|section|ul)>`, 'i'));
+        if (match) {
+          searchHtml = match[1];
+        }
+      }
+
+      const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+      let m;
+      while ((m = imgRegex.exec(searchHtml)) !== null) {
+        let src = m[1];
+        if (src && !src.includes('.gif') && !src.includes('avatar') && !src.includes('icon') && !src.includes('logo')) {
+          try {
+            if (src.startsWith('//')) src = 'https:' + src;
+            else if (src.startsWith('/')) {
+              const u = new URL(picturesUrl);
+              src = `${u.protocol}//${u.host}${src}`;
+            }
+            if (!imageUrls.includes(src)) {
+              imageUrls.push(src);
+            }
+          } catch (_) {}
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('fetchGenericGallery error:', err.message);
+  }
+
+  return imageUrls;
+}
+
+/**
+ * Smart Generic Parser for Custom Phone Sources
+ */
+function parseGenericWebsite(html, sourceUrl, sourceConfig = {}) {
+  let fullName = '';
+  const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  if (h1Match) {
+    fullName = h1Match[1].replace(/<[^>]+>/g, '').trim();
+  }
+  if (!fullName) {
+    const ogTitle = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i);
+    if (ogTitle) fullName = ogTitle[1].trim();
+  }
+  if (!fullName) {
+    const t = html.match(/<title>([\s\S]*?)<\/title>/i);
+    fullName = t ? t[1].split(/[-–|]/)[0].trim() : '';
+  }
+  if (!fullName) {
+    try {
+      const u = new URL(sourceUrl);
+      const seg = u.pathname.split('/').filter(Boolean).pop() || '';
+      fullName = seg.replace(/[-_]+/g, ' ').replace(/\.[a-z0-9]+$/i, '').trim();
+      fullName = fullName.replace(/\b\w/g, l => l.toUpperCase());
+    } catch (_) {}
+  }
+
+  // Clean title noise like ": Android Smartphone Specifications" or "Specs & Price"
+  fullName = fullName
+    .replace(/:\s*Android Smartphone.*$/i, '')
+    .replace(/\s*(?:Full Phone Specifications|Specs & Price|Specifications|Price in Pakistan).*$/i, '')
+    .trim();
+
+  let brand = '';
+  let modelName = fullName;
+  if (fullName) {
+    const parts = fullName.split(' ');
+    brand = parts[0];
+    if (parts.length > 1) {
+      modelName = parts.slice(1).join(' ').trim();
+    }
+  }
+
+  let imageUrl = '';
+  const ogImg = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+  if (ogImg) {
+    imageUrl = ogImg[1].trim();
+    if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
+  }
+  if (!imageUrl) {
+    const imgMatch = html.match(/<img[^>]+src=["']([^"']+\.(?:jpg|jpeg|png|webp))["']/i);
+    if (imgMatch) {
+      imageUrl = imgMatch[1];
+      if (imageUrl.startsWith('//')) imageUrl = 'https:' + imageUrl;
+      else if (imageUrl.startsWith('/')) {
+        try {
+          const u = new URL(sourceUrl);
+          imageUrl = `${u.protocol}//${u.host}${imageUrl}`;
+        } catch (_) {}
+      }
+    }
+  }
+
+  const specs = [];
+  const tableRegex = /<table[^>]*>([\s\S]*?)<\/table>/gi;
+  let tMatch;
+  let sectionIndex = 0;
+
+  while ((tMatch = tableRegex.exec(html)) !== null) {
+    const tableHtml = tMatch[1];
+    let currentSection = `Section ${++sectionIndex}`;
+
+    const secMatch = tableHtml.match(/<(?:caption|th)[^>]*>([\s\S]*?)<\/(?:caption|th)>/i);
+    if (secMatch) {
+      const cleanSec = secMatch[1].replace(/<[^>]+>/g, '').trim();
+      if (cleanSec && cleanSec.length < 50) currentSection = cleanSec;
+    }
+
+    const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+    let rMatch;
+    while ((rMatch = rowRegex.exec(tableHtml)) !== null) {
+      const rowContent = rMatch[1];
+      const cells = [];
+      const cellRegex = /<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>/gi;
+      let cMatch;
+      while ((cMatch = cellRegex.exec(rowContent)) !== null) {
+        cells.push(cMatch[1].replace(/<[^>]+>/g, '').trim());
+      }
+      if (cells.length >= 2) {
+        const key = cells[0];
+        const val = cells.slice(1).join(', ').trim();
+        if (key && val && key.length < 60 && val.length < 500) {
+          specs.push({
+            section: currentSection,
+            key,
+            value: val
+          });
+        }
+      }
+    }
+  }
+
+  if (specs.length === 0) {
+    const dtRegex = /<dt[^>]*>([\s\S]*?)<\/dt>\s*<dd[^>]*>([\s\S]*?)<\/dd>/gi;
+    let dMatch;
+    while ((dMatch = dtRegex.exec(html)) !== null) {
+      const k = dMatch[1].replace(/<[^>]+>/g, '').trim();
+      const v = dMatch[2].replace(/<[^>]+>/g, '').trim();
+      if (k && v) {
+        specs.push({ section: 'Features', key: k, value: v });
+      }
+    }
+  }
+
+  const slug = slugify(fullName || modelName || 'phone-model');
+
+  return {
+    name: modelName || fullName,
+    fullName,
+    brand,
+    slug,
+    price: 0,
+    pricePKR: '',
+    priceUSD: '',
+    priceINR: '',
+    priceGBP: '',
+    releaseDate: '',
+    status: 'Available',
+    imageUrl,
+    imageUrls: imageUrl ? [imageUrl] : [],
+    specs,
+    source: sourceConfig.id || 'custom',
+    sourceUrl,
+    source_name: sourceConfig.name || 'Custom Website'
+  };
 }
 
 /**
@@ -1029,7 +1287,8 @@ function parseWhatMobile(html, sourceUrl) {
 
 /**
  * Main scraper entrypoint
- * @param {string} url - Target URL from whatmobile.com.pk or gsmarena.com
+ * Dynamically queries configured scraper sources (GSMArena, WhatMobile, and custom added websites)
+ * @param {string} url - Target URL from any active configured source
  */
 async function scrapePhoneFromUrl(url) {
   if (!url || typeof url !== 'string') {
@@ -1048,11 +1307,18 @@ async function scrapePhoneFromUrl(url) {
   }
 
   const hostname = parsedUrl.hostname.toLowerCase();
-  const isGsmArena = hostname.includes('gsmarena.com');
-  const isWhatMobile = hostname.includes('whatmobile.com.pk');
 
-  if (!isGsmArena && !isWhatMobile) {
-    throw new Error('Unsupported website. Please provide a link from https://www.gsmarena.com/ or https://www.whatmobile.com.pk/');
+  // Load configured sources from database
+  const sources = await SettingsModel.getScraperSources();
+  const enabledSources = sources.filter(s => s.enabled !== false);
+  const matchedSource = enabledSources.find(s => {
+    const d = (s.domain || '').toLowerCase().trim().replace(/^www\./, '');
+    return d && (hostname === d || hostname.endsWith('.' + d));
+  });
+
+  if (!matchedSource) {
+    const activeNames = enabledSources.map(s => s.name).join(', ') || 'None';
+    throw new Error(`Unsupported website (${hostname}). Active configured sources: ${activeNames}. You can add this website under Settings > Scraper Sources.`);
   }
 
   // Fetch page HTML
@@ -1068,20 +1334,27 @@ async function scrapePhoneFromUrl(url) {
   const html = await res.text();
   let parsedData;
 
-  if (isGsmArena) {
+  const picturesUrl = buildPicturesUrl(trimmedUrl, matchedSource);
+
+  if (matchedSource.id === 'gsmarena') {
     parsedData = parseGSMArena(html, trimmedUrl);
-    // Fetch additional gallery images strictly from GSMArena pictures URL: *-pictures-ID.php
-    const gsmGalleryUrls = await fetchGSMArenaGallery(trimmedUrl, parsedData.imageUrl);
+    parsedData.source_name = 'GSMArena';
+    const gsmGalleryUrls = await fetchGSMArenaGallery(picturesUrl || trimmedUrl, parsedData.imageUrl);
     parsedData.imageUrls = gsmGalleryUrls;
-  } else {
+  } else if (matchedSource.id === 'whatmobile') {
     parsedData = parseWhatMobile(html, trimmedUrl);
-    // Fetch additional gallery images strictly from WhatMobile pictures URL: *_Pictures
-    const wmGalleryUrls = await fetchWhatMobileGallery(trimmedUrl, parsedData.imageUrl);
+    parsedData.source_name = 'WhatMobile';
+    const wmGalleryUrls = await fetchWhatMobileGallery(picturesUrl || trimmedUrl, parsedData.imageUrl);
     parsedData.imageUrls = wmGalleryUrls;
+  } else {
+    parsedData = parseGenericWebsite(html, trimmedUrl, matchedSource);
+    parsedData.source_name = matchedSource.name || 'Custom Website';
+    const customGalleryUrls = await fetchGenericGallery(picturesUrl, parsedData.imageUrl, matchedSource);
+    parsedData.imageUrls = customGalleryUrls;
   }
 
   if (!parsedData.name) {
-    throw new Error('Could not identify phone name from this URL. Please verify the link.');
+    throw new Error(`Could not identify phone name from ${matchedSource.name}. Please verify the link.`);
   }
 
   // Download all gallery images to local storage
@@ -1122,8 +1395,11 @@ module.exports = {
   extractWhatMobileParagraph,
   parseGSMArena,
   parseWhatMobile,
+  parseGenericWebsite,
   downloadScrapedImage,
   downloadAllImages,
   fetchGSMArenaGallery,
-  fetchWhatMobileGallery
+  fetchWhatMobileGallery,
+  fetchGenericGallery,
+  buildPicturesUrl
 };

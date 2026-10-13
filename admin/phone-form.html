@@ -6,6 +6,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Phone Form — PhonesDaddy Admin</title>
   <link rel="stylesheet" href="/css/admin.css?v=2026.5">
+  <link rel="stylesheet" href="/css/seo-assistant.css?v=2026.1">
   <!-- Quill Snow CSS for Rich Summary Editor -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
   <style>
@@ -123,26 +124,31 @@
 
     <div class="admin-content">
       <form id="phoneForm" enctype="multipart/form-data">
-        
-        <!-- Auto-Fetch Specifications Card -->
+        <div class="phone-admin-layout">
+          <div class="phone-form-main-col">
+            
+            <!-- Auto-Fetch Specifications Card -->
         <div class="admin-card auto-fetch-card" style="border-left: 4px solid var(--primary); background: linear-gradient(to right, #f8fafc, #ffffff);">
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
             <div>
               <h3 class="admin-card-title" style="margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                 <span>⚡ Auto-Fetch Specs from URL</span>
-                <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px;">WhatMobile & GSMArena</span>
+                <span class="badge" id="autoFetchSourcesBadge" style="background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 9999px;">WhatMobile &amp; GSMArena</span>
               </h3>
-              <p style="color: #64748b; font-size: 13px;">
+              <p style="color: #64748b; font-size: 13px;" id="autoFetchSourcesDesc">
                 Paste a phone page link from <strong>whatmobile.com.pk</strong> or <strong>gsmarena.com</strong> to automatically fetch model details, price, images, and section specifications.
               </p>
             </div>
-            <div style="display: flex; gap: 8px; font-size: 12px; align-items: center; flex-wrap: wrap;">
+            <div id="autoFetchSourcesPillsWrap" style="display: flex; gap: 8px; font-size: 12px; align-items: center; flex-wrap: wrap;">
               <span style="display: inline-flex; align-items: center; gap: 4px; background: #ecfdf5; color: #047857; padding: 4px 8px; border-radius: 4px; font-weight: 600;">
                 <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span> WhatMobile
               </span>
               <span style="display: inline-flex; align-items: center; gap: 4px; background: #eff6ff; color: #1d4ed8; padding: 4px 8px; border-radius: 4px; font-weight: 600;">
                 <span style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%;"></span> GSMArena
               </span>
+              <a href="/admin/settings#scraper-sources" target="_blank" style="font-size: 11.5px; color: #0d9488; font-weight: 700; text-decoration: none; padding: 3px 8px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 4px;" title="Manage website sources in Settings">
+                ⚙️ Sources
+              </a>
               <button type="button" class="btn btn-outline btn-sm btn-open-bulk-import" onclick="openBulkImportModal()" style="font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-color: var(--admin-primary); color: var(--admin-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                 <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-2 2.5h3L11 10h4l-5 8 1.5-5.5h-3L10 2Z"/></svg>
                 ⚡ Bulk Import Queue (10+ Phones)
@@ -286,7 +292,22 @@
               <input type="hidden" id="phoneRemoveImage" name="remove_image" value="false">
               <input type="hidden" id="phoneScrapedImage" name="scraped_image" value="">
               <input type="hidden" id="phoneImagesJson" name="images" value="">
+              <input type="hidden" id="phoneGalleryAltsJson" name="gallery_alts" value="{}">
               <img id="currentImagePreview" src="" alt="Preview" style="display: none; height: 90px; margin-top: 10px; object-fit: contain; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px;">
+
+              <!-- Dedicated Main Image ALT Text Field -->
+              <div id="mainImageAltWrap" style="margin-top: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                  <label class="form-label" for="phoneImageAlt" style="font-size: 12px; font-weight: 700; margin-bottom: 0; color: #1e293b;">
+                    🖼️ Main Image ALT Text (SEO Image Description)
+                  </label>
+                  <button type="button" id="btnRegenMainAlt" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 2px 8px; color: #0d9488; border-color: #99f6e4;" title="Derive descriptive ALT text from model name and focus keyword">⚡ Regenerate ALT</button>
+                </div>
+                <input type="text" id="phoneImageAlt" name="image_alt" class="form-control" placeholder="e.g. Realme GT 8 Pro smartphone front and back view" style="font-size: 12.5px; padding: 6px 10px;">
+                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                  Accurately describes the main product photo for Google Image Search, screen readers, and SEO compliance. Auto-updates when model/keyword changes unless manually customized.
+                </div>
+              </div>
             </div>
 
             <div class="form-group" style="justify-content: center;">
@@ -313,11 +334,14 @@
                   <span id="galleryCountBadge" class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">0 images</span>
                 </h4>
               </div>
-              <div style="font-size: 12px; color: #64748b;">
-                ⭐ Click thumbnail to set as Primary Image &bull; 🗑️ Click &times; to remove
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div style="font-size: 11.5px; color: #64748b;">
+                  ⭐ Click thumbnail to set as Primary &bull; 🗑️ Click &times; to remove
+                </div>
+                <button type="button" id="btnRegenAllGalleryAlts" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 3px 8px; color: #0d9488; border-color: #99f6e4;" title="Generate relevant ALT descriptions for all gallery views">⚡ Auto-Generate All ALTs</button>
               </div>
             </div>
-            <div id="adminGalleryGrid" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+            <div id="adminGalleryGrid" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start;">
               <!-- Dynamically populated thumbnails -->
             </div>
           </div>
@@ -520,6 +544,14 @@
           <button type="submit" class="btn btn-primary" style="padding: 10px 28px; font-size: 15px;">Save Mobile Phone</button>
         </div>
 
+          </div><!-- /.phone-form-main-col -->
+
+          <!-- Sticky On-Page SEO Assistant Sidebar Column -->
+          <div class="phone-form-seo-col">
+            <div id="phoneSeoAssistantWrap"></div>
+          </div>
+        </div><!-- /.phone-admin-layout -->
+
       </form>
     </div>
 
@@ -543,7 +575,7 @@
           <div id="bulkInputSection">
             <div class="form-group" style="margin-bottom: 14px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label class="form-label" style="font-weight: 700; margin-bottom: 0;">Phone Links (WhatMobile or GSMArena — Any format):</label>
+                <label class="form-label" style="font-weight: 700; margin-bottom: 0;">Phone Links (Any Configured Website Source — Any format):</label>
                 <span id="bulkUrlsCountBadge" style="font-size: 12px; font-weight: 700; color: var(--admin-primary); background: var(--admin-primary-light); padding: 2px 10px; border-radius: 9999px; border: 1px solid var(--admin-primary-border);">0 links detected</span>
               </div>
               <textarea id="bulkImportUrlsInput" class="form-control" rows="7" placeholder="Paste links here (one per line, comma-separated, or in parentheses)&#10;https://www.whatmobile.com.pk/Samsung_Galaxy-A04&#10;https://www.whatmobile.com.pk/Samsung_Galaxy-A05&#10;https://www.gsmarena.com/xiaomi_redmi_note_13-12776.php" style="font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre;"></textarea>
@@ -643,6 +675,8 @@
   <script src="/js/icons.js"></script>
   <!-- Quill Rich Text Editor Library -->
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+  <!-- Yoast-Inspired On-Page SEO Assistant -->
+  <script src="/js/seo-assistant.js?v=2026.1"></script>
   <script src="/js/admin.js?v=2.7.0"></script>
   <script>
     (function() {
@@ -682,17 +716,32 @@
       }
 
       function extractPhoneUrls(text) {
-        if (!text) return [];
-        const regex = /https?:\/\/(?:www\.)?(?:whatmobile\.com\.pk|gsmarena\.com)[^\s"',;)<>]+/gi;
+        if (!text || typeof text !== 'string') return [];
+        if (typeof window.parseBulkUrls === 'function') {
+          const res = window.parseBulkUrls(text);
+          if (res.length > 0) return res;
+        }
+        const regex = /https?:\/\/[^\s"',;)<>]+/gi;
         const matches = text.match(regex) || [];
         const valid = [];
         const seen = new Set();
+        const sources = window.activeScraperSourcesCache || [];
+        const allowedDomains = (sources.length > 0)
+          ? sources.map(s => (s.domain || '').toLowerCase().trim().replace(/^www\./, '')).filter(Boolean)
+          : ['whatmobile.com.pk', 'gsmarena.com'];
+
         for (let r of matches) {
           let c = r.trim().replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
-          if (c && !seen.has(c)) {
-            seen.add(c);
-            valid.push(c);
-          }
+          if (!c) continue;
+          try {
+            const u = new URL(c);
+            const host = u.hostname.toLowerCase().replace(/^www\./, '');
+            const isAllowed = allowedDomains.some(d => host === d || host.endsWith('.' + d) || d.includes(host));
+            if (isAllowed && !seen.has(c)) {
+              seen.add(c);
+              valid.push(c);
+            }
+          } catch (_) {}
         }
         return valid;
       }
@@ -1047,8 +1096,17 @@
           if (e.stopImmediatePropagation) e.stopImmediatePropagation();
         }
         cancelInlineAutoStart();
-        const val = urlInput ? urlInput.value || '' : '';
-        const urls = extractPhoneUrls(val);
+        const val = urlInput ? (urlInput.value || '').trim() : '';
+        let urls = extractPhoneUrls(val);
+
+        // Fallback: If extractPhoneUrls didn't match multiple, check if val itself is a valid web URL
+        if (urls.length === 0 && val.startsWith('http')) {
+          try {
+            const clean = val.replace(/^[("'\s<\[{]+|[)"'\s>,.\]}]+$/g, '');
+            new URL(clean);
+            urls = [clean];
+          } catch (_) {}
+        }
 
         if (urls.length > 1) {
           runInlineBulkQueue(urls);
@@ -1072,7 +1130,8 @@
                 fetchStatus.style.background = '#ecfdf5';
                 fetchStatus.style.color = '#047857';
                 fetchStatus.style.border = '1px solid #a7f3d0';
-                fetchStatus.innerHTML = `✅ Successfully fetched <strong>${escapeHtml(json.data.name)}</strong>! Specifications auto-filled below.`;
+                const srcTitle = json.data.source_name || (json.data.source === 'gsmarena' ? 'GSMArena' : (json.data.source === 'whatmobile' ? 'WhatMobile' : 'Website'));
+                fetchStatus.innerHTML = `✅ Successfully fetched <strong>${escapeHtml(json.data.name)}</strong> from ${escapeHtml(srcTitle)}! Specifications auto-filled below.`;
               }
               if (typeof window.populatePhoneFormWithSpecs === 'function') {
                 window.populatePhoneFormWithSpecs(json.data);
@@ -1099,7 +1158,7 @@
             }
           });
         } else {
-          alert('Please paste at least one phone URL from WhatMobile or GSMArena.');
+          alert('Please paste at least one valid phone URL from a configured website source.');
           if (urlInput) urlInput.focus();
         }
       };

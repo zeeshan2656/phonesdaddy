@@ -38,6 +38,15 @@ function getTemplateHtml(templateFile) {
   return content;
 }
 
+function unescapeHtmlEntities(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
+}
+
 /**
  * Helper to ensure phone cards load optimized WebP thumbnails (5-15 KB instead of full-size image)
  */
@@ -774,15 +783,6 @@ router.get('/phone/:slug', async (req, res, next) => {
     const siteName = branding.site_name || 'PhonesDaddy';
     const siteUrl = branding.site_url || `${req.protocol}://${req.get('host')}`;
 
-    function unescapeHtmlEntities(str) {
-      if (!str || typeof str !== 'string') return '';
-      return str.replace(/&amp;/g, '&')
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>');
-    }
-
     const cleanPhoneName = unescapeHtmlEntities(phone.name);
     let pageTitle = phone.meta_title ? unescapeHtmlEntities(phone.meta_title) : `${cleanPhoneName} Price in Pakistan & Specifications | ${siteName}`;
     let pageDescription = phone.meta_description ? unescapeHtmlEntities(phone.meta_description) : `${cleanPhoneName} price in Pakistan, specifications, display, camera, battery, processor, RAM, storage and other details.`;
@@ -790,7 +790,7 @@ router.get('/phone/:slug', async (req, res, next) => {
       pageTitle = pageTitle.replace(/PhonesDaddy/gi, branding.site_name);
       pageDescription = pageDescription.replace(/PhonesDaddy/gi, branding.site_name);
     }
-    const canonicalUrl = `${siteUrl}/phone/${phone.slug}`;
+    const canonicalUrl = (phone.canonical_url && phone.canonical_url.trim()) ? phone.canonical_url.trim() : `${siteUrl}/phone/${phone.slug}`;
     const fullImageUrl = phone.image ? (phone.image.startsWith('http') ? phone.image : `${siteUrl}${phone.image}`) : '';
 
     // Schema.org Product structured data
@@ -845,18 +845,25 @@ router.get('/phone/:slug', async (req, res, next) => {
     let galleryCountText = '0 Photos';
     let galleryStripStyle = 'display: none;';
 
+    const galleryAltsMap = (phone.gallery_alts && typeof phone.gallery_alts === 'object') ? phone.gallery_alts : {};
+    const defaultMainAlt = phone.image_alt ? unescapeHtmlEntities(phone.image_alt) : `${cleanPhoneName} smartphone official view`;
+
     if (validGalleryImages.length > 1) {
       galleryCountBadgeStyle = 'display: inline-flex;';
       galleryCountText = `1 / ${validGalleryImages.length} Photos`;
       galleryStripStyle = 'display: flex;';
-      galleryThumbsHtml = validGalleryImages.map((src, idx) => `
-        <div class="phone-thumb-item ${idx === 0 ? 'active' : ''}" onclick="selectPreviewImage(${idx})" ondblclick="openGallery(${idx})" title="Click to preview photo ${idx + 1}">
-          <img src="${escapeAttr(src)}" alt="Photo ${idx + 1}" loading="lazy" width="56" height="56" onerror="this.parentElement.style.display='none'">
+      galleryThumbsHtml = validGalleryImages.map((src, idx) => {
+        const altText = galleryAltsMap[src] || (idx === 0 ? defaultMainAlt : `${cleanPhoneName} official photo ${idx + 1}`);
+        return `
+        <div class="phone-thumb-item ${idx === 0 ? 'active' : ''}" onclick="selectPreviewImage(${idx})" ondblclick="openGallery(${idx})" title="${escapeAttr(altText)}">
+          <img src="${escapeAttr(src)}" alt="${escapeAttr(altText)}" loading="lazy" width="56" height="56" onerror="this.parentElement.style.display='none'">
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     const phoneImgUrl = phone.image || '/images/placeholder.svg';
+    const mainImageAlt = phone.image_alt ? unescapeHtmlEntities(phone.image_alt) : `${cleanPhoneName} smartphone front and back view`;
     const lcpPreload = phone.image ? `<link rel="preload" href="${escapeAttr(phone.image)}" as="image" fetchpriority="high">` : '';
 
     const pricePKRDisplay = (phone.price && parseFloat(phone.price) > 0)
@@ -873,6 +880,8 @@ router.get('/phone/:slug', async (req, res, next) => {
       '{{SCHEMA_JSON}}': JSON.stringify(schemaData, null, 2),
       '{{PHONE_DATA_JSON}}': JSON.stringify(phone).replace(/</g, '\\u003c'),
       '{{PHONE_IMAGE}}': escapeAttr(phoneImgUrl),
+      '{{PHONE_IMAGE_ALT}}': escapeAttr(mainImageAlt),
+      '{{OG_IMAGE}}': escapeAttr(fullImageUrl || phoneImgUrl),
       '{{PHONE_IMAGE_PRELOAD}}': lcpPreload,
       '{{GALLERY_BADGE_STYLE}}': galleryCountBadgeStyle,
       '{{GALLERY_COUNT_TEXT}}': galleryCountText,
@@ -974,9 +983,13 @@ router.get('/news/:slug', async (req, res, next) => {
     const siteName = branding.site_name || 'PhonesDaddy';
     const siteUrl = branding.site_url || `${req.protocol}://${req.get('host')}`;
 
-    const pageTitle = `${article.title} | ${siteName} News`;
-    const pageDescription = article.summary || (article.content ? article.content.replace(/<[^>]*>?/gm, '').slice(0, 160) : `Latest smartphone news and updates on ${siteName}.`);
-    const canonicalUrl = `${siteUrl}/news/${article.slug}`;
+    let pageTitle = (article.meta_title && article.meta_title.trim()) ? unescapeHtmlEntities(article.meta_title.trim()) : `${article.title} | ${siteName} News`;
+    let pageDescription = (article.meta_description && article.meta_description.trim()) ? unescapeHtmlEntities(article.meta_description.trim()) : (article.summary || (article.content ? article.content.replace(/<[^>]*>?/gm, '').slice(0, 160) : `Latest smartphone news and updates on ${siteName}.`));
+    if (branding.site_name && branding.site_name !== 'PhonesDaddy') {
+      pageTitle = pageTitle.replace(/PhonesDaddy/gi, branding.site_name);
+      pageDescription = pageDescription.replace(/PhonesDaddy/gi, branding.site_name);
+    }
+    const canonicalUrl = (article.canonical_url && article.canonical_url.trim()) ? article.canonical_url.trim() : `${siteUrl}/news/${article.slug}`;
     const fullImageUrl = article.image ? (article.image.startsWith('http') ? article.image : `${siteUrl}${article.image}`) : `${siteUrl}/images/placeholder.svg`;
     const logoUrl = branding.site_logo ? (branding.site_logo.startsWith('http') ? branding.site_logo : `${siteUrl}${branding.site_logo}`) : `${siteUrl}/images/logo.png`;
 

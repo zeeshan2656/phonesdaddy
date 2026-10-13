@@ -53,6 +53,11 @@ async function runSafeMigrations() {
           \`views\` INT DEFAULT 0,
           \`meta_title\` VARCHAR(255) DEFAULT NULL,
           \`meta_description\` TEXT DEFAULT NULL,
+          \`focus_keyword\` VARCHAR(255) DEFAULT NULL,
+          \`related_keywords\` TEXT DEFAULT NULL,
+          \`canonical_url\` VARCHAR(500) DEFAULT NULL,
+          \`image_alt\` VARCHAR(255) DEFAULT NULL,
+          \`gallery_alts\` TEXT DEFAULT NULL,
           \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           \`updated_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (\`brand_id\`) REFERENCES \`brands\`(\`id\`) ON DELETE CASCADE,
@@ -119,6 +124,11 @@ async function runSafeMigrations() {
           \`content\` LONGTEXT DEFAULT NULL,
           \`image\` VARCHAR(255) DEFAULT NULL,
           \`views\` INT DEFAULT 0,
+          \`meta_title\` VARCHAR(255) DEFAULT NULL,
+          \`meta_description\` TEXT DEFAULT NULL,
+          \`focus_keyword\` VARCHAR(255) DEFAULT NULL,
+          \`related_keywords\` TEXT DEFAULT NULL,
+          \`canonical_url\` VARCHAR(500) DEFAULT NULL,
           \`created_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           \`updated_at\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           INDEX \`idx_news_slug\` (\`slug\`),
@@ -207,11 +217,21 @@ async function runSafeMigrations() {
       await ensureColumn('phones', 'views', 'INT DEFAULT 0');
       await ensureColumn('phones', 'meta_title', 'VARCHAR(255) DEFAULT NULL');
       await ensureColumn('phones', 'meta_description', 'TEXT DEFAULT NULL');
+      await ensureColumn('phones', 'focus_keyword', 'VARCHAR(255) DEFAULT NULL');
+      await ensureColumn('phones', 'related_keywords', 'TEXT DEFAULT NULL');
+      await ensureColumn('phones', 'canonical_url', 'VARCHAR(500) DEFAULT NULL');
+      await ensureColumn('phones', 'image_alt', 'VARCHAR(255) DEFAULT NULL');
+      await ensureColumn('phones', 'gallery_alts', 'TEXT DEFAULT NULL');
 
       await ensureColumn('admins', 'role', "VARCHAR(50) DEFAULT 'admin'");
       await ensureColumn('admins', 'permissions', 'LONGTEXT DEFAULT NULL');
       await ensureColumn('admins', 'status', "VARCHAR(20) DEFAULT 'active'");
 
+      await ensureColumn('news', 'meta_title', 'VARCHAR(255) DEFAULT NULL');
+      await ensureColumn('news', 'meta_description', 'TEXT DEFAULT NULL');
+      await ensureColumn('news', 'focus_keyword', 'VARCHAR(255) DEFAULT NULL');
+      await ensureColumn('news', 'related_keywords', 'TEXT DEFAULT NULL');
+      await ensureColumn('news', 'canonical_url', 'VARCHAR(500) DEFAULT NULL');
       await ensureColumn('news', 'is_hot', 'BOOLEAN DEFAULT FALSE');
       await ensureColumn('news', 'views', 'INT DEFAULT 0');
 

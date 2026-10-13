@@ -1,12 +1,23 @@
 const PhoneModel = require('../models/phoneModel');
 const BrandModel = require('../models/brandModel');
+const SettingsModel = require('../models/settingsModel');
 const { scrapePhoneFromUrl } = require('../utils/phoneScraper');
 const { cache } = require('../utils/cache');
 const { optimizePhoneImage, deleteMediaFiles } = require('../utils/imageOptimizer');
 
-function extractUrls(rawText) {
+async function extractUrls(rawText) {
   if (!rawText || typeof rawText !== 'string') return [];
-  const regex = /https?:\/\/(?:www\.)?(?:whatmobile\.com\.pk|gsmarena\.com)[^\s"',;)<>]+/gi;
+  let domains = ['whatmobile.com.pk', 'gsmarena.com'];
+  try {
+    const sources = await SettingsModel.getScraperSources();
+    const activeDomains = sources
+      .filter(s => s.enabled !== false)
+      .map(s => (s.domain || '').toLowerCase().trim().replace(/^www\./, ''))
+      .filter(Boolean);
+    if (activeDomains.length > 0) domains = activeDomains;
+  } catch (_) {}
+
+  const regex = /https?:\/\/[^\s"',;)<>]+/gi;
   const matches = rawText.match(regex) || [];
   const valid = [];
   const seen = new Set();
@@ -16,7 +27,8 @@ function extractUrls(rawText) {
     try {
       const u = new URL(clean);
       const host = u.hostname.toLowerCase();
-      if ((host.includes('whatmobile.com.pk') || host.includes('gsmarena.com')) && !seen.has(clean)) {
+      const isAllowed = domains.some(d => host === d || host.endsWith('.' + d));
+      if (isAllowed && !seen.has(clean)) {
         seen.add(clean);
         valid.push(clean);
       }
@@ -169,6 +181,9 @@ class PhoneController {
         popular,
         meta_title,
         meta_description,
+        focus_keyword,
+        related_keywords,
+        canonical_url,
         specs,
         prices
       } = req.body;
@@ -237,8 +252,13 @@ class PhoneController {
         price: parseFloat(price) || 0,
         featured: featured === 'true' || featured === true || featured === 1,
         popular: popular === 'true' || popular === true || popular === 1,
-        meta_title,
-        meta_description
+        image_alt: req.body.image_alt ? req.body.image_alt.trim() : null,
+        gallery_alts: req.body.gallery_alts ? (typeof req.body.gallery_alts === 'string' ? (JSON.parse(req.body.gallery_alts) || {}) : req.body.gallery_alts) : null,
+        meta_title: meta_title ? meta_title.trim() : undefined,
+        meta_description: meta_description ? meta_description.trim() : undefined,
+        focus_keyword: focus_keyword ? focus_keyword.trim() : null,
+        related_keywords: related_keywords || null,
+        canonical_url: canonical_url ? canonical_url.trim() : null
       };
 
       const phoneId = await PhoneModel.createPhone(phoneData, parsedSpecs, parsedPrices);
@@ -274,6 +294,9 @@ class PhoneController {
         popular,
         meta_title,
         meta_description,
+        focus_keyword,
+        related_keywords,
+        canonical_url,
         specs,
         prices
       } = req.body;
@@ -292,8 +315,11 @@ class PhoneController {
         price: parseFloat(price) || 0,
         featured: featured === 'true' || featured === true || featured === 1,
         popular: popular === 'true' || popular === true || popular === 1,
-        meta_title,
-        meta_description
+        meta_title: meta_title !== undefined ? meta_title.trim() : undefined,
+        meta_description: meta_description !== undefined ? meta_description.trim() : undefined,
+        focus_keyword: focus_keyword !== undefined ? focus_keyword.trim() : undefined,
+        related_keywords: related_keywords !== undefined ? related_keywords : undefined,
+        canonical_url: canonical_url !== undefined ? canonical_url.trim() : undefined
       };
 
       if (req.file) {
@@ -317,6 +343,20 @@ class PhoneController {
             : req.body.images;
         } catch (_) {
           phoneData.images = String(req.body.images).split(',').map(s => s.trim()).filter(Boolean);
+        }
+      }
+
+      if (req.body.image_alt !== undefined) {
+        phoneData.image_alt = req.body.image_alt ? req.body.image_alt.trim() : null;
+      }
+
+      if (req.body.gallery_alts !== undefined) {
+        try {
+          phoneData.gallery_alts = typeof req.body.gallery_alts === 'string'
+            ? JSON.parse(req.body.gallery_alts)
+            : req.body.gallery_alts;
+        } catch (_) {
+          phoneData.gallery_alts = {};
         }
       }
 
@@ -466,7 +506,7 @@ class PhoneController {
         return res.status(400).json({ success: false, message: 'A valid URL is required.' });
       }
 
-      const multiUrls = extractUrls(url);
+      const multiUrls = await extractUrls(url);
       if (multiUrls.length > 1) {
         return res.status(400).json({
           success: false,
@@ -507,9 +547,10 @@ class PhoneController {
         }
       }
 
+      const sourceTitle = scrapedData.source_name || (scrapedData.source === 'gsmarena' ? 'GSMArena' : (scrapedData.source === 'whatmobile' ? 'WhatMobile' : 'Website'));
       return res.json({
         success: true,
-        message: `Successfully fetched phone specifications from ${scrapedData.source === 'gsmarena' ? 'GSMArena' : 'WhatMobile'}!`,
+        message: `Successfully fetched phone specifications from ${sourceTitle}!`,
         data: {
           ...scrapedData,
           name: cleanModelName,

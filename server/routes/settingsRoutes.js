@@ -21,4 +21,11 @@ router.delete('/logo', requireMasterAdmin, SettingsController.removeLogo);
 router.post('/favicon', requireMasterAdmin, upload.single('favicon'), upload.optimizeUploadedImages, SettingsController.uploadFavicon);
 router.delete('/favicon', requireMasterAdmin, SettingsController.removeFavicon);
 
+// Scraper Sources Endpoints
+router.get('/scraper-sources', requireMasterAdmin, SettingsController.getScraperSources);
+router.get('/scraper-sources/active', SettingsController.getActiveScraperSources);
+router.post('/scraper-sources', requireMasterAdmin, SettingsController.saveScraperSource);
+router.delete('/scraper-sources/:id', requireMasterAdmin, SettingsController.deleteScraperSource);
+router.post('/scraper-sources/test-transform', requireMasterAdmin, SettingsController.testUrlTransform);
+
 module.exports = router;

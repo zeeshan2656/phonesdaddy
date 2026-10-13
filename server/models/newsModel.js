@@ -123,10 +123,12 @@ class NewsModel {
   /**
    * Create new article
    */
-  static async createArticle({ title, slug, summary, author, category, is_hot, status, content, image }) {
+  static async createArticle({ title, slug, summary, author, category, is_hot, status, content, image, meta_title, meta_description, focus_keyword, related_keywords, canonical_url }) {
     const [result] = await pool.query(`
-      INSERT INTO news (title, slug, summary, author, category, is_hot, status, content, image)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO news (
+        title, slug, summary, author, category, is_hot, status, content, image,
+        meta_title, meta_description, focus_keyword, related_keywords, canonical_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       title,
       slug,
@@ -136,7 +138,12 @@ class NewsModel {
       is_hot ? 1 : 0,
       status || 'published',
       content || '',
-      image || null
+      image || null,
+      meta_title || null,
+      meta_description || null,
+      focus_keyword || null,
+      related_keywords ? (typeof related_keywords === 'object' ? JSON.stringify(related_keywords) : String(related_keywords)) : null,
+      canonical_url || null
     ]);
 
     return result.insertId;
@@ -145,7 +152,7 @@ class NewsModel {
   /**
    * Update existing article
    */
-  static async updateArticle(id, { title, slug, summary, author, category, is_hot, status, content, image }) {
+  static async updateArticle(id, { title, slug, summary, author, category, is_hot, status, content, image, meta_title, meta_description, focus_keyword, related_keywords, canonical_url }) {
     const fields = [
       'title = ?',
       'slug = ?',
@@ -154,7 +161,12 @@ class NewsModel {
       'category = ?',
       'is_hot = ?',
       'status = ?',
-      'content = ?'
+      'content = ?',
+      'meta_title = ?',
+      'meta_description = ?',
+      'focus_keyword = ?',
+      'related_keywords = ?',
+      'canonical_url = ?'
     ];
     const params = [
       title,
@@ -164,7 +176,12 @@ class NewsModel {
       category || 'Hot News',
       is_hot ? 1 : 0,
       status || 'published',
-      content || ''
+      content || '',
+      meta_title || null,
+      meta_description || null,
+      focus_keyword || null,
+      related_keywords ? (typeof related_keywords === 'object' ? JSON.stringify(related_keywords) : String(related_keywords)) : null,
+      canonical_url || null
     ];
 
     if (image !== undefined) {

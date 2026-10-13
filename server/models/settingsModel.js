@@ -90,7 +90,10 @@ class SettingsModel {
         ad_article_mid: '',
         ad_article_mid_enabled: '1',
         ad_article_bottom: '',
-        ad_article_bottom_enabled: '1'
+        ad_article_bottom_enabled: '1',
+
+        // Auto-Fetch & Scraper Sources
+        scraper_sources: ''
       };
 
       for (const row of rows) {
@@ -117,6 +120,89 @@ class SettingsModel {
       console.error('Error fetching settings from database:', err);
       return _cachedSettings || {};
     }
+  }
+
+  /**
+   * Default scraper sources: GSMArena & WhatMobile
+   */
+  static getDefaultScraperSources() {
+    return [
+      {
+        id: 'gsmarena',
+        name: 'GSMArena',
+        domain: 'gsmarena.com',
+        enabled: true,
+        is_builtin: true,
+        specs_url_example: 'https://www.gsmarena.com/vivo_v80_5g-14989.php',
+        rule_type: 'insert_before_id',
+        param_insert_text: 'pictures-',
+        param_target_pattern: '(-)(\\d+\\.php)$',
+        image_url_example: 'https://www.gsmarena.com/vivo_v80_5g-pictures-14989.php',
+        image_selector: '#pictures-list',
+        description: 'Global smartphone specifications with high-res picture galleries.'
+      },
+      {
+        id: 'whatmobile',
+        name: 'WhatMobile',
+        domain: 'whatmobile.com.pk',
+        enabled: true,
+        is_builtin: true,
+        specs_url_example: 'https://www.whatmobile.com.pk/Vivo_Y53s',
+        rule_type: 'append_suffix',
+        param_insert_text: '_Pictures',
+        param_target_pattern: '',
+        image_url_example: 'https://www.whatmobile.com.pk/Vivo_Y53s_Pictures',
+        image_selector: '#pictures',
+        description: 'Pakistan market smartphone prices & specifications.'
+      }
+    ];
+  }
+
+  /**
+   * Fetch all configured scraper sources (merging built-ins with custom saved sources)
+   */
+  static async getScraperSources() {
+    const settings = await this.getAllSettings();
+    let sources = null;
+    if (settings.scraper_sources) {
+      try {
+        sources = typeof settings.scraper_sources === 'string'
+          ? JSON.parse(settings.scraper_sources)
+          : settings.scraper_sources;
+      } catch (_) {
+        sources = null;
+      }
+    }
+
+    if (!Array.isArray(sources) || sources.length === 0) {
+      sources = this.getDefaultScraperSources();
+    } else {
+      // Ensure built-in sources exist in the list
+      const defaults = this.getDefaultScraperSources();
+      for (const def of defaults) {
+        const found = sources.find(s => s.id === def.id || s.domain === def.domain);
+        if (!found) {
+          sources.unshift(def);
+        } else {
+          found.is_builtin = true;
+          // Ensure default rule is present if missing
+          if (!found.rule_type) found.rule_type = def.rule_type;
+          if (!found.param_insert_text) found.param_insert_text = def.param_insert_text;
+        }
+      }
+    }
+    return sources;
+  }
+
+  /**
+   * Save scraper sources array
+   */
+  static async saveScraperSources(sourcesArray) {
+    if (!Array.isArray(sourcesArray)) return false;
+    await this.updateSettings({
+      scraper_sources: JSON.stringify(sourcesArray)
+    });
+    return true;
   }
 
   /**

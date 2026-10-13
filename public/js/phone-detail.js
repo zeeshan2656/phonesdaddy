@@ -190,7 +190,7 @@ function renderPhoneDetail(phone) {
   }
 
   // Render gallery strip if multiple images exist & init touch slider
-  renderGalleryStrip(phone.images || [], phone.image);
+  renderGalleryStrip(phone.images || [], phone.image, phone.gallery_alts, phone.image_alt, phone.name);
   initSliderTouchEvents();
 
   // Add to Compare Button
@@ -628,6 +628,8 @@ function escapeAttr(str) {
 
 // Gallery Strip & Slider
 let _galleryImages = [];
+let _galleryAltsMap = {};
+let _defaultMainImageAlt = '';
 let _currentPreviewIndex = 0;
 
 function updatePhoneSliderImage(idx) {
@@ -636,7 +638,13 @@ function updatePhoneSliderImage(idx) {
 
   const mainImg = document.getElementById('phoneDetailImage');
   if (mainImg && _galleryImages[_currentPreviewIndex]) {
-    mainImg.src = _galleryImages[_currentPreviewIndex];
+    const curSrc = _galleryImages[_currentPreviewIndex];
+    mainImg.src = curSrc;
+    if (_galleryAltsMap && _galleryAltsMap[curSrc]) {
+      mainImg.alt = _galleryAltsMap[curSrc];
+    } else if (_currentPreviewIndex === 0 && _defaultMainImageAlt) {
+      mainImg.alt = _defaultMainImageAlt;
+    }
   }
 
   // Update bottom image count badge: "X / Y Photos"
@@ -707,13 +715,15 @@ function initSliderTouchEvents() {
 }
 window.initSliderTouchEvents = initSliderTouchEvents;
 
-function renderGalleryStrip(images, primaryImage) {
+function renderGalleryStrip(images, primaryImage, galleryAlts = {}, primaryAlt = '', phoneName = '') {
   // Build deduped list with primary first
   const allImages = primaryImage
     ? [primaryImage, ...(images || []).filter(u => u && u !== primaryImage)]
     : (images || []);
 
   _galleryImages = allImages.filter(Boolean);
+  _galleryAltsMap = (galleryAlts && typeof galleryAlts === 'object') ? galleryAlts : {};
+  _defaultMainImageAlt = primaryAlt || (phoneName ? `${phoneName} smartphone front and back view` : '');
   _currentPreviewIndex = 0;
 
   const strip = document.getElementById('phoneGalleryStrip');
@@ -743,14 +753,15 @@ function renderGalleryStrip(images, primaryImage) {
   strip.style.display = 'flex';
   strip.innerHTML = _galleryImages.map((src, idx) => {
     const isActive = idx === 0;
+    const altText = _galleryAltsMap[src] || (idx === 0 ? _defaultMainImageAlt : `${phoneName || 'Phone'} official photo ${idx + 1}`);
     return `
       <div
         class="phone-thumb-item ${isActive ? 'active' : ''}"
         onclick="selectPreviewImage(${idx})"
         ondblclick="openGallery(${idx})"
-        title="Click to preview photo ${idx + 1}"
+        title="${escapeAttr(altText)}"
       >
-        <img src="${src}" alt="Photo ${idx + 1}" loading="lazy" onerror="this.parentElement.style.display='none'">
+        <img src="${escapeAttr(src)}" alt="${escapeAttr(altText)}" loading="lazy" onerror="this.parentElement.style.display='none'">
       </div>`;
   }).join('');
 }
